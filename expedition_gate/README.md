@@ -1,56 +1,17 @@
-# sv
+# Expedition's Gate — the app
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+SvelteKit + Svelte 5 (runes) + TypeScript strict. All game code, UI, and tooling for the single-player AI-GM adventure RPG. Project context lives one level up (`../AGENTS.md`, `../Docs/`).
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project
-npx sv create my-app
+```bash
+npm install
+npm run dev          # http://localhost:5173
+npm run test         # Vitest (rules, db, llama client vs fake stub)
+npm run check        # svelte-check
+npm run lint         # prettier --check + eslint
+npm run fake-llama   # OpenAI-compatible stub on :8090 (use this, NOT live :8080)
+npm run db:generate  # drizzle-kit migrations → drizzle/ (checked in)
 ```
 
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@1.1.0 create --template minimal --types ts --install npm scaffold
-```
-
-## Adding features
-
-Add features to your project with `sv add`:
-
-```sh
-npx sv add
-```
-
-For example, to add Tailwind CSS:
-
-```sh
-npx sv add tailwindcss
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```sh
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+- GM endpoint: llama-server at `http://127.0.0.1:8080/v1`, override via `LLAMA_URL` in `.env` (declared in `src/env.ts`, read via `$app/env/private`).
+- Database: `data/gate.db` (SQLite + WAL, gitignored). Migrations auto-apply at startup.
+- The browser never talks to llama-server directly — everything goes through SvelteKit server routes under `src/routes/api/`.

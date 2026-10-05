@@ -2,7 +2,7 @@
 
 **Single-player AI-GM adventure RPG.** A D&D-style tabletop experience where the AI is the Game Master — narrator, referee, and every NPC — with unlimited directions for the story to go. Runs 100% locally against the user's own llama-server. Sibling project of `C:\Code\Novel's_Model` (same user, same machine, shared lessons).
 
-> **This file + `Docs/` are the complete project context.** A fresh session should read this file first, then the Doc relevant to the task. The application code does **not exist yet** — Phase 0 scaffolds it (`Docs/05_ROADMAP.md`). Until then, this repo is design-only.
+> **This file + `Docs/` are the complete project context.** A fresh session should read this file first, then the Doc relevant to the task. The application lives in **`expedition_gate/`** (P0 scaffold completed 2026-10-06 — see Repo layout below and `Docs/05_ROADMAP.md` for phase status).
 
 **Language rule: communicate with the user in ENGLISH only. All game UI and game content is THAI.**
 
@@ -77,10 +77,18 @@ C:\Code\Expedition_Gate\
 
 ## Ports on this machine (don't collide)
 
-3000 Novel's Model app · **8080 llama-server** · 8188 ComfyUI · 8189 Picture Studio · 3100 Code Editor · **Expedition's Gate dev server: 5173** (SvelteKit default).
+3000 Novel's Model app · **8080 llama-server** · 8188 ComfyUI · 8189 Picture Studio · 3100 Code Editor · **Expedition's Gate dev server: 5173** (SvelteKit default) · **8090 fake-llama stub** (`npm run fake-llama` from `expedition_gate/`, tests only).
 
 ## Working gotchas (Windows + this machine)
 
+- **Stack reality (P0 scaffold, 2026-10-06)**: `sv create` installed **SvelteKit 3** (Svelte 5.57 runes, Vite 8 = rolldown/oxc, TypeScript 6) — the "SvelteKit 2" decision maps onto this current generation of the same stack. Kit-3 specifics that bit us:
+  - **`$lib` is removed by default** — we keep it via `alias: { $lib: 'src/lib' }` in `expedition_gate/vite.config.ts` (shadcn-svelte components import `$lib/...`). The scaffold's native style is `#lib` (package.json `imports`); both work, prefer `$lib` to match the docs and shadcn.
+  - **`$env/dynamic/private` is gone** — use `import { LLAMA_URL } from '$app/env/private'` with vars declared in `expedition_gate/src/env.ts`. The exported const **snapshots at module init**, so tests cannot redirect via `process.env` — llama.ts helpers take an explicit `baseUrl` option for that.
+  - `svelte-kit sync` writes `node_modules/$app/tsconfig.json` (the `extends` target in tsconfig) — never delete that folder blindly; re-run `npm run prepare` if missing.
+- **npm 11 allow-scripts**: native postinstalls are blocked until approved. `npm approve-scripts <pkg>` + `npm rebuild <pkg>` (better-sqlite3 + esbuild already approved; recorded in package.json `allowScripts`).
+- **Vitest**: happy-dom's `fetch` cannot hit real sockets — server-side tests that talk to the fake llama use `// @vitest-environment node` (see `tests/fake-llama/llama.test.ts`).
+- **fake-llama**: scenarios route per-request via `model: 'fake:<scenario>'` (`ok`/`json`/`cjk`/`reasoning-burn`/`slow`/`empty`) or server-wide via `GET /__scenario/<name>`.
+- **oxc parse quirk (once)**: vite.config.ts hit an oxc `PARSE_ERROR` around a multiline arrow during scaffold; the single-line rewrite has been stable — if it recurs, simplify the config expression first before suspecting anything else.
 - **Thai text via `curl -d` gets mangled** by the console code page → write JSON payloads to a file, use `--data-binary @file`. Payload files for Python: `os.environ['TEMP']` (no `/tmp` for Windows Python).
 - **SSE streaming responses must send `Connection: close`** and actually close, or clients hang forever.
 - **Test against a fake-llama stub** (OpenAI-compatible mock server, see `Docs/01_TECH_STACK.md` § Testing), NOT the user's live 8080, unless he says otherwise.
