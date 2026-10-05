@@ -1,0 +1,7 @@
+build/
+.svelte-kit/
+node_modules/
+coverage/
+drizzle/
+package-lock.json
+.mimosa/

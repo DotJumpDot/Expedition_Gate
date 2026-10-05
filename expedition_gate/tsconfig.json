@@ -1,0 +1,20 @@
+{
+	"extends": "$app/tsconfig",
+	"compilerOptions": {
+		"strict": true,
+		"types": ["svelte", "vite/client", "$app/types"],
+		"paths": {
+			"$lib": ["./src/lib"],
+			"$lib/*": ["./src/lib/*"],
+			"$lib/components": ["./src/lib/components"],
+			"$lib/components/*": ["./src/lib/components/*"],
+			"$lib/components/ui": ["./src/lib/components/ui"],
+			"$lib/components/ui/*": ["./src/lib/components/ui/*"],
+			"$lib/utils": ["./src/lib/utils"],
+			"$lib/utils/*": ["./src/lib/utils/*"],
+			"$lib/hooks": ["./src/lib/hooks"],
+			"$lib/hooks/*": ["./src/lib/hooks/*"]
+		}
+	},
+	"include": ["src", ".svelte-kit/types", "tests/**/*.ts", "vite.config.ts", "vitest.config.ts"]
+}

@@ -1,0 +1,38 @@
+# Node
+node_modules/
+.pnp
+.pnp.js
+coverage/
+
+# SvelteKit / Vite
+.svelte-kit/
+build/
+dist/
+.vite/
+
+# Env & local config
+.env
+.env.*
+!.env.example
+
+# Local database (campaigns are private)
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# Scene-art binaries (assets/manifest.json IS committed; re-download via scripts/fetch-assets.mjs)
+static/assets/
+
+# Logs & OS
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+
+# Editors / tooling
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.playwright-mcp/
+.mimosa/

@@ -1,0 +1,228 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+	Expedition's Gate — dark-fantasy theme.
+	Dark-only by design: :root carries the dark values directly; .dark mirrors
+	them so shadcn components behave as if the dark variant were always on.
+	Palette: deep umber charcoal + parchment ivory + ember gold, blood red for
+	destructive, arcane blue for มานา. All oklch.
+*/
+:root,
+.dark {
+	--radius: 0.5rem;
+
+	--background: oklch(0.155 0.012 75);
+	--foreground: oklch(0.902 0.028 82);
+
+	--card: oklch(0.195 0.014 75);
+	--card-foreground: oklch(0.902 0.028 82);
+
+	--popover: oklch(0.215 0.014 75);
+	--popover-foreground: oklch(0.902 0.028 82);
+
+	--primary: oklch(0.74 0.13 70);
+	--primary-foreground: oklch(0.17 0.02 75);
+
+	--secondary: oklch(0.26 0.016 75);
+	--secondary-foreground: oklch(0.902 0.028 82);
+
+	--muted: oklch(0.245 0.014 75);
+	--muted-foreground: oklch(0.637 0.022 82);
+
+	--accent: oklch(0.305 0.02 70);
+	--accent-foreground: oklch(0.902 0.028 82);
+
+	--destructive: oklch(0.577 0.2 27);
+	--border: oklch(0.902 0.028 82 / 10%);
+	--input: oklch(0.902 0.028 82 / 14%);
+	--ring: oklch(0.74 0.13 70);
+
+	--chart-1: oklch(0.74 0.13 70);
+	--chart-2: oklch(0.55 0.09 150);
+	--chart-3: oklch(0.5 0.12 300);
+	--chart-4: oklch(0.55 0.18 25);
+	--chart-5: oklch(0.55 0.08 240);
+
+	--sidebar: oklch(0.175 0.013 75);
+	--sidebar-foreground: oklch(0.902 0.028 82);
+	--sidebar-primary: oklch(0.74 0.13 70);
+	--sidebar-primary-foreground: oklch(0.17 0.02 75);
+	--sidebar-accent: oklch(0.305 0.02 70);
+	--sidebar-accent-foreground: oklch(0.902 0.028 82);
+	--sidebar-border: oklch(0.902 0.028 82 / 10%);
+	--sidebar-ring: oklch(0.74 0.13 70);
+}
+
+@theme inline {
+	--radius-sm: calc(var(--radius) * 0.6);
+	--radius-md: calc(var(--radius) * 0.8);
+	--radius-lg: var(--radius);
+	--radius-xl: calc(var(--radius) * 1.4);
+	--radius-2xl: calc(var(--radius) * 1.8);
+	--radius-3xl: calc(var(--radius) * 2.2);
+	--radius-4xl: calc(var(--radius) * 2.6);
+
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+	--color-popover: var(--popover);
+	--color-popover-foreground: var(--popover-foreground);
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+	--color-accent: var(--accent);
+	--color-accent-foreground: var(--accent-foreground);
+	--color-destructive: var(--destructive);
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+	--color-chart-1: var(--chart-1);
+	--color-chart-2: var(--chart-2);
+	--color-chart-3: var(--chart-3);
+	--color-chart-4: var(--chart-4);
+	--color-chart-5: var(--chart-5);
+	--color-sidebar: var(--sidebar);
+	--color-sidebar-foreground: var(--sidebar-foreground);
+	--color-sidebar-primary: var(--sidebar-primary);
+	--color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+	--color-sidebar-accent: var(--sidebar-accent);
+	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+	--color-sidebar-border: var(--sidebar-border);
+	--color-sidebar-ring: var(--sidebar-ring);
+
+	/* Game-semantic colors (HP / มานา / ทอง / XP / ไฟอีมเบอร์) */
+	--color-hp: oklch(0.62 0.19 25);
+	--color-hp-deep: oklch(0.45 0.17 27);
+	--color-mana: oklch(0.66 0.1 262);
+	--color-mana-deep: oklch(0.42 0.09 265);
+	--color-gold: oklch(0.8 0.14 85);
+	--color-xp: oklch(0.66 0.1 152);
+	--color-ember: oklch(0.7 0.16 55);
+	--color-blood: oklch(0.5 0.18 27);
+
+	--font-sans:
+		'Leelawadee UI', 'Noto Sans Thai', 'Sarabun', 'Segoe UI', system-ui, -apple-system, sans-serif;
+
+	/* Stronger-than-default easings (built-ins are too weak for deliberate motion) */
+	--ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+	--ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+	--ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@layer base {
+	* {
+		border-color: var(--color-border);
+	}
+
+	html {
+		color-scheme: dark;
+	}
+
+	body {
+		background-color: var(--color-background);
+		color: var(--color-foreground);
+		font-family: var(--font-sans);
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+
+	::selection {
+		background: oklch(0.74 0.13 70 / 30%);
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--color-ring);
+		outline-offset: 2px;
+	}
+
+	/* Thin, quiet scrollbars that match the theme */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: oklch(0.902 0.028 82 / 18%) transparent;
+	}
+	*::-webkit-scrollbar {
+		width: 8px;
+		height: 8px;
+	}
+	*::-webkit-scrollbar-thumb {
+		background: oklch(0.902 0.028 82 / 18%);
+		border-radius: 9999px;
+	}
+	*::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	@media (prefers-reduced-transparency: reduce) {
+		.gate-vignette,
+		.gate-header {
+			backdrop-filter: none !important;
+		}
+	}
+}
+
+@layer utilities {
+	/* Ambient candle-lit backdrop for the app; fixed so it never scrolls. */
+	.gate-vignette {
+		position: fixed;
+		inset: 0;
+		z-index: -10;
+		pointer-events: none;
+		background:
+			radial-gradient(ellipse 80% 55% at 50% 18%, oklch(0.7 0.16 55 / 7%), transparent 70%),
+			radial-gradient(ellipse 120% 90% at 50% 110%, oklch(0.35 0.05 70 / 45%), transparent 60%),
+			linear-gradient(to bottom, oklch(0.18 0.014 75), oklch(0.13 0.012 75));
+	}
+
+	/* Gate-screen entrance: fade + rise, staggered per element (see markup). */
+	@keyframes gate-rise {
+		from {
+			opacity: 0;
+			transform: translateY(10px) scale(0.98);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0) scale(1);
+		}
+	}
+
+	.gate-rise {
+		opacity: 0;
+		animation: gate-rise 0.45s var(--ease-out) forwards;
+		animation-delay: calc(var(--stagger, 0) * 70ms);
+	}
+
+	/* Breathing ember glow for the online dot; disabled under reduced motion. */
+	@keyframes ember-pulse {
+		0%,
+		100% {
+			opacity: 1;
+			box-shadow: 0 0 0 0 oklch(0.66 0.1 152 / 40%);
+		}
+		50% {
+			opacity: 0.75;
+			box-shadow: 0 0 0 4px oklch(0.66 0.1 152 / 0%);
+		}
+	}
+
+	.ember-pulse {
+		animation: ember-pulse 2.4s var(--ease-in-out) infinite;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.gate-rise {
+			animation: none;
+			opacity: 1;
+			transform: none;
+		}
+		.ember-pulse {
+			animation: none;
+		}
+	}
+}
