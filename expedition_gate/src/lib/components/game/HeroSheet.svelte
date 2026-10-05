@@ -1,0 +1,136 @@
+<script lang="ts">
+	import type { WorldState } from '$lib/server/engine/worldstate';
+	import { STAT_LABELS_TH } from '$lib/server/engine/rules';
+
+	let { state }: { state: WorldState } = $props();
+
+	const hero = $derived(state.hero);
+	const statGroups = $derived([
+		{ label: 'กาย', keys: ['str', 'agi', 'dex', 'vit'] as const },
+		{ label: 'จิต', keys: ['int', 'spi', 'cha'] as const },
+		{ label: 'ชะตา', keys: ['luk'] as const }
+	]);
+
+	const hpPct = $derived(hero.maxHp > 0 ? hero.hp / hero.maxHp : 0);
+	const mpPct = $derived(hero.maxMp > 0 ? hero.mp / hero.maxMp : 0);
+</script>
+
+<div class="space-y-4">
+	<header>
+		<h2 class="text-base font-bold">{hero.name}</h2>
+		<p class="mt-0.5 text-xs text-muted-foreground">
+			{hero.klass} · LV {hero.level}
+			{#if hero.concept}
+				· {hero.concept}
+			{/if}
+		</p>
+	</header>
+
+	<div class="space-y-2.5">
+		<div>
+			<div class="mb-1 flex items-baseline justify-between text-xs">
+				<span class="font-semibold text-hp">พลังชีวิต</span>
+				<span class="tabular-nums">{hero.hp}/{hero.maxHp}</span>
+			</div>
+			<div class="bar-track">
+				<div class="bar-fill bg-hp" style="transform: scaleX({hpPct})"></div>
+			</div>
+		</div>
+		<div>
+			<div class="mb-1 flex items-baseline justify-between text-xs">
+				<span class="font-semibold text-mana">มานา</span>
+				<span class="tabular-nums">{hero.mp}/{hero.maxMp}</span>
+			</div>
+			<div class="bar-track">
+				<div class="bar-fill bg-mana" style="transform: scaleX({mpPct})"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-lg border border-border/60 bg-card/50 p-3">
+		{#each statGroups as group (group.label)}
+			{#if group.label !== 'ชะตา'}
+				<div class="contents">
+					{#each group.keys as key (key)}
+						<div class="flex items-baseline justify-between text-[13px]">
+							<span class="text-muted-foreground">{STAT_LABELS_TH[key]}</span>
+							<span class="font-bold tabular-nums">{hero.stats[key]}</span>
+						</div>
+					{/each}
+				</div>
+			{/if}
+		{/each}
+		<div class="flex items-baseline justify-between text-[13px]">
+			<span class="text-muted-foreground">{STAT_LABELS_TH.luk}</span>
+			<span class="flex items-center gap-1.5 font-bold tabular-nums">
+				{hero.stats.luk}
+				{#if hero.luckPoints > 0}
+					<span class="text-gold" title="แต้มดวงคงเหลือ">🎲{hero.luckPoints}</span>
+				{/if}
+			</span>
+		</div>
+	</div>
+
+	<div class="flex flex-wrap items-center gap-2 text-xs">
+		<span class="rounded-full border border-gold/30 bg-gold/10 px-2.5 py-0.5 text-gold"
+			>💰 {hero.gold} ทอง</span
+		>
+		{#if hero.equipment.weapon}
+			<span class="rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5"
+				>⚔️ {hero.equipment.weapon.label}</span
+			>
+		{/if}
+		{#if hero.equipment.armor}
+			<span class="rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5"
+				>🛡️ {hero.equipment.armor.label}</span
+			>
+		{/if}
+		{#each hero.conditions as condition (condition)}
+			<span
+				class="rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-0.5 text-destructive"
+				>{condition}</span
+			>
+		{/each}
+	</div>
+
+	{#if hero.inventory.length}
+		<div>
+			<h3 class="mb-1.5 text-[11px] font-bold tracking-[0.15em] text-muted-foreground uppercase">
+				ของติดตัว
+			</h3>
+			<ul class="space-y-1 text-[13px]">
+				{#each hero.inventory as item (item.name)}
+					<li class="flex items-baseline justify-between gap-2">
+						<span>· {item.name}{item.note ? ` (${item.note})` : ''}</span>
+						{#if item.qty > 1}
+							<span class="text-muted-foreground tabular-nums">×{item.qty}</span>
+						{/if}
+					</li>
+				{/each}
+			</ul>
+		</div>
+	{/if}
+</div>
+
+<style>
+	.bar-track {
+		height: 8px;
+		overflow: hidden;
+		border-radius: 9999px;
+		background: color-mix(in oklch, var(--color-muted) 70%, transparent);
+	}
+
+	.bar-fill {
+		height: 100%;
+		width: 100%;
+		transform-origin: left center;
+		border-radius: 9999px;
+		transition: transform 0.5s var(--ease-out);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.bar-fill {
+			transition: none;
+		}
+	}
+</style>

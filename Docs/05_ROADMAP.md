@@ -2,28 +2,31 @@
 
 Phases with a definition of done. Work in order; each phase ends committed with tests green. Scope discipline: phases P0–P2 are the "playable game" line — nothing before it is a demo, nothing after it is required for v1.
 
-## P0 — Scaffold ⚙️
+## P0 — Scaffold ⚙️ ✅ (2026-10-06)
 
 `npm create svelte` (SvelteKit 2, TS strict) → install Tailwind, shadcn-svelte, motion, better-sqlite3 + drizzle, zod, Vitest + @testing-library/svelte + happy-dom.
 
-- [ ] App shell renders at `http://localhost:5173` with dark-fantasy theme tokens
-- [ ] Drizzle schema (`campaigns/messages/checkpoints`) + migration + `db/client.ts` (WAL)
-- [ ] `lib/server/llama.ts`: `stream()`, `complete()`, `health()` against `LLAMA_URL` env
-- [ ] `/api/llama/health` wired to a status chip
-- [ ] `tests/fake-llama/` stub server (scriptable SSE + JSON modes)
-- [ ] Vitest runs with 1 real test of the dice/stat unit (proves the pipeline)
-- [ ] `.gitignore`, ESLint + Prettier, `npm run check` clean
+- [x] App shell renders at `http://localhost:5173` with dark-fantasy theme tokens
+- [x] Drizzle schema (`campaigns/messages/checkpoints`) + migration + `db/client.ts` (WAL)
+- [x] `lib/server/llama.ts`: `stream()`, `complete()`, `health()` against `LLAMA_URL` env
+- [x] `/api/llama/health` wired to a status chip
+- [x] `tests/fake-llama/` stub server (scriptable SSE + JSON modes)
+- [x] Vitest runs with 1 real test of the dice/stat unit (proves the pipeline)
+- [x] `.gitignore`, ESLint + Prettier, `npm run check` clean
 
-## P1 — The GM loop (playable prototype)
+(Reality note: `sv create` installed SvelteKit 3 / Svelte 5.57 / Vite 8 — the current generation of the decided stack; Kit-3 migration notes live in `AGENTS.md` § Working gotchas.)
 
-- [ ] World creation wizard (setting/tone → world brief via `complete()`, 🎲 regenerate)
-- [ ] Hero creation (concept + class-lite → AI stat/kit proposal → tweak/accept)
-- [ ] `POST /api/gm/turn`: input → mechanics resolve (dice/stats/damage server-side) → GM SSE stream → save
-- [ ] Narration renderer (dialogue `ชื่อ : "…"` / narration / 📊 status blocks — adapt the sibling app's line-splitting rules; glue regexes must never cross newlines)
-- [ ] World-state update pipeline + zod + retry + `stateStale` fallback (`03_WORLD_STATE.md`)
-- [ ] Stop mid-turn (⏹ button → `/api/gm/stop` flag + client AbortController — both, Windows lesson)
-- [ ] Quick actions (⚔️ 🔍 💬 🏃) + free text both work
+## P1 — The GM loop (playable prototype) ✅ (2026-10-06)
+
+- [x] World creation wizard (setting/tone → world brief via `complete()`, 🎲 regenerate)
+- [x] Hero creation (concept + class-lite → AI stat/kit proposal → tweak/accept)
+- [x] `POST /api/gm/turn`: input → mechanics resolve (dice/stats/damage server-side) → GM SSE stream → save
+- [x] Narration renderer (dialogue `ชื่อ : "…"` / narration / 📊 status blocks — adapt the sibling app's line-splitting rules; glue regexes must never cross newlines)
+- [x] World-state update pipeline + zod + retry + `stateStale` fallback (`03_WORLD_STATE.md`)
+- [x] Stop mid-turn (⏹ button → `/api/gm/stop` flag + client AbortController — both, Windows lesson)
+- [x] Quick actions (⚔️ 🔍 💬 🏃) + free text both work
 - **Done when**: a full session of ~10 turns keeps HP/gold/inventory consistent and reads like a Thai novel.
+  - Machinery proven: 52 unit tests + `tests/e2e-smoke.mjs` (full wizard→turns→stop→persist cycle against the fake llama). The "reads like a Thai novel with real Gemma" playtest is the user's next step.
 
 ## P2 — Campaign living
 

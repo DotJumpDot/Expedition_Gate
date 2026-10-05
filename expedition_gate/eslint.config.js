@@ -38,5 +38,13 @@ export default tseslint.config(
 				parser: tseslint.parser
 			}
 		}
+	},
+	{
+		// Runes modules (.svelte.ts) need the svelte parser for $state/$derived.
+		files: ['**/*.svelte.ts', '**/*.svelte.js'],
+		languageOptions: {
+			parser: svelte.parser,
+			parserOptions: { parser: tseslint.parser }
+		}
 	}
 );

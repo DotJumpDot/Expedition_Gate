@@ -33,9 +33,67 @@ const WORLD_BRIEF_JSON = JSON.stringify({
 	npcs: [{ name: 'ลุงหมึก', role: 'พ่อค้าของชำ' }]
 });
 
+const WORLD_STATE_JSON = JSON.stringify({
+	stateV: 1,
+	hero: {
+		name: 'ตะวัน',
+		concept: 'นักเวทผู้ถูกขับไล่',
+		klass: 'นักเวท',
+		level: 1,
+		xp: 0,
+		stats: { str: 4, agi: 6, dex: 5, vit: 5, int: 8, spi: 9, cha: 7, luk: 8 },
+		hp: 40,
+		maxHp: 40,
+		mp: 34,
+		maxMp: 34,
+		conditions: [],
+		equipment: { weapon: { key: 'sword', label: 'ดาบเหล็ก' } },
+		inventory: [{ name: 'เปื้อน้ำ', qty: 2 }],
+		gold: 120,
+		luckPoints: 8
+	},
+	world: {
+		day: 2,
+		timeOfDay: 'เย็น',
+		location: 'หมู่บ้านท่าไม้',
+		weather: 'ฝนโปรย',
+		era: '',
+		sceneTag: 'village',
+		flags: { เจอรอยเท้า: true },
+		lore: ['รอยเท้าเดินย้อนศร']
+	},
+	npcs: [
+		{
+			id: 'npc-1',
+			name: 'ลุงหมึก',
+			role: 'พ่อค้า',
+			disposition: 1,
+			location: 'ร้านของชำ',
+			status: 'มีชีวิต'
+		}
+	],
+	quests: [{ id: 'q-1', title: 'ตามหาต้นทางรอยเท้า', status: 'active', steps: ['สืบถามชาวบ้าน'] }],
+	recentEvents: ['สอบถามลุงหมึกเรื่องรอยเท้า']
+});
+
+const WORLD_HERO_JSON = JSON.stringify({
+	stats: { str: 5, agi: 6, dex: 5, vit: 6, int: 8, spi: 9, cha: 7, luk: 6 },
+	weapon: { key: 'sword', label: 'ดาบเหล็กโบราณ' },
+	armor: { key: 'leather', label: 'เสื้อเกราะหนัง' },
+	inventory: [
+		{ name: 'เปื้อน้ำมนต์', qty: 2 },
+		{ name: 'เชือกป่าน', qty: 1 }
+	],
+	gold: 120,
+	background:
+		'ตะวันเป็นลูกหลานของหมอผีเก่าแก่ ถูกขับไล่จากเมืองหลวงจากข้อหาฝึกเวทต้องห้าม และเดินทางมาถึงประตูหินแห่งนี้เพื่อตามหาครูเก่าของตน'
+});
+
 const DEFAULT_SCENARIOS = {
 	ok: { content: THAI_NARRATION, finish: 'stop', chunkDelayMs: 5 },
 	json: { content: WORLD_BRIEF_JSON, finish: 'stop', chunkDelayMs: 5 },
+	hero: { content: WORLD_HERO_JSON, finish: 'stop', chunkDelayMs: 5 },
+	state: { content: WORLD_STATE_JSON, finish: 'stop', chunkDelayMs: 5 },
 	cjk: { content: 'ป่าไผ่เงียบสงัด 挑战 อยู่ตรงหน้า', finish: 'stop', chunkDelayMs: 5 },
 	'reasoning-burn': {
 		content: '',
@@ -62,6 +120,17 @@ export function createFakeLlama({ scenarios = DEFAULT_SCENARIOS } = {}) {
 			const name = model.slice(5);
 			if (!(name in scenarios)) throw new Error(`unknown fake scenario: ${name}`);
 			return name;
+		}
+		if (defaultScenario !== 'ok') return defaultScenario;
+		// Content routing: app-level tests hit this stub with real prompts —
+		// pick the JSON fixture that answers the question being asked.
+		const lastUser = Array.isArray(body?.messages)
+			? ([...body.messages].reverse().find((message) => message?.role === 'user')?.content ?? '')
+			: '';
+		if (typeof lastUser === 'string') {
+			if (lastUser.includes('ระบบบันทึกสถานะเกม')) return 'state';
+			if (lastUser.includes('ผู้สร้างโลก')) return 'json';
+			if (lastUser.includes('ผู้สร้างตัวละคร')) return 'hero';
 		}
 		return defaultScenario;
 	};

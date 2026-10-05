@@ -1,4 +1,3 @@
-/// <reference types="vitest/config" />
 import adapter from '@sveltejs/adapter-auto';
 import { sveltekit } from '@sveltejs/kit/vite';
 import tailwindcss from '@tailwindcss/vite';

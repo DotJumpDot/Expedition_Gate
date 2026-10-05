@@ -2,7 +2,7 @@
 
 **Single-player AI-GM adventure RPG.** A D&D-style tabletop experience where the AI is the Game Master — narrator, referee, and every NPC — with unlimited directions for the story to go. Runs 100% locally against the user's own llama-server. Sibling project of `C:\Code\Novel's_Model` (same user, same machine, shared lessons).
 
-> **This file + `Docs/` are the complete project context.** A fresh session should read this file first, then the Doc relevant to the task. The application lives in **`expedition_gate/`** (P0 scaffold completed 2026-10-06 — see Repo layout below and `Docs/05_ROADMAP.md` for phase status).
+> **This file + `Docs/` are the complete project context.** A fresh session should read this file first, then the Doc relevant to the task. The application lives in **`expedition_gate/`** — **P0 (scaffold) and P1 (the GM loop) are COMPLETE** (2026-10-06, see Repo layout below and `Docs/05_ROADMAP.md` for status).
 
 **Language rule: communicate with the user in ENGLISH only. All game UI and game content is THAI.**
 
@@ -87,7 +87,8 @@ C:\Code\Expedition_Gate\
   - `svelte-kit sync` writes `node_modules/$app/tsconfig.json` (the `extends` target in tsconfig) — never delete that folder blindly; re-run `npm run prepare` if missing.
 - **npm 11 allow-scripts**: native postinstalls are blocked until approved. `npm approve-scripts <pkg>` + `npm rebuild <pkg>` (better-sqlite3 + esbuild already approved; recorded in package.json `allowScripts`).
 - **Vitest**: happy-dom's `fetch` cannot hit real sockets — server-side tests that talk to the fake llama use `// @vitest-environment node` (see `tests/fake-llama/llama.test.ts`).
-- **fake-llama**: scenarios route per-request via `model: 'fake:<scenario>'` (`ok`/`json`/`cjk`/`reasoning-burn`/`slow`/`empty`) or server-wide via `GET /__scenario/<name>`.
+- **fake-llama**: scenarios route per-request via `model: 'fake:<scenario>'` (`ok`/`json`/`hero`/`state`/`cjk`/`reasoning-burn`/`slow`/`empty`) or server-wide via `GET /__scenario/<name>`; non-stream JSON calls also route by prompt content (world-brief/hero/state-tracker prompts get their JSON fixture automatically).
+- **Full-stack E2E**: `npm run fake-llama` + `LLAMA_URL=http://127.0.0.1:8090/v1 npm run dev` + `npm run e2e` (plays wizard → opening → attack → stop-mid-turn → persistence → cleanup).
 - **oxc parse quirk (once)**: vite.config.ts hit an oxc `PARSE_ERROR` around a multiline arrow during scaffold; the single-line rewrite has been stable — if it recurs, simplify the config expression first before suspecting anything else.
 - **Thai text via `curl -d` gets mangled** by the console code page → write JSON payloads to a file, use `--data-binary @file`. Payload files for Python: `os.environ['TEMP']` (no `/tmp` for Windows Python).
 - **SSE streaming responses must send `Connection: close`** and actually close, or clients hang forever.
