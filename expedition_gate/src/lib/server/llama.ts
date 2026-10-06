@@ -118,7 +118,8 @@ async function postChat(body: Record<string, unknown>, base: string, signal?: Ab
 		headers: { 'content-type': 'application/json' },
 		body: JSON.stringify({ ...body, stream: body.stream ?? false }),
 		signal,
-		cache: 'no-store'
+		cache: 'no-store',
+		redirect: 'error'
 	});
 	if (!res.ok) {
 		const text = await res.text().catch(() => '');
@@ -132,7 +133,8 @@ export async function health(timeoutMs = 3000, baseUrl?: string): Promise<LlamaH
 	try {
 		const res = await fetch(`${baseUrl ?? llamaUrl()}/models`, {
 			signal: timeoutSignal(timeoutMs),
-			cache: 'no-store'
+			cache: 'no-store',
+			redirect: 'error'
 		});
 		if (!res.ok) return { online: false, error: `HTTP ${res.status}` };
 		const data = (await res.json()) as { data?: Array<{ id?: string }> };
