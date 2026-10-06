@@ -273,7 +273,7 @@
 	.death-scrim {
 		position: absolute;
 		inset: 0;
-		background: oklch(0.08 0.01 27 / 85%);
+		background: color-mix(in oklch, var(--color-background) 72%, black);
 		backdrop-filter: blur(7px);
 	}
 
@@ -285,7 +285,11 @@
 		border-radius: calc(var(--radius-lg) + 4px);
 		border: 1px solid color-mix(in oklch, var(--color-destructive) 25%, transparent);
 		background:
-			radial-gradient(ellipse 80% 50% at 50% -10%, oklch(0.577 0.2 27 / 12%), transparent 65%),
+			radial-gradient(
+				ellipse 80% 50% at 50% -10%,
+				color-mix(in oklch, var(--color-destructive) 12%, transparent),
+				transparent 65%
+			),
 			var(--color-popover);
 		box-shadow: 0 24px 64px oklch(0 0 0 / 60%);
 	}

@@ -128,7 +128,11 @@
 		border-radius: calc(var(--radius-lg) + 4px);
 		border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);
 		background:
-			radial-gradient(ellipse 80% 50% at 50% -20%, oklch(0.66 0.1 152 / 8%), transparent 65%),
+			radial-gradient(
+				ellipse 80% 50% at 50% -20%,
+				color-mix(in oklch, var(--color-xp) 8%, transparent),
+				transparent 65%
+			),
 			var(--color-popover);
 		box-shadow: 0 24px 64px oklch(0 0 0 / 55%);
 	}

@@ -171,7 +171,11 @@
 		border-radius: var(--radius-lg);
 		border: 1px solid color-mix(in oklch, var(--color-border) 80%, transparent);
 		background:
-			radial-gradient(ellipse 90% 120% at 12% -30%, oklch(0.7 0.16 55 / 8%), transparent 60%),
+			radial-gradient(
+				ellipse 90% 120% at 12% -30%,
+				color-mix(in oklch, var(--color-ember) 8%, transparent),
+				transparent 60%
+			),
 			color-mix(in oklch, var(--color-card) 75%, transparent);
 		padding: 0.7rem 1rem;
 	}

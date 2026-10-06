@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
-	import { Compass, FileUp, ScrollText, Swords } from '@lucide/svelte';
+	import { goto } from '$app/navigation';
+	import { Compass, FileUp, Swords } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { SCENARIOS } from '$lib/game/scenarios';
 
@@ -41,7 +42,7 @@
 			});
 			const body = (await res.json()) as { id?: string; error?: string };
 			if (!res.ok || !body.id) throw new Error(body.error ?? 'นำเข้าไม่สำเร็จ');
-			await import('$app/navigation').then(({ goto }) => goto(`/campaign/${body.id}`));
+			await goto(`/campaign/${body.id}`);
 		} catch (err) {
 			importError = err instanceof Error ? err.message : 'นำเข้าไม่สำเร็จ';
 			importing = false;

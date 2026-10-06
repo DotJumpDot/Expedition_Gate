@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 	import { Compass, Minus, Plus, Sparkles, X } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
@@ -9,23 +10,17 @@
 	import { SCENARIOS, type Scenario, type ScenarioHero } from '$lib/game/scenarios';
 	import { settings, type CustomPreset } from '$lib/stores/settings.svelte';
 
-	let {
-		initialMode = 'scenario',
-		initialScenarioId = ''
-	}: {
-		initialMode?: 'scenario' | 'custom';
-		initialScenarioId?: string;
-	} = $props();
-
 	type Step = 'world' | 'brief' | 'hero' | 'scenario';
-	// svelte-ignore state_referenced_locally — set once from the opener
-	let step = $state<Step>(initialMode === 'scenario' ? 'scenario' : 'world');
-	// svelte-ignore state_referenced_locally — the gate screen sets it at open time
-	let mode = $state<'scenario' | 'custom'>(initialMode);
+
+	// Query params drive the entry point (?scenario=<id> deep link, ?mode=custom)
+	// — read once at mount; the tabs take over from here.
+	const params = page.url.searchParams;
+	const startScenarioId = params.get('scenario') ?? '';
+	const startMode: 'scenario' | 'custom' = params.get('mode') === 'custom' ? 'custom' : 'scenario';
+	let step = $state<Step>(startMode === 'scenario' ? 'scenario' : 'world');
+	let mode = $state<'scenario' | 'custom'>(startMode);
 	/** Hand-authored ready-to-play story (เริ่มทันที). */
 	let scenario = $state<Scenario | null>(null);
-	/** The ready-made hero picked from the scenario (cleared if the player uses AI instead). */
-	let readyHero = $state<ScenarioHero | null>(null);
 	let setting = $state('sword_sorcery');
 	/** The player-saved preset currently chosen (null = built-in or กำหนดเอง). */
 	let customSelected = $state<CustomPreset | null>(null);
@@ -135,7 +130,6 @@
 		if (!brief) return;
 		heroLoading = true;
 		heroError = '';
-		readyHero = null; // the AI proposal supersedes the ready-made pick
 		try {
 			const isCustom = heroClass === CUSTOM_CLASS;
 			const klass = isCustom ? customClassName.trim().slice(0, 40) || 'นักผจญภัย' : heroClass;
@@ -174,12 +168,11 @@
 	// --- เริ่มทันที (ready-to-play scenarios) ---
 
 	// Deep link (?scenario=<id>) lands directly on that story's detail.
-	const linked = SCENARIOS.find((entry) => entry.id === initialScenarioId);
+	const linked = SCENARIOS.find((entry) => entry.id === startScenarioId);
 	if (linked) selectScenario(linked);
 
 	function selectScenario(entry: Scenario) {
 		scenario = entry;
-		readyHero = null;
 		proposal = null;
 		stats = null;
 		brief = entry.brief;
@@ -196,7 +189,6 @@
 	 * buy before starting.
 	 */
 	function selectReadyHero(hero: ScenarioHero) {
-		readyHero = hero;
 		proposal = {
 			stats: hero.stats,
 			weapon: hero.weapon,
@@ -214,7 +206,6 @@
 
 	/** Leave the ready-made heroes and build a custom hero inside this scenario. */
 	function buildOwnHero() {
-		readyHero = null;
 		proposal = null;
 		stats = null;
 		heroName = '';
@@ -799,7 +790,11 @@
 		border-radius: calc(var(--radius-lg) + 4px);
 		border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);
 		background:
-			radial-gradient(ellipse 80% 50% at 50% -20%, oklch(0.7 0.16 55 / 6%), transparent 65%),
+			radial-gradient(
+				ellipse 80% 50% at 50% -20%,
+				color-mix(in oklch, var(--color-gold) 6%, transparent),
+				transparent 65%
+			),
 			var(--color-popover);
 		box-shadow: 0 24px 64px oklch(0 0 0 / 55%);
 	}
