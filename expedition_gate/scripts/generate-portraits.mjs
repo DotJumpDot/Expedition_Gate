@@ -46,6 +46,50 @@ const ROLES = /** @type {const} */ ([
 	['noble', 'wealthy noble aristocrat, ornate embroidered outfit, jewelry, proud posture']
 ]);
 
+// Personality variants on the two adult genders — the same merchant woman can
+// be a cheerful soul or a dull tired one, and the picker should show both.
+const GENDERS = /** @type {const} */ ([
+	['man', 'adult asian man in his 30s'],
+	['woman', 'adult asian woman in her 30s']
+]);
+const EXPRESSIONS = /** @type {const} */ ([
+	['cheerful', 'bright cheerful smile, warm sparkling eyes, open friendly face'],
+	['stern', 'stern serious expression, sharp focused gaze, set jaw'],
+	['dull', 'tired dull expression, weary half-lidded eyes, flat mouth']
+]);
+
+// NPC professions the hero matrix doesn't cover (inn staff, watch, crafts…).
+const PROFESSIONS = /** @type {const} */ ([
+	['innkeeper', 'innkeeper, waistcoat and apron, holding a mug and towel, warm tavern keeper'],
+	['guard', 'town watch guard, light chainmail and tabard, spear on shoulder, watchful'],
+	[
+		'blacksmith',
+		'blacksmith, leather apron over simple clothes, soot-smudged cheeks, holding a hammer'
+	],
+	['servant', 'house servant, neat simple uniform, humble polite demeanor'],
+	['farmer', 'farm worker, straw hat, practical rough-spun clothes, sun-weathered'],
+	['priest', 'temple priest, layered vestments, prayer beads, serene devout look']
+]);
+
+// Common bestiary — the GM meets these constantly; portraits surface in the NPC panel.
+const MONSTERS = /** @type {const} */ ([
+	['goblin', 'small green goblin, big ears, mischievous grin, crude leather rags'],
+	['orc', 'burly green orc warrior, tusks, crude armor, battle-scarred'],
+	['slime', 'translucent blue slime creature, glossy jelly body, big round eyes'],
+	['dragon', 'young dragon, gleaming scales, small wings, curled horns, intelligent eyes'],
+	['skeleton', 'animated skeleton warrior, worn bone armor, glowing eye sockets'],
+	['ghost', 'pale translucent ghost, tattered flowing robes, sorrowful glow'],
+	['wolf', 'dire wolf, thick dark fur, amber eyes, bared fangs'],
+	['bandit', 'human bandit, hood and face scarf, daggers, calculating eyes'],
+	['troll', 'hulking cave troll, mossy grey skin, underbite tusks, wooden club'],
+	['kobold', 'small reptilian kobold, dull scales, snout, ragged clothes, timid'],
+	['golem', 'stone golem, rune-carved rocky body, glowing core, imposing stance'],
+	['harpy', 'harpy, great bird wings and talons, wild human face, wind-blown feathers']
+]);
+
+const MONSTER_STYLE =
+	'fantasy bestiary illustration, game creature portrait, full body, centered, detailed, dark simple background';
+
 const CHECKPOINTS = /** @type {const} */ ([
 	{ file: 'Illustrious-XL-v2.0.safetensors', short: 'illustrious', bucket: 'anime' },
 	{ file: 'NoobAI-XL v1.1 (Anime NSFW).safetensors', short: 'noobai', bucket: 'anime' }
@@ -71,11 +115,24 @@ function ageAnchor(ageKey) {
 	return ageKey === 'girl' || ageKey === 'woman' || ageKey === 'grandma' ? '1girl' : '1boy';
 }
 
+// Seeds are deterministic per stem, so a rejected image would reproduce
+// identically forever. Bump the number here to reroll that one portrait
+// (delete its file first), keeping every other image stable. Reviewed
+// rejects from the 2026-10-06 full-library contact-sheet pass.
+const SEED_BUMPS = /** @type {Record<string, number>} */ ({
+	anime_man_merchant_stern_noobai: 1, // rendered a cheerful pink-haired girl under man/stern tags
+	anime_monster_bandit_illustrious: 2, // first reroll came back as a literal cat
+	anime_monster_bandit_noobai: 1, // abstract orange spiral face
+	anime_monster_troll_noobai: 1, // flat cartoon style clashes with the set
+	anime_monster_wolf_illustrious: 1 // anthro royal-cap wolf, not a dire wolf
+});
+
 // --- helpers ----------------------------------------------------------------
 
 function hashSeed(stem) {
+	const salt = SEED_BUMPS[stem] ? `#${SEED_BUMPS[stem]}` : '';
 	let h = 2166136261;
-	for (const ch of stem) h = (Math.imul(h ^ ch.codePointAt(0), 16777619) >>> 0) >>> 0;
+	for (const ch of stem + salt) h = (Math.imul(h ^ ch.codePointAt(0), 16777619) >>> 0) >>> 0;
 	return h % 2147483647;
 }
 
@@ -145,14 +202,13 @@ async function listCheckpoints() {
 	return data.CheckpointLoaderSimple.input.required.ckpt_name[0];
 }
 
-async function generateOne({ cp, age, role }, manifest) {
-	const stem = `${cp.bucket}_${age[0]}_${role[0]}_${cp.short}`;
+async function generateOne({ cp, stem, tags, subject, anchor }, manifest) {
 	const file = `${stem}.png`;
 	if (existsSync(resolve(OUT_DIR, file)) && manifest.portraits.some((p) => p.file === file)) {
 		return 'skip';
 	}
 
-	const positive = `solo, ${ageAnchor(age[0])}, ${STYLE}, ${age[1]}, ${role[1]}`;
+	const positive = anchor ? `solo, ${anchor}, ${STYLE}, ${subject}` : `solo, ${STYLE}, ${subject}`;
 	const seed = hashSeed(stem);
 	const clientId = `gate-${stem}`;
 	const queue = await comfyFetch('/prompt', {
@@ -186,7 +242,7 @@ async function generateOne({ cp, age, role }, manifest) {
 		manifest.portraits.push({
 			file,
 			bucket: cp.bucket,
-			tags: [age[0], role[0]],
+			tags,
 			settings: ['any'],
 			source: `comfyui:${cp.file}`,
 			license: 'locally-generated, user-owned',
@@ -202,23 +258,63 @@ async function generateOne({ cp, age, role }, manifest) {
 
 const args = process.argv.slice(2);
 const dryRun = args.includes('--dry-run');
-const onlyIdx = args.indexOf('--only');
-const only = onlyIdx >= 0 ? args[onlyIdx + 1] : null;
 
 mkdirSync(OUT_DIR, { recursive: true });
 const manifest = loadManifest();
 manifest.$comment =
-	'Character-portrait library (Docs/02 § Hero portraits). One entry per image: file (under static/assets/portraits/), bucket anime|realistic (NEVER mixed inside one world — presets declare their style), tags [age, role], settings, source checkpoint, license. Regenerate with scripts/generate-portraits.mjs against local ComfyUI.';
+	'Character-portrait library (Docs/02 § Hero portraits). One entry per image: file (under static/assets/portraits/), bucket anime (realistic dropped by user review), tags describe the subject — heroes [age, role], personality variants [gender, role, expression], professions [gender, profession], monsters [monster, name], source checkpoint, license. Regenerate with scripts/generate-portraits.mjs against local ComfyUI.';
 
+// The plan: heroes (72) + adult personality variants (72) + professions (24)
+// + monsters (24) = 192 images across the two anime checkpoints.
 const plan = [];
 for (const cp of CHECKPOINTS) {
-	if (only && cp.bucket !== only) continue;
-	for (const age of AGES) for (const role of ROLES) plan.push({ cp, age, role });
+	for (const age of AGES) {
+		for (const role of ROLES) {
+			plan.push({
+				cp,
+				stem: `anime_${age[0]}_${role[0]}_${cp.short}`,
+				tags: [age[0], role[0]],
+				subject: `${age[1]}, ${role[1]}`,
+				anchor: ageAnchor(age[0])
+			});
+		}
+	}
+	for (const gender of GENDERS) {
+		for (const role of ROLES) {
+			for (const expr of EXPRESSIONS) {
+				plan.push({
+					cp,
+					stem: `anime_${gender[0]}_${role[0]}_${expr[0]}_${cp.short}`,
+					tags: [gender[0], role[0], expr[0]],
+					subject: `${gender[1]}, ${role[1]}, ${expr[1]}`,
+					anchor: ageAnchor(gender[0])
+				});
+			}
+		}
+		for (const prof of PROFESSIONS) {
+			plan.push({
+				cp,
+				stem: `anime_${gender[0]}_${prof[0]}_${cp.short}`,
+				tags: [gender[0], prof[0]],
+				subject: `${gender[1]}, ${prof[1]}`,
+				anchor: ageAnchor(gender[0])
+			});
+		}
+	}
+	for (const monster of MONSTERS) {
+		plan.push({
+			cp,
+			stem: `anime_monster_${monster[0]}_${cp.short}`,
+			tags: ['monster', monster[0]],
+			subject: `${MONSTER_STYLE}, ${monster[1]}`,
+			anchor: null
+		});
+	}
 }
 
 if (dryRun) {
 	console.log(`plan: ${plan.length} portraits`);
-	for (const p of plan) console.log(` ${p.cp.bucket}/${p.age[0]}/${p.role[0]} ← ${p.cp.short}`);
+	for (const p of plan) console.log(` ${p.stem} [${p.tags.join(', ')}]`);
 	process.exit(0);
 }
 
@@ -231,9 +327,7 @@ for (const cp of CHECKPOINTS) {
 let done = 0;
 let skipped = 0;
 for (const item of plan) {
-	process.stdout.write(
-		`[${done + skipped + 1}/${plan.length}] ${item.cp.bucket}/${item.age[0]}/${item.role[0]} … `
-	);
+	process.stdout.write(`[${done + skipped + 1}/${plan.length}] ${item.stem} … `);
 	const result = await generateOne(item, manifest);
 	if (result === 'skip') {
 		skipped++;

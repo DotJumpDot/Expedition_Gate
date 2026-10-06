@@ -22,7 +22,7 @@
 | Content rating | **Uncensored-mature-capable, flows with the story** — no per-campaign toggle. Full policy: `Docs/04_GM_PROMPT.md` § Content policy |
 | Rules depth | **Hybrid**: EIGHT stats — RO six (STR/AGI/DEX/VIT/INT/LUK) + **SPI จิตวิญญาณ** + **CHA เสน่ห์** (8 = hard ceiling, more = world-state flags); HP + มานา pools, d20+mod vs DC, inventory/gold/quests. NOT full D&D 5e — user explicitly rejected that as fussy |
 | Scene art | **Local free-asset library, AI-picked** (`world.sceneTag` from the manifest's controlled vocabulary) — **NOT ComfyUI at v1**: the GPU is busy running the GM during play; user explicitly deferred generation to a future door. CC0/free-license only, every asset recorded in `assets/manifest.json` |
-| Hero portraits | **Local ComfyUI pre-generated library** (offline, `npm run portraits`), auto-picked per hero class. **Anime-only** (72 = 6 ages × 6 roles × 2 checkpoints) — a photoreal bucket was generated and dropped by user review; don't re-add styles without asking. User-owned images, SFW prompts, `solo`+`1boy/1girl` anchors in prompts (danbooru checkpoints otherwise leak multi-view "design sheets") |
+| Hero portraits | **Local ComfyUI pre-generated library** (offline, `npm run portraits`), auto-picked per hero class / NPC role (Thai keyword matching; monster bestiary included). **Anime-only** (192: heroes 72, personality variants 72, professions 24, monsters 24) — a photoreal bucket was generated and dropped by user review; don't re-add styles without asking. User-owned images, SFW prompts, `solo`+`1boy/1girl` anchors in prompts (danbooru checkpoints otherwise leak multi-view "design sheets") |
 
 ## Golden rules
 
@@ -80,7 +80,7 @@ C:\Code\Expedition_Gate\
     ├── scripts\               ← fetch-assets.mjs · generate-portraits.mjs (ComfyUI batch, offline)
     ├── drizzle\               ← checked-in migration SQL
     ├── assets\manifest.json   ← scene-art library manifest (COMMITTED; binaries re-download via scripts/fetch-assets.mjs)
-    ├── assets\portraits.json  ← hero-portrait catalog (COMMITTED; 72 anime = 6 ages × 6 roles × 2 checkpoints, regenerate via `npm run portraits`)
+    ├── assets\portraits.json  ← character-portrait catalog (COMMITTED; 192 anime: heroes/variants/professions/monsters, regenerate via `npm run portraits`)
     ├── static\assets\         ← scene + portrait image binaries (gitignored)
     └── data\gate.db           ← SQLite campaign data (gitignored)
 ```

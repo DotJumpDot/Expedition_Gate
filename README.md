@@ -21,7 +21,7 @@ All game UI and game content is **Thai**; the repo is documented in English.
 
 **Live world** — hero sheet, quest log, and NPC panel update every turn from a zod-validated world state; scene art card illustrates the current scene from a 37-image local library (AI-picked `sceneTag`, anti-repeat, manual 🖼 override); บันทึกแห่งโลก codex collects lore, NPCs, quests, flags.
 
-**Hero portraits** — every hero gets a face from a 72-portrait anime library generated locally with ComfyUI (`npm run portraits`; 6 ages × 6 roles × 2 checkpoints). Auto-picked to fit the hero's class (นักเวท → mystic, นักดาบ → warrior, …) and stable per hero, with a manual 🖼 override on the game screen. (A photorealistic bucket was also generated and dropped by review — it didn't match the app's look.)
+**Hero portraits** — every hero gets a face from a locally-generated anime library (ComfyUI, `npm run portraits`): 72 hero portraits (6 ages × 6 roles × 2 checkpoints) plus personality variants (cheerful / stern / dull), NPC professions (innkeeper, guard, blacksmith, servant, farmer, priest — men and women), and a monster bestiary (goblin, orc, slime, dragon, skeleton, ghost, wolf, bandit, troll, kobold, golem, harpy) — 192 images total. Auto-picked to fit the hero's class / the NPC's role (Thai keyword matching, monsters included) and stable per name, with a manual 🖼 override on the game screen; NPC faces show in the NPC panel. (A photorealistic bucket was generated and dropped by review — it didn't match the app's look.)
 
 **Memory** — three tiers injected into every GM prompt: verbatim window, session summary (rebuilt every 8 turns), and a whole-campaign chronicle (every 20). Closing the tab overnight and resuming gives you a "ก่อนหน้านี้…" recap and coherent continuation.
 

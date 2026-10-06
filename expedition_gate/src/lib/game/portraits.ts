@@ -22,7 +22,8 @@ export type PortraitRole = (typeof PORTRAIT_ROLES)[number];
 export interface PortraitEntry {
 	file: string;
 	bucket: string;
-	/** [age, role] from the fixed vocabularies (assets/portraits.json). */
+	/** Group vocabulary: heroes [age, role], personality variants [gender, role,
+	 *  expression], professions [gender, profession], monsters ['monster', name]. */
 	tags: string[];
 	url?: string;
 	available?: boolean;
@@ -76,4 +77,94 @@ export function pickPortrait(
 	const preferred = usable.filter((entry) => entry.tags.includes(role));
 	const pool = preferred.length > 0 ? preferred : usable;
 	return pool[hashKey(seedKey) % pool.length] ?? null;
+}
+
+// --- NPC & monster faces -----------------------------------------------------
+// The GM adds NPCs (and enemies) as world-state entries with free-text Thai
+// names/roles; these keyword tables route them at the library's profession,
+// monster, and personality-variant groups. Best effort by design — any miss
+// falls through to a sensible pool, never to "no portrait".
+
+const MONSTER_KEYWORDS: Array<[string, string[]]> = [
+	['goblin', ['กอบลิน', 'โกบลิน', 'goblin']],
+	['orc', ['ออร์ก', 'ออร์ค', 'orc']],
+	['slime', ['สไลม์', 'slime']],
+	['dragon', ['มังกร', 'dragon', 'ไวเวิร์น', 'wyvern']],
+	['skeleton', ['โครงกระดูก', 'skeleton']],
+	['ghost', ['ผี', 'วิญญาณ', 'ภูต', 'ghost']],
+	['wolf', ['หมาป่า', 'wolf']],
+	['bandit', ['โจร', 'ปล้น', 'bandit']],
+	['troll', ['ยักษ์', 'troll']],
+	['kobold', ['โคบอลด์', 'kobold']],
+	['golem', ['กอเลม', 'โกเลม', 'จักรกลเวท', 'golem']],
+	['harpy', ['ฮาร์ปี้', 'ฮาร์ปี', 'harpy']]
+];
+
+const PROFESSION_KEYWORDS: Array<[string, string[]]> = [
+	['innkeeper', ['โรงแรม', 'โรงเหล้า', 'เฝ้าโรง', 'แม่เม้า', 'เจ้าของร้านเหล้า', 'ที่พัก']],
+	['guard', ['ยาม', 'ผู้พิทักษ์', 'องครักษ์', 'เจ้าหน้าที่', 'ฝ่ายธุรการ']],
+	['blacksmith', ['ช่างตีเหล็ก', 'ช่างเหล็ก', 'ตีเหล็ก', 'ช่างซ่อม']],
+	['servant', ['สาวใช้', 'คนรับใช้', 'บ่าว', 'ข้ารับใช้', 'สมุบ']],
+	['farmer', ['ชาวนา', 'ชาวไร่', 'เกษตรกร']],
+	['priest', ['พระ', 'นักบวช', 'หมอผี', 'ปุโรหิต', 'แม่ชี', 'เณร']]
+];
+
+const WOMAN_HINTS = ['ป้า', 'ยาย', 'แม่', 'นาง', 'หญิง', 'สาว', 'คุณหญิง', 'หม่อม'];
+const MAN_HINTS = ['ลุง', 'ตา', 'พ่อ', 'นาย', 'ชาย', 'หนุ่ม'];
+const ADULT_AGES = ['man', 'woman', 'grandpa', 'grandma'];
+
+function firstHit(haystack: string, table: Array<[string, string[]]>): string | null {
+	for (const [tag, words] of table) {
+		if (words.some((word) => haystack.includes(word))) return tag;
+	}
+	return null;
+}
+
+/**
+ * Portrait for a world-state NPC (or enemy — monsters route via name/role
+ * keywords). Fallback chain: monster → profession/role (± gender) → any adult
+ * → anything; tie-break stable per NPC name. Empty library → null.
+ */
+export function pickNpcPortrait(
+	entries: PortraitEntry[],
+	npcName: string,
+	npcRole: string
+): PortraitEntry | null {
+	const usable = entries.filter(
+		(entry) => entry.bucket === PORTRAIT_BUCKET && entry.available !== false
+	);
+	if (usable.length === 0) return null;
+
+	const hay = `${npcName} ${npcRole}`.toLowerCase();
+
+	// 1) monsters (the name or role names a creature)
+	const monster = firstHit(hay, MONSTER_KEYWORDS);
+	if (monster) {
+		let pool = usable.filter((entry) => entry.tags[0] === 'monster' && entry.tags[1] === monster);
+		if (pool.length > 0) return pool[hashKey(npcName) % pool.length] ?? null;
+		pool = usable.filter((entry) => entry.tags[0] === 'monster');
+		if (pool.length > 0) return pool[hashKey(npcName) % pool.length] ?? null;
+	}
+
+	// 2) profession (library professions first, then the hero-role vocabulary)
+	const profTag = firstHit(hay, PROFESSION_KEYWORDS) ?? roleTagForClass(npcRole);
+	const isWoman = WOMAN_HINTS.some((word) => hay.includes(word));
+	const isMan = MAN_HINTS.some((word) => hay.includes(word));
+	const gender = isWoman && !isMan ? 'woman' : isMan && !isWoman ? 'man' : null;
+	let pool = usable.filter(
+		(entry) =>
+			entry.tags[0] !== 'monster' &&
+			entry.tags.includes(profTag) &&
+			(gender === null || entry.tags.includes(gender))
+	);
+	if (pool.length > 0) return pool[hashKey(npcName) % pool.length] ?? null;
+	pool = usable.filter((entry) => entry.tags[0] !== 'monster' && entry.tags.includes(profTag));
+	if (pool.length > 0) return pool[hashKey(npcName) % pool.length] ?? null;
+
+	// 3) any adult human (kids read wrong for arbitrary NPCs)
+	pool = usable.filter(
+		(entry) => entry.tags[0] !== 'monster' && ADULT_AGES.includes(entry.tags[0])
+	);
+	if (pool.length > 0) return pool[hashKey(npcName) % pool.length] ?? null;
+	return usable[hashKey(npcName) % usable.length] ?? null;
 }

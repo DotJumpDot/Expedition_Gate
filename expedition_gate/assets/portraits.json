@@ -1,5 +1,5 @@
 {
-	"$comment": "Character-portrait library (Docs/02 § Hero portraits). One entry per image: file (under static/assets/portraits/), bucket anime (realistic bucket dropped by user review 2026-10-06 — anime only), tags [age, role], settings, source checkpoint, license. Regenerate with scripts/generate-portraits.mjs against local ComfyUI.",
+	"$comment": "Character-portrait library (Docs/02 § Hero portraits). One entry per image: file (under static/assets/portraits/), bucket anime (realistic dropped by user review), tags describe the subject — heroes [age, role], personality variants [gender, role, expression], professions [gender, profession], monsters [monster, name], source checkpoint, license. Regenerate with scripts/generate-portraits.mjs against local ComfyUI.",
 	"portraits": [
 		{
 			"file": "anime_boy_poor_illustrious.png",
@@ -1006,6 +1006,1758 @@
 				"any"
 			],
 			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_poor_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"poor",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_poor_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"poor",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_poor_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"poor",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_commoner_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"commoner",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_commoner_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"commoner",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_commoner_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"commoner",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_merchant_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"merchant",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_merchant_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"merchant",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_merchant_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"merchant",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_warrior_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"warrior",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_warrior_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"warrior",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_warrior_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"warrior",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_mystic_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"mystic",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_mystic_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"mystic",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_mystic_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"mystic",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_noble_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"noble",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_noble_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"noble",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_noble_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"noble",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_innkeeper_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"innkeeper"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_guard_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"guard"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_blacksmith_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"blacksmith"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_servant_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"servant"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_farmer_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"farmer"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_priest_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"priest"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_poor_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"poor",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_poor_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"poor",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_poor_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"poor",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_commoner_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"commoner",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_commoner_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"commoner",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_commoner_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"commoner",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_merchant_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"merchant",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_merchant_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"merchant",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_merchant_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"merchant",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_warrior_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"warrior",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_warrior_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"warrior",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_warrior_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"warrior",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_mystic_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"mystic",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_mystic_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"mystic",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_mystic_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"mystic",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_noble_cheerful_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"noble",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_noble_stern_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"noble",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_noble_dull_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"noble",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_innkeeper_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"innkeeper"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_guard_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"guard"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_blacksmith_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"blacksmith"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_servant_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"servant"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_farmer_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"farmer"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_priest_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"priest"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_goblin_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"goblin"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_orc_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"orc"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_slime_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"slime"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_dragon_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"dragon"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_skeleton_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"skeleton"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_ghost_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"ghost"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_troll_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"troll"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_kobold_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"kobold"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_golem_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"golem"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_harpy_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"harpy"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_poor_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"poor",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_poor_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"poor",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_poor_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"poor",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_commoner_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"commoner",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_commoner_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"commoner",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_commoner_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"commoner",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_merchant_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"merchant",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_merchant_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"merchant",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_warrior_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"warrior",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_warrior_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"warrior",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_warrior_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"warrior",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_mystic_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"mystic",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_mystic_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"mystic",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_mystic_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"mystic",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_noble_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"noble",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_noble_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"noble",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_noble_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"noble",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_innkeeper_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"innkeeper"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_guard_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"guard"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_blacksmith_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"blacksmith"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_servant_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"servant"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_farmer_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"farmer"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_priest_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"priest"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_poor_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"poor",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_poor_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"poor",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_poor_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"poor",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_commoner_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"commoner",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_commoner_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"commoner",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_commoner_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"commoner",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_merchant_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"merchant",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_merchant_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"merchant",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_merchant_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"merchant",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_warrior_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"warrior",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_warrior_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"warrior",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_warrior_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"warrior",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_mystic_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"mystic",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_mystic_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"mystic",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_mystic_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"mystic",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_noble_cheerful_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"noble",
+				"cheerful"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_noble_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"noble",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_noble_dull_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"noble",
+				"dull"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_innkeeper_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"innkeeper"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_guard_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"guard"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_blacksmith_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"blacksmith"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_servant_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"servant"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_farmer_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"farmer"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_woman_priest_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"woman",
+				"priest"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_goblin_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"goblin"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_orc_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"orc"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_slime_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"slime"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_dragon_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"dragon"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_skeleton_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"skeleton"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_ghost_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"ghost"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_wolf_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"wolf"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_kobold_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"kobold"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_golem_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"golem"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_harpy_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"harpy"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_wolf_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"wolf"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_man_merchant_stern_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"man",
+				"merchant",
+				"stern"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_bandit_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"bandit"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_troll_noobai.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"troll"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:NoobAI-XL v1.1 (Anime NSFW).safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "anime_monster_bandit_illustrious.png",
+			"bucket": "anime",
+			"tags": [
+				"monster",
+				"bandit"
+			],
+			"settings": [
+				"any"
+			],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
 			"license": "locally-generated, user-owned",
 			"author": "user (ComfyUI)"
 		}
