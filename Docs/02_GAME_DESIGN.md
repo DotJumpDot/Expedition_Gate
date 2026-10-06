@@ -22,7 +22,7 @@ Hero-sheet display grouping: **กาย** (STR·AGI·DEX·VIT) / **จิต** 
 - **Range 1–10 at creation** (point-buy: **52 points**, min 1 each — or let the AI allocate from the hero concept).
 - **Check modifier by stat value:** 1–2 → −2 · 3–4 → −1 · 5–6 → 0 · 7–8 → +1 · 9–10 → +2.
 - **HP** = 20 + VIT × 4. **มานา (MP)** = 8 + (INT + SPI) × 2 — both mind stats feed the pool so spirit-caster heroes aren't INT-walled.
-- **Spell costs**: minor flavor magic = narration only; a declared spell/ability costs มานา 3–10 by tier (the app deducts, never the model). *(v1 status: design intent — มานา changes currently come from the state tracker narrating declared spells; an app-side spell-cost parser is a future refinement.)*
+- **Spell costs**: minor flavor magic = narration only; a declared spell/ability costs มานา 3–10 by tier (the app deducts, never the model). *(Wired 2026-10-06: free text containing a cast verb (ร่าย/เสก/ใช้เวท…) is priced by intensity words — เวทเล็ก 3 · เวทปกติ 5 · เวทใหญ่ 8 — deducted app-side; not enough มานา = the cast fizzles with a resolution line, no deduction. Heuristics live in `lib/game/rules.ts`, isomorphic.)*
 - AGI vs DEX overlap was debated (merge considered) — kept separate for RO identity; if GM playtests show the model constantly picking the wrong one of the pair, merge them then, not before. *(v1: quick actions hard-pin the stat — attack → weapon stat, search → SPI, talk → CHA, flee → AGI — so the model never picks.)*
 - **Damage reduction** from armor: cloth 0 · leather 1 · chain 2 · plate 3 (+shield 1). Flat, no dice.
 - **Leveling**: XP thresholds double per level (L1→2 = 100 XP); +2 stat points per level, +HP(VIT×2) +MP(INT×2). Soft cap L10 in v1 (numbers tunable later).
@@ -32,7 +32,7 @@ Hero-sheet display grouping: **กาย** (STR·AGI·DEX·VIT) / **จิต** 
 - **Core check**: `d20 + stat mod` vs **DC** — 8 ง่ายมาก · 12 ง่าย · 15 ปกติ · 18 ยาก · 22 แทบเป็นไปไม่ได้.
 - **Nat 20** = critical success (narrated big). **Nat 1** = fumble (complication, never instant death).
 - **Damage dice** by weapon: มีด d4 · ดาบ/กระบอง d6 · ขวาน/คทา d8 · อาวุธใหญ่ d10 · ธนู d6 (DEX), +STR mod on melee.
-- **LUK**: `แต้มดวง` = LUK value, refresh each session; spend 1 to reroll any die or force "เป็นไปได้" on one declared action. *(v1 status: the pool ships — initialized = LUK at creation, shown on the hero sheet, tracked in state — but the spend-to-reroll action is NOT wired yet; future refinement.)*
+- **LUK**: `แต้มดวง` = LUK value, refresh each session; spend 1 to reroll any die or force "เป็นไปได้" on one declared action. *(Wired 2026-10-06: a gold 🎲 button under the last completed turn's narration spends 1 point and rerolls that check as its own GM turn ("โชคพลิกกลับมา") — offered only for the most recent check, while points last. Death saves and damage rolls are excluded. Session-refresh of the pool is still future work.)*
 - **Opposed checks**: both sides roll d20+mod, high wins (NPC mods improvised by GM from fiction: ทหารเก่า ≈ 7, ปรมาจารย์ ≈ 10).
 - Server-side RNG, results logged in the message record. **How the model learns the result**: the turn's context includes a line like `ผลการตัดสิน (ระบบทอยแล้ว ใช้ผลนี้เท่านั้น): d20(14) + DEX(+1) = 15 vs DC 15 → สำเร็จ` — the GM narrates the outcome, never re-rolls, never contradicts it.
 
@@ -90,7 +90,7 @@ Decided 2026-10-06: do NOT generate scene art with ComfyUI during play — the G
 - **Fetch script**: `scripts/fetch-assets.mjs` re-downloads from the manifest after a fresh clone (same pattern as the sibling app's avatar re-downloader). It validates every URL — http/https only, host resolved and checked (never localhost/loopback/private/reserved addresses) — and caps per-file size, writing atomically.
 - **Picker**: the world-state update call also returns `world.sceneTag` chosen from a **controlled vocabulary** = the manifest's tag list (inn · tavern · forest · dungeon · market · campfire · night · rain · desert · temple · …). zod validates against the vocabulary; invalid → keep the previous tag. The client matches `sceneTag` (+ setting filter) to assets, avoids recently-used repeats, and crossfades the scene card (motion). No match → keep previous art or none — never a broken image.
 - **Manual override**: a small 🖼 button on the scene card lets the player pick any library image for the scene.
-- v1 asset budget: ~80–120 images covering ~25 tags across the setting presets (ดาบและเวทมนตร์ / ไซไฟ / สยองขวัญ / ตำนานไทย).
+- v1 asset budget: ~80–120 images covering ~25 tags across the setting presets (ดาบและเวทมนตร์ / ไซไฟ / สยองขวัญ / ตำนานไทย). *(Progress 2026-10-06: 37 images — 13 locally-generated CC0 SVG scenes + 24 curated from Wikimedia Commons: public-domain Romantic paintings (Friedrich, John Martin, Brouwer, Teniers, Caffi), PD Ayutthaya photography for ตำนานไทย, and NASA/ESA/Webb imagery for ไซไฟ, plus CC-BY/CC-BY-SA entries whose attribution is recorded in the manifest. Curation continues — append verified `url` entries to the manifest and run `npm run assets`.)*
 
 ## UI screens (desktop-first)
 

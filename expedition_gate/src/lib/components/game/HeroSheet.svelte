@@ -1,8 +1,16 @@
 <script lang="ts">
 	import type { WorldState } from '$lib/game/worldstate';
-	import { STAT_LABELS_TH } from '$lib/game/rules';
+	import { STAT_LABELS_TH, isUsableItem } from '$lib/game/rules';
 
-	let { world }: { world: WorldState } = $props();
+	let {
+		world,
+		disabled = false,
+		onuseitem
+	}: {
+		world: WorldState;
+		disabled?: boolean;
+		onuseitem?: (name: string) => void;
+	} = $props();
 
 	const hero = $derived(world.hero);
 	const statGroups = $derived([
@@ -119,9 +127,22 @@
 				{#each hero.inventory as item (item.name)}
 					<li class="flex items-baseline justify-between gap-2">
 						<span>· {item.name}{item.note ? ` (${item.note})` : ''}</span>
-						{#if item.qty > 1}
-							<span class="text-muted-foreground tabular-nums">×{item.qty}</span>
-						{/if}
+						<span class="flex items-center gap-1.5">
+							{#if item.qty > 1}
+								<span class="text-muted-foreground tabular-nums">×{item.qty}</span>
+							{/if}
+							{#if onuseitem && isUsableItem(item.name)}
+								<button
+									type="button"
+									class="use-btn"
+									{disabled}
+									onclick={() => onuseitem(item.name)}
+									aria-label="ใช้ {item.name}"
+								>
+									ใช้
+								</button>
+							{/if}
+						</span>
 					</li>
 				{/each}
 			</ul>
@@ -169,6 +190,26 @@
 		animation: hp-glow 0.6s var(--ease-out);
 	}
 
+	/* Potion "ใช้" — press feedback only; it's data-adjacent, not decoration. */
+	.use-btn {
+		border-radius: 9999px;
+		border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);
+		padding: 0.05rem 0.55rem;
+		font-size: 0.68rem;
+		color: var(--color-muted-foreground);
+		transition:
+			transform 0.12s var(--ease-out),
+			color 0.12s var(--ease-out),
+			border-color 0.12s var(--ease-out);
+	}
+	.use-btn:active {
+		transform: scale(0.94);
+	}
+	.use-btn:disabled {
+		opacity: 0.45;
+		cursor: not-allowed;
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.hp-hit,
 		.hp-heal {
@@ -179,6 +220,16 @@
 	@media (prefers-reduced-motion: reduce) {
 		.bar-fill {
 			transition: none;
+		}
+		.use-btn {
+			transition: none;
+		}
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.use-btn:not(:disabled):hover {
+			color: var(--color-gold);
+			border-color: color-mix(in oklch, var(--color-gold) 40%, transparent);
 		}
 	}
 </style>

@@ -212,6 +212,31 @@ export function isHeroDead(hero: { hp: number; conditions: string[] }): boolean 
 	return hero.hp === 0 && countDeathFails(hero.conditions) >= DEATH_SAVE_MAX_FAILS;
 }
 
+/**
+ * App-wins merge for a consumed item (Docs/03 § update pipeline): the app
+ * resolved the use against `resolvedFrom` (pre-tracker state), so the consumed
+ * item's qty in the tracker output is FORCED to resolved−1 whatever the
+ * tracker did with it (kept it, decremented it, or dropped it). Items the
+ * tracker changed otherwise (loot, repairs) pass through untouched.
+ */
+export function mergeConsumed(
+	resolvedFrom: Hero['inventory'],
+	trackerInventory: Hero['inventory'],
+	name: string
+): Hero['inventory'] {
+	const before = resolvedFrom.find((item) => item.name === name);
+	if (!before) return trackerInventory; // nothing was consumed (resolveTurn guards too)
+	const targetQty = before.qty - 1;
+
+	const next = trackerInventory.map((item) =>
+		item.name === name ? { ...item, qty: targetQty } : item
+	);
+	if (targetQty > 0 && !trackerInventory.some((item) => item.name === name)) {
+		next.push({ ...before, qty: targetQty }); // tracker dropped it — restore at app qty
+	}
+	return targetQty > 0 ? next : next.filter((item) => item.name !== name); // last one consumed → gone
+}
+
 // ---------------------------------------------------------------------------
 // Factories
 // ---------------------------------------------------------------------------

@@ -234,3 +234,69 @@ export function applyLevelUp(pools: LevelUpPools, vit: number, int: number): Lev
 		maxMp: pools.maxMp + int * 2
 	};
 }
+
+// ---------------------------------------------------------------------------
+// Declared spells (Docs/02 § Spell costs) — the APP deducts มานา, never the
+// model. A free-text turn that declares a cast is detected here and priced.
+// ---------------------------------------------------------------------------
+
+/** มานา cost by tier: minor flavor 3 · standard 5 · major working 8. */
+export const SPELL_COSTS = { minor: 3, standard: 5, major: 8 } as const;
+export type SpellTier = keyof typeof SPELL_COSTS;
+
+/** Cast verbs — text containing one of these DECLARES a spell this turn. */
+const CAST_MARKERS = ['ร่าย', 'เสก', 'ใช้เวท', 'ใช้มนต์', 'ใช้อาคม', 'อาคม'] as const;
+
+const TIER_BIG_WORDS = [
+	'ทำลาย',
+	'พายุ',
+	'ไฟนรก',
+	'สายฟ้า',
+	'เต็มกำลัง',
+	'สุดกำลัง',
+	'ขั้นสูง',
+	'ใหญ่',
+	'แรงสุด',
+	'ปราศจาก'
+] as const;
+const TIER_SMALL_WORDS = ['เล็ก', 'เบา', 'นิดหน่อย', 'นิด', 'หน่อย', 'ประคอง'] as const;
+
+/** Does this free text declare a cast? (Shared with the UI for hints.) */
+export function declaresCast(text: string): boolean {
+	return CAST_MARKERS.some((marker) => text.includes(marker));
+}
+
+/** Tier from intensity words in the declared cast. */
+export function spellTier(text: string): SpellTier {
+	if (TIER_BIG_WORDS.some((word) => text.includes(word))) return 'major';
+	if (TIER_SMALL_WORDS.some((word) => text.includes(word))) return 'minor';
+	return 'standard';
+}
+
+// ---------------------------------------------------------------------------
+// Usable inventory items (Docs/02) — potions/elixirs the APP prices and rolls.
+// Recognition is name-based heuristics shared with the hero-sheet UI so the
+// ใช้ button only ever appears for items the server will also honor.
+// ---------------------------------------------------------------------------
+
+export type ItemEffect = 'heal' | 'mana';
+
+const USABLE_WORDS = ['ยา', 'โพชั่น', 'โปชั่น', 'เฟือ', 'น้ำมนต์', 'สมุนไพร', 'อาหาร'] as const;
+const MANA_WORDS = ['มานา', 'เวท', 'จิต', 'สมาธิ'] as const;
+
+/** Is this inventory item app-usable (shows the ใช้ affordance)? */
+export function isUsableItem(name: string): boolean {
+	return USABLE_WORDS.some((word) => name.includes(word));
+}
+
+/** Which pool does it restore? (mana variants override the default heal.) */
+export function itemEffect(name: string): ItemEffect {
+	if (MANA_WORDS.some((word) => name.includes(word))) return 'mana';
+	return 'heal';
+}
+
+/** Healing potion: 2d6 + 4 · มานา potion: 1d6 + 7 (the app rolls, per Docs/02). */
+export function potionAmount(effect: ItemEffect, rng: Rng): number {
+	if (effect === 'mana') return rollDie(6, rng) + 7;
+	return rollDie(6, rng) + rollDie(6, rng) + 4;
+}

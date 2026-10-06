@@ -238,11 +238,57 @@ ${Array.from({ length: 14 }, (_, i) => {
 		svgWrap(
 			'',
 			`<path d="M-20 330 200 300l180 26 200-34 240 40v128h-840z" fill="#0a1020"/>
-<path d="M-20 356c120-18 240-10 360 6s300 14 480-8v116h-840z" fill="#0c1830"/>
-<g stroke="#5a86b8" stroke-opacity="0.4" stroke-width="2.4" fill="none"><path d="M80 400c60-8 120-6 180 2"/><path d="M330 420c70-10 150-8 230 2"/><path d="M560 396c60-6 110-4 160 4"/></g>
-<path d="M540 210 580 130l52 86z" fill="#0b0d18"/>
-<circle cx="580" cy="105" r="34" fill="#e8dcc0" opacity="0.85"/>`,
+	<path d="M-20 356c120-18 240-10 360 6s300 14 480-8v116h-840z" fill="#0c1830"/>
+	<g stroke="#5a86b8" stroke-opacity="0.4" stroke-width="2.4" fill="none"><path d="M80 400c60-8 120-6 180 2"/><path d="M330 420c70-10 150-8 230 2"/><path d="M560 396c60-6 110-4 160 4"/></g>
+	<path d="M540 210 580 130l52 86z" fill="#0b0d18"/>
+	<circle cx="580" cy="105" r="34" fill="#e8dcc0" opacity="0.85"/>`,
 			SKY.night
+		),
+	market: () =>
+		svgWrap(
+			'',
+			`<g fill="#0d0b16"><rect y="310" width="800" height="140"/></g>
+	<g>
+	${[0, 1, 2, 3]
+		.map((i) => {
+			const x = 60 + i * 190;
+			return `<g fill="#0c0a14"><rect x="${x}" y="250" width="150" height="110"/><path d="M${x - 12} 252 ${x + 75} 208 ${x + 162} 252z" fill="#151027"/></g>
+	<rect x="${x + 55}" y="286" width="40" height="74" fill="#e8954a" opacity="${0.55 + (i % 2) * 0.3}"/>`;
+		})
+		.join('')}
+	</g>
+	<g fill="#e8b45a"><circle cx="140" cy="270" r="5" opacity="0.85"/><circle cx="330" cy="262" r="5" opacity="0.8"/><circle cx="710" cy="268" r="5" opacity="0.85"/><circle cx="520" cy="258" r="4.4" opacity="0.7"/></g>
+	<ellipse cx="400" cy="452" rx="430" ry="52" fill="#08070e"/>`,
+			SKY.ember
+		),
+	rain: () =>
+		svgWrap(
+			'',
+			`<g fill="#0a0d16"><rect y="300" width="800" height="150"/><rect x="120" y="180" width="110" height="180"/><rect x="330" y="150" width="130" height="210"/><rect x="560" y="200" width="120" height="160"/></g>
+	<g fill="#e8954a" opacity="0.8"><rect x="355" y="200" width="26" height="34"/><rect x="410" y="236" width="22" height="30" opacity="0.6"/><rect x="600" y="240" width="24" height="32" opacity="0.7"/></g>
+	<g stroke="#8fa8c8" stroke-opacity="0.3" stroke-width="1.6" stroke-linecap="round">
+	${Array.from({ length: 46 }, (_, i) => {
+		const x = ((i * 83) % 860) - 30;
+		const y = (i * 61) % 420;
+		return `<line x1="${x}" y1="${y}" x2="${x - 14}" y2="${y + 52}"/>`;
+	}).join('')}
+	</g>
+	<ellipse cx="400" cy="452" rx="420" ry="48" fill="#0a1220" opacity="0.9"/>`,
+			SKY.gloom
+		),
+	workshop: () =>
+		svgWrap(
+			'',
+			`<g fill="#0b0912"><rect y="120" width="800" height="330"/><path d="M60 120 400 40l340 80z" fill="#100c1c"/></g>
+	<circle cx="330" cy="400" r="150" fill="url(#glow)"/>
+	<g fill="#120d0a"><rect x="300" y="330" width="200" height="16" rx="6"/></g>
+	<path d="M368 346h64l-14 26h-36z" fill="#1a1410"/>
+	<path d="M392 372c4 22 6 34 8 46h-8c-2-12-4-24-8-46z" fill="#2a1c12"/>
+	<circle cx="330" cy="336" r="12" fill="#e8622a"/><circle cx="330" cy="336" r="30" fill="#e8622a" opacity="0.25"/><circle cx="330" cy="336" r="58" fill="#e8954a" opacity="0.14"/>
+	<g stroke="#241c14" stroke-width="7" stroke-linecap="round"><line x1="560" y1="200" x2="560" y2="300"/><line x1="610" y1="190" x2="610" y2="292"/><line x1="660" y1="204" x2="660" y2="298"/></g>
+	<g fill="#e8b45a"><rect x="180" y="216" width="30" height="40" opacity="0.5"/><rect x="660" y="330" width="34" height="46" opacity="0.65"/></g>
+	<ellipse cx="400" cy="452" rx="360" ry="44" fill="#080505"/>`,
+			SKY.ember
 		)
 };
 

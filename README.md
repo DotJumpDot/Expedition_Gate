@@ -11,9 +11,9 @@ All game UI and game content is **Thai**; the repo is documented in English.
 
 **Create** — 3-step wizard: pick a setting preset (ดาบและเวทมนตร์ · ไซไฟ · สยองขวัญ · ตำนานไทย · กำหนดเอง) + tone chips → AI writes the world brief (regenerate with 🎲) → describe your hero and the AI proposes stats, kit, and background; tweak the 52-point stat buy yourself or reroll.
 
-**Play** — free-text input always available, plus quick actions (⚔️ โจมตี · 🔍 ตรวจสอบ · 💬 พูดคุย · 🏃 หนี) and a dice tray (pick stat + DC). **The app does all the math server-side** — d20+mod vs DC, weapon damage, crits, HP/MP/gold/XP — and the GM narrates the already-resolved result as streaming Thai novel prose (dialogue lines, 📊 status blocks only when something mechanical changed). At 0 HP the dying hero rolls death saves (d20 ≥ 10, three fails = the end).
+**Play** — free-text input always available, plus quick actions (⚔️ โจมตี · 🔍 ตรวจสอบ · 💬 พูดคุย · 🏃 หนี) and a dice tray (pick stat + DC). **The app does all the math server-side** — d20+mod vs DC, weapon damage, crits, HP/MP/gold/XP, declared-spell มานา costs (tiered 3/5/8, fizzles when short), and potion use (ใช้ button on recognized items — heal 2d6+4 / มานา 1d6+7) — and the GM narrates the already-resolved result as streaming Thai novel prose (dialogue lines, 📊 status blocks only when something mechanical changed). Botched a roll? Spend 1 แต้มดวง (LUK) to reroll the last check with fate twisting back. At 0 HP the dying hero rolls death saves (d20 ≥ 10, three fails = the end).
 
-**Live world** — hero sheet, quest log, and NPC panel update every turn from a zod-validated world state; scene art card illustrates the current scene from a local free-asset library (AI-picked `sceneTag`, anti-repeat, manual 🖼 override); บันทึกแห่งโลก codex collects lore, NPCs, quests, flags.
+**Live world** — hero sheet, quest log, and NPC panel update every turn from a zod-validated world state; scene art card illustrates the current scene from a 37-image local library (AI-picked `sceneTag`, anti-repeat, manual 🖼 override); บันทึกแห่งโลก codex collects lore, NPCs, quests, flags.
 
 **Memory** — three tiers injected into every GM prompt: verbatim window, session summary (rebuilt every 8 turns), and a whole-campaign chronicle (every 20). Closing the tab overnight and resuming gives you a "ก่อนหน้านี้…" recap and coherent continuation.
 
@@ -52,7 +52,7 @@ LLAMA_URL=http://127.0.0.1:8090/v1 npm run dev
 All from `expedition_gate/`; nothing ever touches a live model server:
 
 ```bash
-npm test         # Vitest — 86 unit/engine tests (13 files)
+npm test         # Vitest — 102 unit/engine tests (14 files)
 npm run e2e      # node E2E smoke vs fake-llama: wizard → turns → stop → persist →
                  #   chips cache → checkpoint round-trip → consolidation → cleanup
 npm run e2e:pw   # Playwright browser e2e (boots fake-llama + dev server itself)
@@ -87,7 +87,7 @@ expedition_gate/
 
 ## Assets & licensing
 
-Scene art is **CC0 / public-domain / explicitly-free-license only**. Every image is recorded in `expedition_gate/assets/manifest.json` with source URL, license, and author; `npm run assets` re-downloads binaries after a fresh clone (URLs validated — no private/loopback hosts, per-file size cap). The committed library currently holds 10 locally-authored CC0 starter scenes; curating the full 80–120-image library is an ongoing content task (see `Docs/02` § Scene illustration).
+Scene art is **CC0 / public-domain / explicitly-free-license only**. Every image is recorded in `expedition_gate/assets/manifest.json` with source URL, license, and author; `npm run assets` re-downloads binaries after a fresh clone (URLs validated — no private/loopback hosts, per-file size cap). The committed library currently holds **37 images**: 13 locally-authored CC0 SVG scenes plus 24 curated from Wikimedia Commons (public-domain Romantic paintings for the fantasy/horror moods, PD Ayutthaya photography for ตำนานไทย, NASA/ESA/Webb imagery for ไซไฟ, and CC-BY/CC-BY-SA works with recorded attribution). Growing it to the planned 80–120 is an ongoing content task — append verified `url` entries to the manifest and re-run the script (see `Docs/02` § Scene illustration).
 
 ## Status
 

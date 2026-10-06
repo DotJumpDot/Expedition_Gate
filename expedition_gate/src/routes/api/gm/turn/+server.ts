@@ -13,7 +13,7 @@ import { mulberry32 } from '$lib/server/engine/rules';
 import { resolveTurn, type TurnInput } from '$lib/server/engine/turn';
 import { finishTurn, isTurnRunning, registerTurn } from '$lib/server/engine/turnRuntime';
 import { complete, resolveLlamaBaseUrl, stream } from '$lib/server/llama';
-import { isHeroDead, type WorldState } from '$lib/game/worldstate';
+import { isHeroDead, mergeConsumed, type WorldState } from '$lib/game/worldstate';
 import { LENGTH_TOKENS, LENGTH_HINTS, type NarrationLength } from '$lib/stores/settings.svelte';
 
 /** CJK leak detector (Docs/04 #6) — Han/CJK ideographs in Thai prose. */
@@ -192,14 +192,24 @@ export const POST: RequestHandler = async ({ request }) => {
 					stale = false;
 				}
 				// Authoritative merge #2: app math + the app's death-save markers
-				// survive whatever the tracker did (idempotent absolute values).
+				// + consumed items survive whatever the tracker did (idempotent
+				// absolute values — app wins, Docs/03).
 				const fallback: WorldState = next ?? trackerState;
 				const finalState: WorldState = {
 					...fallback,
 					hero: {
 						...fallback.hero,
 						...resolved.appMath,
-						...(resolved.appConditions ? { conditions: resolved.appConditions } : {})
+						...(resolved.appConditions ? { conditions: resolved.appConditions } : {}),
+						...(resolved.consume
+							? {
+									inventory: mergeConsumed(
+										state.hero.inventory,
+										fallback.hero.inventory,
+										resolved.consume.name
+									)
+								}
+							: {})
 					}
 				};
 

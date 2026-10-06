@@ -67,6 +67,14 @@ Phases with a definition of done. Work in order; each phase ends committed with 
 
 A full independent audit of everything above found **12 real bugs, all fixed and regression-tested** (`tests/engine/recheck.test.ts`): missing death saves, aborted turns persisted as complete, no double-turn guard, history filter by content-equality, CJK-rewrite desync, hard-abort mislabeled finality, chips still calling the model at count 0, consolidation ignoring the test baseUrl, a `$state` mutation inside `$derived`, IPv6-bracket + credentialed URL gaps in the llama allowlist, hidden-tab polling, import body cap + optimizer drift. Gates re-verified after: **86 unit tests · 2 Playwright specs · node E2E smoke · svelte-check 0/0 · ESLint/Prettier clean · production build green.** History rewritten to one-line commit messages and pushed (`d81821e`).
 
+### Mechanics wiring + art batch ✅ (2026-10-06, later same day)
+
+- [x] **LUK แต้มดวง spend-reroll** — gold 🎲 button on the last completed check; rerolls as its own GM turn; death saves/damage excluded
+- [x] **Declared-spell มานา costs** — cast verbs detected in free text, tiered 3/5/8 by intensity words, app-side deduction, fizzle line when short
+- [x] **Potion use as app math** — ใช้ button on recognized inventory items (ยา/โพชั่น/เฟือ/น้ำมนต์…): heal 2d6+4 or มานา 1d6+7, app rolls, consumed-item qty force-merged over the state tracker (`mergeConsumed`)
+- [x] **Scene-art library 10 → 37** — 3 new generators (market/rain/workshop) + 24 curated Wikimedia Commons images (PD Romantic paintings, PD Ayutthaya photos, NASA/ESA/Webb), every entry with verified source+license+author
+- Tests: 86 → **102** (16 new in `tests/engine/mechanics.test.ts`)
+
 ## P5 — Future doors (explicitly NOT promised)
 
 - **Multiplayer** (the "MMO" door): friends join the same campaign via LAN — reference AnyWorld; SvelteKit server already centralizes state, but turn ownership + sync is a project of its own

@@ -17,7 +17,8 @@ export interface UiMessage {
 	meta: Record<string, unknown>;
 }
 
-export type SendKind = 'free' | 'opening' | 'attack' | 'search' | 'talk' | 'flee' | 'roll';
+export type SendKind =
+	'free' | 'opening' | 'attack' | 'search' | 'talk' | 'flee' | 'roll' | 'reroll' | 'use-item';
 
 function createSession() {
 	let campaignId = $state<string | null>(null);
@@ -94,7 +95,13 @@ function createSession() {
 	}
 
 	/** Send a turn; streams the GM reply into `streaming` until done/aborted. */
-	async function send(kind: SendKind, text = '', stat?: string, dc?: number): Promise<void> {
+	async function send(
+		kind: SendKind,
+		text = '',
+		stat?: string,
+		dc?: number,
+		item?: string
+	): Promise<void> {
 		if (!campaignId || busy) return;
 		const playerText = kind === 'opening' ? '（เริ่มต้นการผจญภัย）' : text.trim();
 		if (kind !== 'opening' && !playerText) return;
@@ -140,7 +147,7 @@ function createSession() {
 				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({
 					campaignId,
-					input: { kind, text: playerText, stat, dc },
+					input: { kind, text: playerText, stat, dc, item },
 					...(settings.modelUrl ? { baseUrl: settings.modelUrl } : {}),
 					narrationLength: settings.narrationLength,
 					extrasOff: settings.extrasOff,

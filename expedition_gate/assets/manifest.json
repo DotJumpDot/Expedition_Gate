@@ -90,6 +90,249 @@
 			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
 			"license": "CC0-1.0",
 			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "market.svg",
+			"tags": ["market", "village"],
+			"setting": ["any"],
+			"generator": "market",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "rain.svg",
+			"tags": ["rain", "street", "night"],
+			"setting": ["any"],
+			"generator": "rain",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "workshop.svg",
+			"tags": ["workshop"],
+			"setting": ["any"],
+			"generator": "workshop",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "pd-friedrich-wanderer-fog.jpg",
+			"tags": ["mountain", "night"],
+			"setting": ["sword_sorcery", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg/1280px-Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Caspar_David_Friedrich_-_Wanderer_above_the_sea_of_fog.jpg",
+			"license": "Public domain",
+			"author": "Caspar David Friedrich (1774–1840)"
+		},
+		{
+			"file": "pd-friedrich-riesengebirge.jpg",
+			"tags": ["mountain"],
+			"setting": ["sword_sorcery", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/52/Caspar_David_Friedrich_Paysage_de_Riesengebirge_avec_la_brume_montante.jpg/1280px-Caspar_David_Friedrich_Paysage_de_Riesengebirge_avec_la_brume_montante.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Caspar_David_Friedrich_Paysage_de_Riesengebirge_avec_la_brume_montante.jpg",
+			"license": "Public domain",
+			"author": "Caspar David Friedrich (1774–1840)"
+		},
+		{
+			"file": "pd-friedrich-cairn-snow.jpg",
+			"tags": ["snow", "mountain"],
+			"setting": ["sword_sorcery", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Caspar_David_Friedrich_-_Cairn_in_Snow_-_Google_Art_Project.jpg/1280px-Caspar_David_Friedrich_-_Cairn_in_Snow_-_Google_Art_Project.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Caspar_David_Friedrich_-_Cairn_in_Snow_-_Google_Art_Project.jpg",
+			"license": "Public domain",
+			"author": "Caspar David Friedrich (1774–1840)"
+		},
+		{
+			"file": "pd-friedrich-eismeer.jpg",
+			"tags": ["snow", "sea"],
+			"setting": ["sword_sorcery", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/bc/Caspar_David_Friedrich_-_Das_Eismeer_-_Hamburger_Kunsthalle.jpg/1280px-Caspar_David_Friedrich_-_Das_Eismeer_-_Hamburger_Kunsthalle.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Caspar_David_Friedrich_-_Das_Eismeer_-_Hamburger_Kunsthalle.jpg",
+			"license": "Public domain",
+			"author": "Caspar David Friedrich (1774–1840)"
+		},
+		{
+			"file": "pd-friedrich-einsamer-baum.jpg",
+			"tags": ["forest", "river"],
+			"setting": ["sword_sorcery", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f0/Caspar_David_Friedrich_-_Der_einsame_Baum_-_Google_Art_Project.jpg/1280px-Caspar_David_Friedrich_-_Der_einsame_Baum_-_Google_Art_Project.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Caspar_David_Friedrich_-_Der_einsame_Baum_-_Google_Art_Project.jpg",
+			"license": "Public domain",
+			"author": "Caspar David Friedrich (1774–1840)"
+		},
+		{
+			"file": "pd-friedrich-two-men-moon.jpg",
+			"tags": ["night", "mountain"],
+			"setting": ["sword_sorcery", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Friedrich_-_Two_Men_Contemplating_the_Moon.jpg/1280px-Friedrich_-_Two_Men_Contemplating_the_Moon.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Friedrich_-_Two_Men_Contemplating_the_Moon.jpg",
+			"license": "Public domain",
+			"author": "Caspar David Friedrich (1774–1840)"
+		},
+		{
+			"file": "pd-friedrich-moench-meer.jpg",
+			"tags": ["sea", "night"],
+			"setting": ["sword_sorcery", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/21/Caspar_David_Friedrich_-_Der_M%C3%B6nch_am_Meer_-_Google_Art_Project.jpg/1280px-Caspar_David_Friedrich_-_Der_M%C3%B6nch_am_Meer_-_Google_Art_Project.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Caspar_David_Friedrich_-_Der_M%C3%B6nch_am_Meer_-_Google_Art_Project.jpg",
+			"license": "Public domain",
+			"author": "Caspar David Friedrich (1774–1840)"
+		},
+		{
+			"file": "pd-friedrich-toreingang.jpg",
+			"tags": ["gate", "city", "street"],
+			"setting": ["sword_sorcery", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/26/Caspar_David_Friedrich_-_Toreingang_in_Mei%C3%9Fen.jpg/1280px-Caspar_David_Friedrich_-_Toreingang_in_Mei%C3%9Fen.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Caspar_David_Friedrich_-_Toreingang_in_Mei%C3%9Fen.jpg",
+			"license": "Public domain",
+			"author": "Caspar David Friedrich (1774–1840)"
+		},
+		{
+			"file": "pd-friedrich-augustusbrucke.jpg",
+			"tags": ["city", "river"],
+			"setting": ["sword_sorcery", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/1/15/Caspar_David_Friedrich_Augustusbr%C3%BCcke_in_Dresden.jpg/1280px-Caspar_David_Friedrich_Augustusbr%C3%BCcke_in_Dresden.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Caspar_David_Friedrich_Augustusbr%C3%BCcke_in_Dresden.jpg",
+			"license": "Public domain",
+			"author": "Caspar David Friedrich (1774–1840)"
+		},
+		{
+			"file": "pd-martin-wrath.jpg",
+			"tags": ["battle", "ruins", "void"],
+			"setting": ["sword_sorcery", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/50/John_Martin_-_The_Great_Day_of_His_Wrath_-_Google_Art_Project.jpg/1280px-John_Martin_-_The_Great_Day_of_His_Wrath_-_Google_Art_Project.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:John_Martin_-_The_Great_Day_of_His_Wrath_-_Google_Art_Project.jpg",
+			"license": "Public domain",
+			"author": "John Martin (1789–1854)"
+		},
+		{
+			"file": "pd-martin-last-judgement.jpg",
+			"tags": ["battle", "ritual", "void"],
+			"setting": ["sword_sorcery", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Martin%2C_John_-_The_Last_Judgement_-_1853.jpg/1280px-Martin%2C_John_-_The_Last_Judgement_-_1853.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Martin,_John_-_The_Last_Judgement_-_1853.jpg",
+			"license": "Public domain",
+			"author": "John Martin (1789–1854)"
+		},
+		{
+			"file": "pd-brouwer-inn.jpg",
+			"tags": ["inn", "tavern"],
+			"setting": ["sword_sorcery"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/2/22/Adriaen_Brouwer_-_Inn_with_drunken_peasants.jpg/1280px-Adriaen_Brouwer_-_Inn_with_drunken_peasants.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Adriaen_Brouwer_-_Inn_with_drunken_peasants.jpg",
+			"license": "Public domain",
+			"author": "Adriaen Brouwer (1603–1638)"
+		},
+		{
+			"file": "pd-brouwer-drinking.jpg",
+			"tags": ["tavern", "inn"],
+			"setting": ["sword_sorcery"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e9/Peasants_Drinking_About_by_Adriaen_Brouwer_Mauritshuis_847.jpg/1280px-Peasants_Drinking_About_by_Adriaen_Brouwer_Mauritshuis_847.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Peasants_Drinking_About_by_Adriaen_Brouwer_Mauritshuis_847.jpg",
+			"license": "Public domain",
+			"author": "Adriaen Brouwer (1603–1638)"
+		},
+		{
+			"file": "pd-teniers-smokers.jpg",
+			"tags": ["tavern", "inn"],
+			"setting": ["sword_sorcery"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Tavern_Scene_with_Smokers_%28David_Teniers_d.y.%29_-_Nationalmuseum_-_137952.tif/lossy-page1-1280px-Tavern_Scene_with_Smokers_%28David_Teniers_d.y.%29_-_Nationalmuseum_-_137952.tif.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Tavern_Scene_with_Smokers_(David_Teniers_d.y.)_-_Nationalmuseum_-_137952.tif",
+			"license": "Public domain",
+			"author": "David Teniers the Younger (1610–1690)"
+		},
+		{
+			"file": "pd-caffi-simoom.jpg",
+			"tags": ["desert"],
+			"setting": ["sword_sorcery"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/Ippolito_Caffi_-_A_caravan_in_the_desert_in_a_Simoom.jpg/1280px-Ippolito_Caffi_-_A_caravan_in_the_desert_in_a_Simoom.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Ippolito_Caffi_-_A_caravan_in_the_desert_in_a_Simoom.jpg",
+			"license": "Public domain",
+			"author": "Ippolito Caffi (1809–1866)"
+		},
+		{
+			"file": "pd-simonsen-storm.jpg",
+			"tags": ["desert", "rain"],
+			"setting": ["sword_sorcery"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Niels_Simonsen_-_A_Caravan_overtaken_by_a_Storm_in_the_Desert_-_NG.M.00207_-_National_Museum_of_Art%2C_Architecture_and_Design.jpg/1280px-Niels_Simonsen_-_A_Caravan_overtaken_by_a_Storm_in_the_Desert_-_NG.M.00207_-_National_Museum_of_Art%2C_Architecture_and_Design.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Niels_Simonsen_-_A_Caravan_overtaken_by_a_Storm_in_the_Desert_-_NG.M.00207_-_National_Museum_of_Art,_Architecture_and_Design.jpg",
+			"license": "Public domain",
+			"author": "Niels Simonsen (1807–1885)"
+		},
+		{
+			"file": "pd-mathana-choeng-tar-001.jpg",
+			"tags": ["temple", "ruins"],
+			"setting": ["thai_legend"],
+			"url": "https://upload.wikimedia.org/wikipedia/commons/2/22/Ayudhaya_wat_choeng_tar_001.JPG",
+			"source": "https://commons.wikimedia.org/wiki/File:Ayudhaya_wat_choeng_tar_001.JPG",
+			"license": "Public domain",
+			"author": "มัทนา"
+		},
+		{
+			"file": "pd-mathana-choeng-tar-002.jpg",
+			"tags": ["temple", "ruins"],
+			"setting": ["thai_legend"],
+			"url": "https://upload.wikimedia.org/wikipedia/commons/2/2a/Ayudhaya_wat_choeng_tar_002.JPG",
+			"source": "https://commons.wikimedia.org/wiki/File:Ayudhaya_wat_choeng_tar_002.JPG",
+			"license": "Public domain",
+			"author": "มัทนา"
+		},
+		{
+			"file": "bysa-fussan-choeng-tha-0003.jpg",
+			"tags": ["temple", "ruins"],
+			"setting": ["thai_legend"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f0/Ayutthaya_-_Wat_Choeng_Tha_-_0003.jpg/1280px-Ayutthaya_-_Wat_Choeng_Tha_-_0003.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Ayutthaya_-_Wat_Choeng_Tha_-_0003.jpg",
+			"license": "CC BY-SA 3.0",
+			"author": "Stefan Fussan"
+		},
+		{
+			"file": "bysa-fussan-choeng-tha-0015.jpg",
+			"tags": ["temple", "ruins"],
+			"setting": ["thai_legend"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Ayutthaya_-_Wat_Choeng_Tha_-_0015.jpg/1280px-Ayutthaya_-_Wat_Choeng_Tha_-_0015.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Ayutthaya_-_Wat_Choeng_Tha_-_0015.jpg",
+			"license": "CC BY-SA 3.0",
+			"author": "Stefan Fussan"
+		},
+		{
+			"file": "bysa-fussan-choeng-tha-0036.jpg",
+			"tags": ["temple", "ruins", "river"],
+			"setting": ["thai_legend"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/Ayutthaya_-_Wat_Choeng_Tha_-_0036.jpg/1280px-Ayutthaya_-_Wat_Choeng_Tha_-_0036.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Ayutthaya_-_Wat_Choeng_Tha_-_0036.jpg",
+			"license": "CC BY-SA 3.0",
+			"author": "Stefan Fussan"
+		},
+		{
+			"file": "bysa-kriengsak-choeng-tha-1.jpg",
+			"tags": ["temple", "ruins"],
+			"setting": ["thai_legend"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Wat_Choeng_Tha%2C_Ayutthaya1.jpg/1280px-Wat_Choeng_Tha%2C_Ayutthaya1.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Wat_Choeng_Tha,_Ayutthaya1.jpg",
+			"license": "CC BY-SA 4.0",
+			"author": "Kriengsak Jirasirirojanakorn"
+		},
+		{
+			"file": "pd-hubble-pillars.jpg",
+			"tags": ["void", "night"],
+			"setting": ["scifi", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg/1280px-Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg",
+			"source": "https://commons.wikimedia.org/wiki/File:Pillars_of_creation_2014_HST_WFC3-UVIS_full-res_denoised.jpg",
+			"license": "Public domain (NASA/ESA/Hubble Heritage)",
+			"author": "NASA, ESA, and the Hubble Heritage Team (STScI/AURA)"
+		},
+		{
+			"file": "by4-webb-pillars.jpg",
+			"tags": ["void", "night"],
+			"setting": ["scifi", "horror"],
+			"url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6f/Pillars_of_Creation_%28NIRCam_and_MIRI_Composite_Image%29_%28pillarsofcreation_composite%29.jpeg/1280px-Pillars_of_Creation_%28NIRCam_and_MIRI_Composite_Image%29_%28pillarsofcreation_composite%29.jpeg",
+			"source": "https://commons.wikimedia.org/wiki/File:Pillars_of_Creation_(NIRCam_and_MIRI_Composite_Image)_(pillarsofcreation_composite).jpeg",
+			"license": "CC BY 4.0",
+			"author": "NASA, ESA, CSA, STScI"
 		}
 	]
 }

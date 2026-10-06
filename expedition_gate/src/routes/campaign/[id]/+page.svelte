@@ -23,7 +23,7 @@
 	import { session } from '$lib/stores/campaign.svelte';
 	import { settings, LENGTH_HINTS, type NarrationLength } from '$lib/stores/settings.svelte';
 	import type { StatKey, Stats } from '$lib/game/rules';
-	import { xpToNext } from '$lib/game/rules';
+	import { STAT_LABELS_TH, xpToNext } from '$lib/game/rules';
 
 	let { data }: { data: { id: string; title: string; ended: string | null } } = $props();
 
@@ -60,6 +60,54 @@
 			!session.ended &&
 			session.state!.hero.xp >= xpToNext(session.state!.hero.level)
 	);
+
+	interface RollRecord {
+		kind: string;
+		stat?: StatKey;
+		detail?: { dc?: number };
+	}
+
+	/**
+	 * แต้มดวง target: the check on the LAST completed turn (a saved GM reply
+	 * preceded by a player message carrying a check roll). Rerolls of older
+	 * rolls are deliberately not offered — narratively they'd be retcons.
+	 */
+	function computeRerollTarget(): { stat: StatKey; dc: number } | null {
+		const msgs = session.messages;
+		if (msgs.length < 2) return null;
+		const last = msgs[msgs.length - 1];
+		if (last.role !== 'gm' || last.meta?.aborted) return null;
+		const player = msgs[msgs.length - 2];
+		if (player.role !== 'player') return null;
+		const dice = player.meta?.dice as RollRecord[] | undefined;
+		const hit = dice?.find(
+			(record) => record.kind === 'check' && record.stat && typeof record.detail?.dc === 'number'
+		);
+		if (!hit || !hit.stat || typeof hit.detail?.dc !== 'number') return null;
+		return { stat: hit.stat, dc: hit.detail.dc };
+	}
+
+	const rerollTarget = $derived(computeRerollTarget());
+	const canReroll = $derived(
+		rerollTarget !== null &&
+			!session.busy &&
+			!session.ended &&
+			session.state !== null &&
+			session.state.hero.luckPoints > 0
+	);
+
+	function handleReroll(target: { stat: StatKey; dc: number }) {
+		void session.send(
+			'reroll',
+			'ใช้แต้มดวง — ทอยเช็ค ' + STAT_LABELS_TH[target.stat] + ' (DC ' + target.dc + ') ใหม่',
+			target.stat,
+			target.dc
+		);
+	}
+
+	function handleUseItem(name: string) {
+		void session.send('use-item', 'ใช้ ' + name, undefined, undefined, name);
+	}
 
 	function handleSend(
 		kind: Parameters<typeof session.send>[0],
@@ -105,7 +153,7 @@
 				class="rail-enter hidden w-72 shrink-0 flex-col gap-5 overflow-y-auto border-r border-border/60 bg-sidebar/40 px-4 py-5 lg:flex"
 			>
 				{#if session.state}
-					<HeroSheet world={session.state} />
+					<HeroSheet world={session.state} disabled={session.busy} onuseitem={handleUseItem} />
 					<NpcPanel world={session.state} />
 					<QuestList world={session.state} />
 				{/if}
@@ -120,7 +168,7 @@
 				class="drawer-enter fixed inset-y-0 top-14 left-0 z-40 flex w-72 max-w-[85vw] flex-col gap-5 overflow-y-auto border-r border-border/60 bg-popover px-4 py-5 shadow-2xl lg:hidden"
 			>
 				{#if session.state}
-					<HeroSheet world={session.state} />
+					<HeroSheet world={session.state} disabled={session.busy} onuseitem={handleUseItem} />
 					<NpcPanel world={session.state} />
 					<QuestList world={session.state} />
 				{/if}
@@ -359,6 +407,22 @@
 						</div>
 					{/if}
 
+					{#if canReroll && rerollTarget}
+						<div class="flex justify-center">
+							<button
+								type="button"
+								class="luck-btn"
+								onclick={() => handleReroll(rerollTarget)}
+								title="ใช้ 1 แต้มดวงเพื่อทอยเช็คล่าสุดใหม่ (เหลือ {session.state?.hero
+									.luckPoints} แต้ม)"
+							>
+								<span aria-hidden="true">🎲</span>
+								ใช้แต้มดวง 1 แต้ม — ทอยเช็ค {STAT_LABELS_TH[rerollTarget.stat]} (DC {rerollTarget.dc})
+								ใหม่
+							</button>
+						</div>
+					{/if}
+
 					<ChoiceChips
 						chips={session.chips}
 						busy={session.busy}
@@ -474,6 +538,26 @@
 			border-color 0.12s var(--ease-out),
 			background-color 0.12s var(--ease-out);
 	}
+
+	/* แต้มดวง reroll — a gold-tinged offer, press feedback only. */
+	.luck-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+		border-radius: 9999px;
+		border: 1px solid color-mix(in oklch, var(--color-gold) 35%, transparent);
+		background: color-mix(in oklch, var(--color-gold) 8%, transparent);
+		padding: 0.4rem 1rem;
+		font-size: 0.8rem;
+		color: var(--color-gold);
+		transition:
+			transform 0.12s var(--ease-out),
+			background-color 0.15s var(--ease-out),
+			border-color 0.15s var(--ease-out);
+	}
+	.luck-btn:active {
+		transform: scale(0.96);
+	}
 	.seg-active {
 		border-color: color-mix(in oklch, var(--color-gold) 55%, transparent);
 		background: color-mix(in oklch, var(--color-gold) 12%, transparent);
@@ -501,6 +585,16 @@
 		}
 		.seg-btn {
 			transition: none;
+		}
+		.luck-btn {
+			transition: none;
+		}
+	}
+
+	@media (hover: hover) and (pointer: fine) {
+		.luck-btn:hover {
+			background: color-mix(in oklch, var(--color-gold) 14%, transparent);
+			border-color: color-mix(in oklch, var(--color-gold) 55%, transparent);
 		}
 	}
 </style>

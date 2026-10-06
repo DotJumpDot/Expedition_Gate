@@ -7,7 +7,13 @@ import {
 	check,
 	damage,
 	describeCheck,
+	declaresCast,
+	isUsableItem,
+	itemEffect,
+	potionAmount,
 	rollDie,
+	spellTier,
+	SPELL_COSTS,
 	WEAPONS,
 	type CheckResult,
 	type Rng,
@@ -22,7 +28,8 @@ import {
 	type WorldState
 } from './worldstate';
 
-export type TurnKind = 'free' | 'opening' | 'attack' | 'search' | 'talk' | 'flee' | 'roll';
+export type TurnKind =
+	'free' | 'opening' | 'attack' | 'search' | 'talk' | 'flee' | 'roll' | 'reroll' | 'use-item';
 
 export interface TurnInput {
 	kind: TurnKind;
@@ -30,6 +37,8 @@ export interface TurnInput {
 	/** For kind: 'roll' — stat + DC come from the dice tray. */
 	stat?: StatKey;
 	dc?: number;
+	/** For kind: 'use-item' — the exact inventory item name to consume. */
+	item?: string;
 }
 
 export interface ResolvedTurn {
@@ -48,14 +57,26 @@ export interface ResolvedTurn {
 	 * tracker copies from AND merged over its output (app wins for its markers).
 	 */
 	appConditions?: string[];
+	/**
+	 * Item consumed by a 'use-item' turn — the turn route force-merges its qty
+	 * over the tracker output (app wins, Docs/03).
+	 */
+	consume?: { name: string };
 	/** Structured roll record for the message meta (audit trail). */
-	rolls?: Array<{
-		kind: 'check' | 'damage' | 'death-save';
-		detail: CheckResult | { weapon: string; total: number };
-	}>;
+	rolls?: Array<
+		| { kind: 'check'; stat: StatKey; detail: CheckResult }
+		| { kind: 'damage'; detail: { weapon: string; total: number } }
+		| { kind: 'death-save'; detail: CheckResult }
+	>;
 }
 
 const QUICK_DC = { attack: 13, search: 15, talk: 15, flee: 13 } as const;
+
+const TIER_LABEL_TH: Record<keyof typeof SPELL_COSTS, string> = {
+	minor: 'เวทเล็ก',
+	standard: 'เวทปกติ',
+	major: 'เวทใหญ่'
+};
 
 /** Resolve declared mechanics for a turn. Free/opening turns resolve nothing. */
 export function resolveTurn(input: TurnInput, state: WorldState, rng: Rng): ResolvedTurn {
@@ -67,6 +88,7 @@ export function resolveTurn(input: TurnInput, state: WorldState, rng: Rng): Reso
 
 	// Docs/02 death saves: at 0 HP the hero is dying — the app rolls d20 vs 10
 	// each turn; success stabilizes at 1 HP, the third fail ends the campaign.
+	// (First branch on purpose: a dying hero can't cast, drink, or reroll.)
 	if (state.hero.hp === 0) {
 		const die = rollDie(20, rng);
 		const success = die >= DEATH_SAVE_DC;
@@ -95,7 +117,63 @@ export function resolveTurn(input: TurnInput, state: WorldState, rng: Rng): Reso
 		};
 	}
 
+	// แต้มดวง (Docs/02 LUK): spend 1 to reroll the last check — fate twists.
+	if (input.kind === 'reroll') {
+		if (state.hero.luckPoints < 1) return { appMath }; // guard: nothing to spend
+		const stat: StatKey = input.stat ?? 'luk';
+		const dc = input.dc ?? 15;
+		const result = check(state.hero.stats[stat], dc, rng);
+		appMath.luckPoints = state.hero.luckPoints - 1;
+		return {
+			resolutionLine: `ใช้แต้มดวง 1 แต้ม — โชคพลิกกลับมา ทอยเช็คใหม่\n${describeCheck(stat, result)}`,
+			appMath,
+			rolls: [{ kind: 'check', stat, detail: result }]
+		};
+	}
+
+	if (input.kind === 'use-item') {
+		const name = input.item?.trim() ?? '';
+		const found = name ? state.hero.inventory.find((entry) => entry.name === name) : undefined;
+		// Unrecognized/unusable item: no app math — the GM narrates the use.
+		if (!found || !isUsableItem(name)) return { appMath };
+		const effect = itemEffect(name);
+		const amount = potionAmount(effect, rng);
+		if (effect === 'mana') {
+			const mp = Math.min(state.hero.maxMp, state.hero.mp + amount);
+			appMath.mp = mp;
+			return {
+				resolutionLine: `ใช้ไอเทม (ระบบคิดแล้ว): ${name} → ฟื้นมานา ${amount} (${state.hero.mp} → ${mp})`,
+				appMath,
+				consume: { name }
+			};
+		}
+		const hp = Math.min(state.hero.maxHp, state.hero.hp + amount);
+		appMath.hp = hp;
+		return {
+			resolutionLine: `ใช้ไอเทม (ระบบคิดแล้ว): ${name} → ฟื้นพลังชีวิต ${amount} (${state.hero.hp} → ${hp})`,
+			appMath,
+			consume: { name }
+		};
+	}
+
 	if (input.kind === 'free') {
+		// Declared spell (Docs/02): the app prices the cast and deducts มานา —
+		// or refuses it when the pool is short. No roll; the GM narrates the rest.
+		if (declaresCast(input.text)) {
+			const tier = spellTier(input.text);
+			const cost = SPELL_COSTS[tier];
+			if (state.hero.mp >= cost) {
+				appMath.mp = state.hero.mp - cost;
+				return {
+					resolutionLine: `การใช้เวท (ระบบหักมานาแล้ว): ${TIER_LABEL_TH[tier]} ใช้มานา ${cost} (เหลือ ${state.hero.mp - cost}/${state.hero.maxMp})`,
+					appMath
+				};
+			}
+			return {
+				appMath,
+				resolutionLine: `การใช้เวทไม่สำเร็จ: มานาไม่พอ — มีอยู่ ${state.hero.mp} แต่ต้องใช้ ${cost} เวทจึงดับกลางคัน ไม่มีอะไรเกิดขึ้น`
+			};
+		}
 		return { appMath };
 	}
 
@@ -106,7 +184,7 @@ export function resolveTurn(input: TurnInput, state: WorldState, rng: Rng): Reso
 		return {
 			resolutionLine: describeCheck(stat, result),
 			appMath,
-			rolls: [{ kind: 'check', detail: result }]
+			rolls: [{ kind: 'check', stat, detail: result }]
 		};
 	}
 
@@ -120,7 +198,7 @@ export function resolveTurn(input: TurnInput, state: WorldState, rng: Rng): Reso
 	const stat = statFor[input.kind];
 	const dc = QUICK_DC[input.kind];
 	const result = check(state.hero.stats[stat], dc, rng);
-	const rolls: ResolvedTurn['rolls'] = [{ kind: 'check', detail: result }];
+	const rolls: ResolvedTurn['rolls'] = [{ kind: 'check', stat, detail: result }];
 
 	// A landed attack rolls weapon damage too (narrated against the target;
 	// enemy bookkeeping lives in the state tracker, not app math).
