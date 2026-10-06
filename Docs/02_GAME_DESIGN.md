@@ -92,6 +92,14 @@ Decided 2026-10-06: do NOT generate scene art with ComfyUI during play — the G
 - **Manual override**: a small 🖼 button on the scene card lets the player pick any library image for the scene.
 - v1 asset budget: ~80–120 images covering ~25 tags across the setting presets (ดาบและเวทมนตร์ / ไซไฟ / สยองขวัญ / ตำนานไทย). *(Progress 2026-10-06: 37 images — 13 locally-generated CC0 SVG scenes + 24 curated from Wikimedia Commons: public-domain Romantic paintings (Friedrich, John Martin, Brouwer, Teniers, Caffi), PD Ayutthaya photography for ตำนานไทย, and NASA/ESA/Webb imagery for ไซไฟ, plus CC-BY/CC-BY-SA entries whose attribution is recorded in the manifest. Curation continues — append verified `url` entries to the manifest and run `npm run assets`.)*
 
+## Hero portraits (local ComfyUI library, anime-only)
+
+Decided 2026-10-06: hero faces come from a **pre-generated local library**, never generated live (same GPU-contention rule as scene art) and never fetched from the internet.
+
+- **Library**: `static/assets/portraits/` (binaries, gitignored) + `assets/portraits.json` (committed) — 72 portraits = 6 ages (`boy girl man woman grandpa grandma`) × 6 roles (`poor commoner merchant warrior mystic noble`) × 2 local anime checkpoints (Illustrious-XL, NoobAI-XL). All images are **user-owned, generated on the user's own rig**; prompts are SFW (NSFW terms sit in the negative prompt). A photorealistic bucket (ArienMixXL / Diving-Real-Asian) was generated the same day and **dropped by user review** — the style didn't match the app; the catalog keeps a `bucket` field so a future style expansion stays schema-compatible.
+- **Auto-pick**: the hero's class maps to a role tag (`นักเวท`→mystic, `นักดาบ`/`อัศวิน`→warrior, `พ่อค้า`→merchant, `ขุนนาง`→noble, `โจร`→poor, else commoner); the pick is deterministic per hero name (FNV hash) so a hero keeps the same face across reloads. Manual 🖼 override per campaign on the game screen.
+- **Regenerate**: `npm run portraits` (offline, ~20 s/image on the RTX 5060; idempotent resume). Prompts live in `scripts/generate-portraits.mjs` — keep `solo` + `1boy`/`1girl` anchors and the anti-"character sheet" negatives, or danbooru-trained checkpoints leak multi-view expression sheets.
+
 ## UI screens (desktop-first)
 
 1. **Gate screen** — campaign list (cards: world name, hero, day/act, last played) + สร้างโลกใหม่ wizard.

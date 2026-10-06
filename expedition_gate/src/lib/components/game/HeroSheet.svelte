@@ -2,13 +2,16 @@
 	import type { WorldState } from '$lib/game/worldstate';
 	import { STAT_LABELS_TH, isUsableItem } from '$lib/game/rules';
 	import CollapsibleSection from './CollapsibleSection.svelte';
+	import HeroPortrait from './HeroPortrait.svelte';
 
 	let {
 		world,
+		campaignId,
 		disabled = false,
 		onuseitem
 	}: {
 		world: WorldState;
+		campaignId: string;
 		disabled?: boolean;
 		onuseitem?: (name: string) => void;
 	} = $props();
@@ -42,9 +45,12 @@
 </script>
 
 <div class="space-y-4">
-	<header>
-		<h2 class="text-base font-bold">{hero.name}</h2>
-		<p class="mt-0.5 text-xs text-muted-foreground">{hero.klass} · LV {hero.level}</p>
+	<header class="flex items-center gap-3">
+		<HeroPortrait heroName={hero.name} klass={hero.klass} {campaignId} />
+		<div>
+			<h2 class="text-base font-bold">{hero.name}</h2>
+			<p class="mt-0.5 text-xs text-muted-foreground">{hero.klass} · LV {hero.level}</p>
+		</div>
 	</header>
 
 	<div class="space-y-2.5">

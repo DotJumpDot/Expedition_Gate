@@ -6,14 +6,12 @@
  * happens OFFLINE (never during GM turns) — the GPU-contention rule from
  * Docs/02 stays intact.
  *
- * Matrix: 6 ages × 6 roles × 4 checkpoints = 144 portraits.
- *   anime     ← Illustrious-XL v2.0, NoobAI-XL v1.1
- *   realistic ← ArienMixXL v4.0 (Asian Portrait), Diving-Real-Asian v7
- * The two buckets NEVER mix inside one world — the app filters by bucket.
+ * Matrix: 6 ages × 6 roles × 2 checkpoints = 72 portraits (anime only —
+ * Illustrious-XL v2.0 + NoobAI-XL v1.1; the photoreal checkpoints were tried
+ * and dropped by user review, see Docs/02 § Hero portraits).
  *
  * Usage (from expedition_gate/):
  *   node scripts/generate-portraits.mjs            # everything missing
- *   node scripts/generate-portraits.mjs --only anime
  *   node scripts/generate-portraits.mjs --dry-run  # print the plan only
  *
  * Idempotent: existing files are skipped, the manifest is rewritten after
@@ -50,21 +48,28 @@ const ROLES = /** @type {const} */ ([
 
 const CHECKPOINTS = /** @type {const} */ ([
 	{ file: 'Illustrious-XL-v2.0.safetensors', short: 'illustrious', bucket: 'anime' },
-	{ file: 'NoobAI-XL v1.1 (Anime NSFW).safetensors', short: 'noobai', bucket: 'anime' },
-	{ file: 'ArienMixXL v4.0 Asian Portrait (Realistic NSFW).safetensors', short: 'arien', bucket: 'realistic' },
-	{ file: 'Diving-Real-Asian-v7.safetensors', short: 'diving', bucket: 'realistic' }
+	{ file: 'NoobAI-XL v1.1 (Anime NSFW).safetensors', short: 'noobai', bucket: 'anime' }
 ]);
 
-const STYLE = /** @type {const} */ ({
-	anime:
-		'anime style character portrait, detailed face, clean line art, cel shading, fantasy character design sheet, upper body, facing viewer, masterpiece, best quality',
-	realistic:
-		'photorealistic portrait photograph, detailed face, natural skin texture, soft window light, dark plain backdrop, upper body shot, facing viewer, 85mm lens, sharp focus, high detail'
-});
+// A realistic bucket (ArienMixXL / Diving-Real-Asian) was generated and reviewed
+// 2026-10-06 — the user judged the photoreal style a poor match for the app and
+// dropped it. Anime-only library; the checkpoints above are all we regenerate.
+
+const STYLE =
+	'masterpiece, best quality, solo focus, single character, game character portrait, upper body, facing viewer, looking at viewer, detailed face, detailed eyes, anime style illustration, cel shading, soft lighting, dark simple background';
 
 // SFW by design — the NSFW-capable checkpoints are steered away from it.
+// The middle band exists because danbooru-trained checkpoints LOVE leaking
+// multi-view "character sheets", expression grids and sketch pages into
+// single-portrait requests (bitten 2026-10-06: 3-panel sketch pages in output).
 const NEGATIVE =
-	'text, watermark, signature, logo, cropped, multiple people, extra limbs, deformed hands, bad anatomy, blurry, lowres, jpeg artifacts, nsfw, nude, child nudity';
+	'text, watermark, signature, logo, cropped, out of frame, border, frame, multiple people, multiple views, multiple girls, multiple boys, character sheet, expression sheet, reference sheet, comic panel, storyboard, split screen, extra limbs, deformed hands, bad anatomy, blurry, lowres, jpeg artifacts, nsfw, nude, child nudity, monochrome, greyscale, sketch, lineart, unfinished, 2koma, 4koma';
+
+// Danbooru-trained checkpoints bind hard to 1boy/1girl counters — it is the
+// single most reliable "exactly one person" anchor.
+function ageAnchor(ageKey) {
+	return ageKey === 'girl' || ageKey === 'woman' || ageKey === 'grandma' ? '1girl' : '1boy';
+}
 
 // --- helpers ----------------------------------------------------------------
 
@@ -80,11 +85,11 @@ function sleep(ms) {
 
 function buildWorkflow({ checkpoint, positive, negative, seed }) {
 	return {
-		'1': { class_type: 'CheckpointLoaderSimple', inputs: { ckpt_name: checkpoint } },
-		'2': { class_type: 'CLIPTextEncode', inputs: { text: positive, clip: ['1', 1] } },
-		'3': { class_type: 'CLIPTextEncode', inputs: { text: negative, clip: ['1', 1] } },
-		'4': { class_type: 'EmptyLatentImage', inputs: { width: 832, height: 1216, batch_size: 1 } },
-		'5': {
+		1: { class_type: 'CheckpointLoaderSimple', inputs: { ckpt_name: checkpoint } },
+		2: { class_type: 'CLIPTextEncode', inputs: { text: positive, clip: ['1', 1] } },
+		3: { class_type: 'CLIPTextEncode', inputs: { text: negative, clip: ['1', 1] } },
+		4: { class_type: 'EmptyLatentImage', inputs: { width: 832, height: 1216, batch_size: 1 } },
+		5: {
 			class_type: 'KSampler',
 			inputs: {
 				seed,
@@ -99,8 +104,8 @@ function buildWorkflow({ checkpoint, positive, negative, seed }) {
 				latent_image: ['4', 0]
 			}
 		},
-		'6': { class_type: 'VAEDecode', inputs: { samples: ['5', 0], vae: ['1', 2] } },
-		'7': { class_type: 'SaveImage', inputs: { filename_prefix: 'gate_portrait', images: ['6', 0] } }
+		6: { class_type: 'VAEDecode', inputs: { samples: ['5', 0], vae: ['1', 2] } },
+		7: { class_type: 'SaveImage', inputs: { filename_prefix: 'gate_portrait', images: ['6', 0] } }
 	};
 }
 
@@ -147,13 +152,16 @@ async function generateOne({ cp, age, role }, manifest) {
 		return 'skip';
 	}
 
-	const positive = `${STYLE[cp.bucket]}, ${age[1]}, ${role[1]}`;
+	const positive = `solo, ${ageAnchor(age[0])}, ${STYLE}, ${age[1]}, ${role[1]}`;
 	const seed = hashSeed(stem);
 	const clientId = `gate-${stem}`;
 	const queue = await comfyFetch('/prompt', {
 		method: 'POST',
 		headers: { 'content-type': 'application/json' },
-		body: JSON.stringify({ prompt: buildWorkflow({ checkpoint: cp.file, positive, negative: NEGATIVE, seed }), client_id: clientId })
+		body: JSON.stringify({
+			prompt: buildWorkflow({ checkpoint: cp.file, positive, negative: NEGATIVE, seed }),
+			client_id: clientId
+		})
 	}).then((r) => r.json());
 	const promptId = queue.prompt_id;
 
@@ -223,7 +231,9 @@ for (const cp of CHECKPOINTS) {
 let done = 0;
 let skipped = 0;
 for (const item of plan) {
-	process.stdout.write(`[${done + skipped + 1}/${plan.length}] ${item.cp.bucket}/${item.age[0]}/${item.role[0]} … `);
+	process.stdout.write(
+		`[${done + skipped + 1}/${plan.length}] ${item.cp.bucket}/${item.age[0]}/${item.role[0]} … `
+	);
 	const result = await generateOne(item, manifest);
 	if (result === 'skip') {
 		skipped++;

@@ -21,6 +21,8 @@ All game UI and game content is **Thai**; the repo is documented in English.
 
 **Live world** — hero sheet, quest log, and NPC panel update every turn from a zod-validated world state; scene art card illustrates the current scene from a 37-image local library (AI-picked `sceneTag`, anti-repeat, manual 🖼 override); บันทึกแห่งโลก codex collects lore, NPCs, quests, flags.
 
+**Hero portraits** — every hero gets a face from a 72-portrait anime library generated locally with ComfyUI (`npm run portraits`; 6 ages × 6 roles × 2 checkpoints). Auto-picked to fit the hero's class (นักเวท → mystic, นักดาบ → warrior, …) and stable per hero, with a manual 🖼 override on the game screen. (A photorealistic bucket was also generated and dropped by review — it didn't match the app's look.)
+
 **Memory** — three tiers injected into every GM prompt: verbatim window, session summary (rebuilt every 8 turns), and a whole-campaign chronicle (every 20). Closing the tab overnight and resuming gives you a "ก่อนหน้านี้…" recap and coherent continuation.
 
 **Control** — stop mid-turn (⏹ — server flag + client abort), checkpoints (30-cap; restoring archives the abandoned branch, nothing is ever lost), choice chips (0–6 configurable next-action suggestions, ✨-labeled on major-decision cliffhangers), level-ups (2 stat points), death → AI epilogue → rebirth as a new hero in the same world, campaign export/import as a single `.json`.

@@ -5,3 +5,4 @@ coverage/
 drizzle/
 package-lock.json
 .mimosa/
+assets/portraits.json

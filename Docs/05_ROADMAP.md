@@ -113,6 +113,14 @@ The player clarified that "preset" meant **published-adventure-style ready-to-pl
 - [x] **/adventures page**: the full campaign list (resume/delete) lives behind a new การผจญภัย header button; gate keeps a "การผจญภัยของคุณ →" link.
 - [x] **Color themes**: 6 themes — มืดแฟนตาซี (default), สว่างกระดาษ, Monokai Soda, Monokai Night, ซากุระ สว่าง, ซากุระ มืด — as `[data-theme]` token blocks in app.css applied on `<html>` from settings (ธีมสี picker with per-theme swatch previews). Game colors (gold/HP/มานา/XP/ember) are now var-indirected so every chip, bar, and 📊 block follows the theme; vignette, scrollbars, selection, scene shade, and scrims tokenized too.
 
+### Hero portraits: local ComfyUI library (2026-10-06, same day) ✅
+
+- [x] **72-portrait anime library generated OFFLINE** on the user's own ComfyUI (Picture_Model, port 8188): 6 ages × 6 roles × 2 checkpoints (Illustrious-XL + NoobAI-XL) via `scripts/generate-portraits.mjs` (`npm run portraits`) — deterministic seeds, idempotent resume, SFW prompts. ComfyUI was used OFFLINE only — the P5 live-generation door stays closed.
+- [x] **Anime-only by user review**: a second realistic bucket (ArienMixXL + Diving-Real-Asian, Asian settings) was generated and the user judged the photoreal look a poor match for the app — dropped the same day; catalog keeps the `bucket` field for a possible future expansion. No per-preset art style, no settings override: one library, one look.
+- [x] **Auto-pick + override**: `lib/game/portraits.ts` maps the Thai class → role tag (นักเวท→mystic, นักดาบ→warrior, …) and picks deterministically per hero name; `HeroPortrait.svelte` renders it in the hero sheet (rail + mobile drawer) and as a read-only preview in the wizard; per-campaign 🖼 override picker; graceful monogram tile when the library is absent (fresh clone).
+- [x] First generation attempt was wiped twice over: (1) the prompt phrase "character design sheet" made danbooru checkpoints leak multi-view expression sheets in ~all outputs — prompts hardened (`solo` + `1boy`/`1girl` anchors, anti-character-sheet negatives) and every image regenerated; (2) the realistic bucket was then dropped entirely per user review. Full contact-sheet review pass over the final set.
+- [x] Tests (`tests/engine/portraits.test.ts`): catalog shape + 72 matrix + binaries present, role mapping, determinism, fallbacks.
+
 ## P5 — Future doors (explicitly NOT promised)
 
 - **Multiplayer** (the "MMO" door): friends join the same campaign via LAN — reference AnyWorld; SvelteKit server already centralizes state, but turn ownership + sync is a project of its own

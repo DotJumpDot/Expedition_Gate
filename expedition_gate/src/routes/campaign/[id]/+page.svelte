@@ -167,7 +167,12 @@
 					: 'border-r'}"
 			>
 				{#if session.state}
-					<HeroSheet world={session.state} disabled={session.busy} onuseitem={handleUseItem} />
+					<HeroSheet
+						world={session.state}
+						campaignId={data.id}
+						disabled={session.busy}
+						onuseitem={handleUseItem}
+					/>
 					<QuestList world={session.state} />
 					<NpcPanel world={session.state} />
 				{/if}
@@ -182,7 +187,12 @@
 				class="drawer-enter fixed inset-y-0 top-14 left-0 z-40 flex w-72 max-w-[85vw] flex-col gap-5 overflow-y-auto border-r border-border/60 bg-popover px-4 py-5 shadow-2xl lg:hidden"
 			>
 				{#if session.state}
-					<HeroSheet world={session.state} disabled={session.busy} onuseitem={handleUseItem} />
+					<HeroSheet
+						world={session.state}
+						campaignId={data.id}
+						disabled={session.busy}
+						onuseitem={handleUseItem}
+					/>
 					<QuestList world={session.state} />
 					<NpcPanel world={session.state} />
 				{/if}

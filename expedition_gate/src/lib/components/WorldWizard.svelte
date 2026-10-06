@@ -8,6 +8,7 @@
 	import { SETTING_PRESETS, settingPreset, type HeroProposal } from '$lib/game/worldstate';
 	import type { WorldBrief } from '$lib/game/worldstate';
 	import { SCENARIOS, type Scenario, type ScenarioHero } from '$lib/game/scenarios';
+	import HeroPortrait from '$lib/components/game/HeroPortrait.svelte';
 	import { settings, type CustomPreset } from '$lib/stores/settings.svelte';
 
 	type Step = 'world' | 'brief' | 'hero' | 'scenario';
@@ -680,6 +681,16 @@
 								</div>
 							{:else}
 								<div class="space-y-4">
+									<div class="flex items-center gap-3">
+										<HeroPortrait
+											heroName={heroName || 'ผู้กล้า'}
+											klass={heroClass === CUSTOM_CLASS
+												? customClassName.trim() || 'นักผจญภัย'
+												: heroClass}
+											readonly
+										/>
+										<p class="text-[11px] text-muted-foreground">เปลี่ยนรูปได้ในหน้าเกม</p>
+									</div>
 									<div class="rounded-lg border border-border/60 bg-card/50 p-3.5">
 										<p
 											class="mb-1 text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase"
