@@ -75,6 +75,19 @@ A full independent audit of everything above found **12 real bugs, all fixed and
 - [x] **Scene-art library 10 → 37** — 3 new generators (market/rain/workshop) + 24 curated Wikimedia Commons images (PD Romantic paintings, PD Ayutthaya photos, NASA/ESA/Webb), every entry with verified source+license+author
 - Tests: 86 → **102** (16 new in `tests/engine/mechanics.test.ts`)
 
+### Readability & settings polish (2026-10-06, after first real-Gemma playtest) ✅
+
+Playtest findings fixed + player requests, all verified live against fake-llama and in DOM:
+
+- [x] **Fix — live-session desync**: the check chip and แต้มดวง reroll button vanished after a live turn until reload (client mirrored player meta without the persisted `resolution`/`dice`). Server now sends `dice` on the SSE `resolution` event; the store stamps them onto the local player message. Reroll verified working end-to-end without a reload (LUK 8 → 7 on the fake hero).
+- [x] **Fix — scene-art picker clipped**: `.scene-card { overflow: hidden }` cut the picker popover off; the art layer clips itself now, picker opens above the stream (z-45).
+- [x] **Fix — wizard ignored the GM URL setting**: world-brief + hero-proposal calls never sent `settings.modelUrl` (turns/chips did).
+- [x] **Fonts**: bundled OFL Thai fonts (Sarabun with true italics, IBM Plex Sans Thai, Mitr — `static/fonts/`, licenses in FONTS.md) + font-family picker and 85–140% UI scale in settings; Sarabun is the new default.
+- [x] **Settings page**: modal replaced by a full `/settings` route (section nav + cards, CometStream-style); linked from the global header and the game header.
+- [x] **Readability**: stable per-speaker colored dialogue cards (Novel's Model lineage), `**bold**` / `*stage*` / `__underline__` / "quotes" inline rendering (escape-first), 📊 block split into per-value colored chips (HP red, มานา blue, ทอง gold, สภาพ red/plain), GM-only dice jargon replaced by a player-friendly outcome chip (green/red), GM prompt now allows emphasis markup with examples.
+- [x] **Layout**: hero rail moved to the right (left/right configurable), อาวุธ·เกราะ / ของติดตัว / เควส / ตัวละครที่พบ are collapsible sections with NPCs last, hero background text removed from the sheet (lives in the codex), auto-scroll follows only while the reader is at the bottom.
+- Tests: 102 → **113** (11 new narration-parser/format tests). Gates re-verified: svelte-check 0/0 · ESLint/Prettier clean · production build green · 2 Playwright specs.
+
 ## P5 — Future doors (explicitly NOT promised)
 
 - **Multiplayer** (the "MMO" door): friends join the same campaign via LAN — reference AnyWorld; SvelteKit server already centralizes state, but turn ownership + sync is a project of its own

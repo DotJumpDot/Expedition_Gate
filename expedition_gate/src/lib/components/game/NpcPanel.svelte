@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { WorldState } from '$lib/game/worldstate';
+	import CollapsibleSection from './CollapsibleSection.svelte';
 
 	let { world }: { world: WorldState } = $props();
 
@@ -17,10 +18,7 @@
 </script>
 
 {#if alive.length}
-	<div class="space-y-2">
-		<h3 class="text-[11px] font-bold tracking-[0.15em] text-muted-foreground uppercase">
-			ตัวละครที่พบ
-		</h3>
+	<CollapsibleSection title="ตัวละครที่พบ ({alive.length})" open={false}>
 		<ul class="space-y-1.5">
 			{#each alive.slice(0, 12) as npc (npc.id)}
 				<li class="rounded-lg border border-border/60 bg-card/50 px-2.5 py-1.5">
@@ -36,5 +34,5 @@
 				</li>
 			{/each}
 		</ul>
-	</div>
+	</CollapsibleSection>
 {/if}

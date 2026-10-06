@@ -165,7 +165,6 @@
 <style>
 	.scene-card {
 		position: relative;
-		overflow: hidden;
 		border-radius: var(--radius-lg);
 		border: 1px solid color-mix(in oklch, var(--color-border) 80%, transparent);
 		background:
@@ -174,9 +173,13 @@
 		padding: 0.7rem 1rem;
 	}
 
+	/* The art layer clips ITSELF (rounded corners) — the card must not clip,
+	because the art-picker popover opens outside the card's bounds. */
 	.scene-art {
 		position: absolute;
 		inset: 0;
+		overflow: hidden;
+		border-radius: inherit;
 		opacity: 0.5;
 	}
 	.scene-shade {
@@ -218,7 +221,8 @@
 		position: absolute;
 		right: 0;
 		top: 1.9rem;
-		z-index: 25;
+		/* Above the narration stream and every panel layer below the header. */
+		z-index: 45;
 		width: 240px;
 		border-radius: var(--radius-lg);
 		border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);

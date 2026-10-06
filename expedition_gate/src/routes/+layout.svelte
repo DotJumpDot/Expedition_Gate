@@ -2,9 +2,17 @@
 	import '../app.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import GmStatusChip from '$lib/components/GmStatusChip.svelte';
+	import { settings } from '$lib/stores/settings.svelte';
 	import type { LayoutProps } from './$types';
 
 	let { children }: LayoutProps = $props();
+
+	// Reading preferences (ตั้งค่า → การแสดงผล): font family + UI scale, applied
+	// at the document root so every rem-based size follows the choice.
+	$effect(() => {
+		document.documentElement.style.setProperty('--font-sans', settings.fontStack());
+		document.documentElement.style.fontSize = `${(settings.fontScale / 100) * 16}px`;
+	});
 </script>
 
 <svelte:head>
@@ -49,7 +57,32 @@
 					</span>
 				</span>
 			</a>
-			<GmStatusChip />
+			<div class="flex items-center gap-1.5">
+				<GmStatusChip />
+				<a
+					href="/settings"
+					class="rounded-md p-1.5 text-muted-foreground transition-colors hover:text-foreground"
+					title="ตั้งค่า"
+					aria-label="ตั้งค่า"
+				>
+					<svg
+						aria-hidden="true"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="1.8"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="size-4.5"
+					>
+						<!-- gear (settings) -->
+						<path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z" />
+						<path
+							d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34h0a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55h0a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87v0a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z"
+						/>
+					</svg>
+				</a>
+			</div>
 		</div>
 	</header>
 

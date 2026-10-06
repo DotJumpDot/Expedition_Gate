@@ -121,7 +121,15 @@ export const POST: RequestHandler = async ({ request }) => {
 			};
 
 			try {
-				if (resolved.resolutionLine) send({ type: 'resolution', line: resolved.resolutionLine });
+				if (resolved.resolutionLine) {
+					// dice rides along so the client can mirror the persisted player
+					// message meta (check chip + แต้มดวง reroll) without a reload.
+					send({
+						type: 'resolution',
+						line: resolved.resolutionLine,
+						...(resolved.rolls ? { dice: resolved.rolls } : {})
+					});
+				}
 
 				for await (const event of stream({
 					messages: gmMessages,

@@ -167,6 +167,7 @@ function createSession() {
 					let data: {
 						type: string;
 						line?: string;
+						dice?: unknown[];
 						text?: string;
 						message?: string;
 						state?: WorldState;
@@ -182,6 +183,16 @@ function createSession() {
 					switch (data.type) {
 						case 'resolution':
 							resolutionLine = data.line ?? '';
+							// Mirror the persisted player-message meta onto the local
+							// copy — the check chip and the แต้มดวง reroll read it
+							// without needing a page reload (session-desync fix).
+							if (resolutionLine) {
+								const player = messages[messages.length - 1];
+								if (player?.role === 'player') {
+									player.meta.resolution = resolutionLine;
+									if (Array.isArray(data.dice)) player.meta.dice = data.dice;
+								}
+							}
 							break;
 						case 'delta':
 							streaming += data.text ?? '';

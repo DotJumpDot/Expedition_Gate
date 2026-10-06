@@ -125,4 +125,20 @@
 		text-transform: uppercase;
 		color: var(--color-muted-foreground);
 	}
+
+	.panel-enter {
+		animation: codex-rise 0.2s var(--ease-out) backwards;
+	}
+	@keyframes codex-rise {
+		from {
+			opacity: 0;
+			transform: translateY(6px) scale(0.98);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.panel-enter {
+			animation: none;
+		}
+	}
 </style>

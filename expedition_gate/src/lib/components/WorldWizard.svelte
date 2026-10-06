@@ -6,6 +6,7 @@
 	import { STAT_KEYS, STAT_LABELS_TH, type Stats } from '$lib/game/rules';
 	import { SETTING_PRESETS, type HeroProposal } from '$lib/game/worldstate';
 	import type { WorldBrief } from '$lib/game/worldstate';
+	import { settings } from '$lib/stores/settings.svelte';
 
 	let { onclose }: { onclose: () => void } = $props();
 
@@ -49,7 +50,8 @@
 				body: JSON.stringify({
 					setting,
 					tone: tones,
-					premise: setting === 'custom' ? premise : undefined
+					premise: setting === 'custom' ? premise : undefined,
+					...(settings.modelUrl ? { baseUrl: settings.modelUrl } : {})
 				})
 			});
 			const data = (await res.json()) as { brief?: WorldBrief; error?: string };
@@ -71,7 +73,13 @@
 			const res = await fetch('/api/campaigns/hero-proposal', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ brief, name: heroName, concept: heroConcept, klass: heroClass })
+				body: JSON.stringify({
+					brief,
+					name: heroName,
+					concept: heroConcept,
+					klass: heroClass,
+					...(settings.modelUrl ? { baseUrl: settings.modelUrl } : {})
+				})
 			});
 			const data = (await res.json()) as { proposal?: HeroProposal; error?: string };
 			if (!res.ok || !data.proposal) throw new Error(data.error ?? 'สร้างฮีโร่ไม่สำเร็จ');

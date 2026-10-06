@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { WorldState } from '$lib/game/worldstate';
 	import { STAT_LABELS_TH, isUsableItem } from '$lib/game/rules';
+	import CollapsibleSection from './CollapsibleSection.svelte';
 
 	let {
 		world,
@@ -43,12 +44,7 @@
 <div class="space-y-4">
 	<header>
 		<h2 class="text-base font-bold">{hero.name}</h2>
-		<p class="mt-0.5 text-xs text-muted-foreground">
-			{hero.klass} · LV {hero.level}
-			{#if hero.concept}
-				· {hero.concept}
-			{/if}
-		</p>
+		<p class="mt-0.5 text-xs text-muted-foreground">{hero.klass} · LV {hero.level}</p>
 	</header>
 
 	<div class="space-y-2.5">
@@ -100,16 +96,6 @@
 		<span class="rounded-full border border-gold/30 bg-gold/10 px-2.5 py-0.5 text-gold"
 			>💰 {hero.gold} ทอง</span
 		>
-		{#if hero.equipment.weapon}
-			<span class="rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5"
-				>⚔️ {hero.equipment.weapon.label}</span
-			>
-		{/if}
-		{#if hero.equipment.armor}
-			<span class="rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5"
-				>🛡️ {hero.equipment.armor.label}</span
-			>
-		{/if}
 		{#each hero.conditions as condition (condition)}
 			<span
 				class="rounded-full border border-destructive/40 bg-destructive/10 px-2.5 py-0.5 text-destructive"
@@ -118,11 +104,25 @@
 		{/each}
 	</div>
 
+	{#if hero.equipment.weapon || hero.equipment.armor}
+		<CollapsibleSection title="อาวุธ · เกราะ">
+			<div class="flex flex-wrap items-center gap-2 text-xs">
+				{#if hero.equipment.weapon}
+					<span class="rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5"
+						>⚔️ {hero.equipment.weapon.label}</span
+					>
+				{/if}
+				{#if hero.equipment.armor}
+					<span class="rounded-full border border-border/70 bg-muted/40 px-2.5 py-0.5"
+						>🛡️ {hero.equipment.armor.label}</span
+					>
+				{/if}
+			</div>
+		</CollapsibleSection>
+	{/if}
+
 	{#if hero.inventory.length}
-		<div>
-			<h3 class="mb-1.5 text-[11px] font-bold tracking-[0.15em] text-muted-foreground uppercase">
-				ของติดตัว
-			</h3>
+		<CollapsibleSection title="ของติดตัว">
 			<ul class="space-y-1 text-[13px]">
 				{#each hero.inventory as item (item.name)}
 					<li class="flex items-baseline justify-between gap-2">
@@ -146,7 +146,7 @@
 					</li>
 				{/each}
 			</ul>
-		</div>
+		</CollapsibleSection>
 	{/if}
 </div>
 

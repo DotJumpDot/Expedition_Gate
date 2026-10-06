@@ -19,9 +19,9 @@ All game UI and game content is **Thai**; the repo is documented in English.
 
 **Control** — stop mid-turn (⏹ — server flag + client abort), checkpoints (30-cap; restoring archives the abandoned branch, nothing is ever lost), choice chips (0–6 configurable next-action suggestions, ✨-labeled on major-decision cliffhangers), level-ups (2 stat points), death → AI epilogue → rebirth as a new hero in the same world, campaign export/import as a single `.json`.
 
-**Tuning** — settings panel: GM model URL, narration length (สั้น/กลาง/ยาว), 📊 extras on/off, chip count, and a runtime GM-prompt override appended as the last instruction (last-instruction-wins).
+**Tuning** — a full `/settings` page (section nav + cards): reading font (Sarabun / IBM Plex Sans Thai / Mitr bundled, or system fonts) + UI text scale, hero-panel side (left/right), narration length (สั้น/กลาง/ยาว), 📊 extras on/off, chip count, GM model URL, and a runtime GM-prompt override appended as the last instruction (last-instruction-wins).
 
-Also in place: CJK-leak auto-retry with ⚠ chip, stale-state chip when a state update fails, connection-lost handling, `prefers-reduced-motion` everywhere, mobile pass (rail → tabs), dark-fantasy theme.
+Also in place: CJK-leak auto-retry with ⚠ chip, stale-state chip when a state update fails, connection-lost handling, `prefers-reduced-motion` everywhere, mobile pass (rail → tabs), dark-fantasy theme. Readability pass (2026-10-06 late): per-speaker colored dialogue cards, `**bold**`/`*stage-direction*` inline rendering, per-value colorized 📊 status chips, player-friendly dice wording, collapsible hero-panel sections, follow-scroll only while you're at the bottom.
 
 ## Quickstart
 
@@ -52,7 +52,7 @@ LLAMA_URL=http://127.0.0.1:8090/v1 npm run dev
 All from `expedition_gate/`; nothing ever touches a live model server:
 
 ```bash
-npm test         # Vitest — 102 unit/engine tests (14 files)
+npm test         # Vitest — 113 unit/engine tests (14 files)
 npm run e2e      # node E2E smoke vs fake-llama: wizard → turns → stop → persist →
                  #   chips cache → checkpoint round-trip → consolidation → cleanup
 npm run e2e:pw   # Playwright browser e2e (boots fake-llama + dev server itself)
