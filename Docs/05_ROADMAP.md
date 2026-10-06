@@ -97,6 +97,15 @@ Player request: presets were too Thai-centric and too few, and กำหนด�
 - [x] **Classes 6 → 11** (อัศวิน, นักเวทดาบ, นักธนู, นักปราชญ์, นักเล่นแร่แปรธาตุ added) and กำหนดเอง now reveals name + ability-description inputs; the note flows through hero-proposal into the AI prompt (`classNote`).
 - [x] `settingPreset()` fallback keeps old saves working; gate icons derive from the preset map. Tests: 113 → **120** (`tests/engine/presets.test.ts`); full gates + e2e re-verified.
 
+### Ready-to-play scenarios — เริ่มทันที (2026-10-06, same day) ✅
+
+The player clarified that "preset" meant **published-adventure-style ready-to-play stories**, not generation categories — so both now exist, side by side in the wizard.
+
+- [x] **5 hand-authored scenario modules** (`src/lib/game/scenarios.ts`, isomorphic, editable like prompts): ผู้กลับชาติขุนนางแดนน้ำแข็ง · ไต่ชั้นสถาบันเวทมนตร์ · ระบบพลังลับ · ขุนนางตกอับ นักดาบพเนจร · ผู้สั่งการเวลา — each with full terrain lore, opening situation, 4 story hooks, 4 named NPCs with motives, and 2 ready-made heroes (52-point stats, kit, background) that fit the story.
+- [x] **Wizard "เริ่มทันที" mode**: pick scenario → story + NPC preview → pick a ready hero (slots into the existing tweakable stat view — zero AI calls) or build your own inside the scenario (class chips + suggested-concept chips + AI proposal against the scenario's brief). Gate screen gets a เริ่มทันที button; สร้างโลกเอง keeps the generation flow.
+- [x] Brief/NPC schema caps raised (terrain 1600, situation 1200, hooks 300 chars, NPC role 100) so authored scenarios are richer than AI output — zod is the only gate.
+- [x] Tests: 120 → **124** (`tests/engine/scenarios.test.ts`: schema conformance, 52-point buys, unique ids, class-vocabulary drift guard); Playwright e2e gains a เริ่มทันที spec (scenario → ready hero → opening → turn). All gates green.
+
 ## P5 — Future doors (explicitly NOT promised)
 
 - **Multiplayer** (the "MMO" door): friends join the same campaign via LAN — reference AnyWorld; SvelteKit server already centralizes state, but turn ownership + sync is a project of its own

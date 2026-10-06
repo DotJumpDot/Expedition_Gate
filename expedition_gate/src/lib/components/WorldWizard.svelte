@@ -6,12 +6,26 @@
 	import { STAT_KEYS, STAT_LABELS_TH, type Stats } from '$lib/game/rules';
 	import { SETTING_PRESETS, settingPreset, type HeroProposal } from '$lib/game/worldstate';
 	import type { WorldBrief } from '$lib/game/worldstate';
+	import { SCENARIOS, type Scenario, type ScenarioHero } from '$lib/game/scenarios';
 	import { settings, type CustomPreset } from '$lib/stores/settings.svelte';
 
-	let { onclose }: { onclose: () => void } = $props();
+	let {
+		onclose,
+		initialMode = 'scenario'
+	}: {
+		onclose: () => void;
+		initialMode?: 'scenario' | 'custom';
+	} = $props();
 
-	type Step = 'world' | 'brief' | 'hero';
-	let step = $state<Step>('world');
+	type Step = 'world' | 'brief' | 'hero' | 'scenario';
+	// svelte-ignore state_referenced_locally — set once from the opener
+	let step = $state<Step>(initialMode === 'scenario' ? 'scenario' : 'world');
+	// svelte-ignore state_referenced_locally — the gate screen sets it at open time
+	let mode = $state<'scenario' | 'custom'>(initialMode);
+	/** Hand-authored ready-to-play story (เริ่มทันที). */
+	let scenario = $state<Scenario | null>(null);
+	/** The ready-made hero picked from the scenario (cleared if the player uses AI instead). */
+	let readyHero = $state<ScenarioHero | null>(null);
 	let setting = $state('sword_sorcery');
 	/** The player-saved preset currently chosen (null = built-in or กำหนดเอง). */
 	let customSelected = $state<CustomPreset | null>(null);
@@ -121,6 +135,7 @@
 		if (!brief) return;
 		heroLoading = true;
 		heroError = '';
+		readyHero = null; // the AI proposal supersedes the ready-made pick
 		try {
 			const isCustom = heroClass === CUSTOM_CLASS;
 			const klass = isCustom ? customClassName.trim().slice(0, 40) || 'นักผจญภัย' : heroClass;
@@ -154,6 +169,53 @@
 		if (next[key] < 1 || next[key] > 10) return;
 		if (delta > 0 && pointsLeft <= 0) return;
 		stats = next;
+	}
+
+	// --- เริ่มทันที (ready-to-play scenarios) ---
+
+	function selectScenario(entry: Scenario) {
+		scenario = entry;
+		readyHero = null;
+		proposal = null;
+		stats = null;
+		brief = entry.brief;
+		setting = entry.setting;
+		tones = [...entry.tones];
+		heroClass = entry.suggestedClasses[0] ?? heroClass;
+		heroConcept = '';
+		step = 'scenario';
+	}
+
+	/**
+	 * A ready-made hero IS a proposal — authored by hand, no AI call. Slot it
+	 * into the shared proposal view so the player can still tweak the 52-point
+	 * buy before starting.
+	 */
+	function selectReadyHero(hero: ScenarioHero) {
+		readyHero = hero;
+		proposal = {
+			stats: hero.stats,
+			weapon: hero.weapon,
+			armor: hero.armor,
+			inventory: hero.inventory,
+			gold: hero.gold,
+			background: hero.background
+		};
+		stats = { ...hero.stats };
+		heroName = hero.name;
+		heroConcept = hero.concept;
+		heroClass = hero.klass;
+		step = 'hero';
+	}
+
+	/** Leave the ready-made heroes and build a custom hero inside this scenario. */
+	function buildOwnHero() {
+		readyHero = null;
+		proposal = null;
+		stats = null;
+		heroName = '';
+		heroConcept = '';
+		step = 'hero';
 	}
 
 	async function startCampaign() {
@@ -195,7 +257,9 @@
 	<div class="wizard-card msg-enter" role="dialog" aria-modal="true" aria-label="สร้างโลกใหม่">
 		<header class="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
 			<h2 class="text-base font-bold">
-				{#if step === 'world'}
+				{#if step === 'scenario'}
+					เริ่มทันที — เรื่องพร้อมเล่น
+				{:else if step === 'world'}
 					สร้างโลกใหม่
 				{:else if step === 'brief'}
 					โลกของคุณ
@@ -208,8 +272,141 @@
 			</Button>
 		</header>
 
+		<!-- Mode tabs: ready-to-play stories vs. build-your-own world -->
+		<div class="flex gap-1.5 border-b border-border/60 px-5 py-2.5">
+			<button
+				type="button"
+				class="mode-tab {mode === 'scenario' ? 'mode-active' : ''}"
+				onclick={() => {
+					mode = 'scenario';
+					step = 'scenario';
+				}}
+			>
+				🎬 เริ่มทันที
+			</button>
+			<button
+				type="button"
+				class="mode-tab {mode === 'custom' ? 'mode-active' : ''}"
+				onclick={() => {
+					mode = 'custom';
+					step = 'world';
+				}}
+			>
+				✍️ สร้างโลกเอง
+			</button>
+		</div>
+
 		<div class="max-h-[70vh] overflow-y-auto px-5 py-4">
-			{#if step === 'world'}
+			{#if mode === 'scenario' && step === 'scenario'}
+				<!-- ============ เริ่มทันที ============ -->
+				{#if !scenario}
+					<section class="space-y-3">
+						<p class="text-sm text-muted-foreground">
+							เรื่องพร้อมเล่นที่เขียนไว้เต็มรูปแบบ — เลือกแล้วเข้าเกมได้ทันที ไม่ต้องรอสร้างโลก
+						</p>
+						{#each SCENARIOS as entry (entry.id)}
+							<button type="button" class="scenario-card" onclick={() => selectScenario(entry)}>
+								<span class="text-xl">{entry.icon}</span>
+								<span class="min-w-0 flex-1">
+									<span class="block text-sm font-bold text-gold">{entry.title}</span>
+									<span class="mt-0.5 block text-xs leading-relaxed text-muted-foreground"
+										>{entry.tagline}</span
+									>
+								</span>
+							</button>
+						{/each}
+					</section>
+				{:else}
+					<section class="space-y-4">
+						<button
+							type="button"
+							class="text-xs text-muted-foreground transition-colors hover:text-foreground"
+							onclick={() => (scenario = null)}
+						>
+							← กลับไปเลือกเรื่องอื่น
+						</button>
+
+						<div>
+							<h3 class="text-lg font-bold text-primary">{scenario.icon} {scenario.brief.name}</h3>
+							<p class="mt-1 text-sm leading-relaxed text-pretty">{scenario.brief.terrain}</p>
+						</div>
+
+						<div class="rounded-lg border border-border/60 bg-card/50 p-3.5">
+							<p class="mb-1 text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">
+								สถานการณ์ของคุณ
+							</p>
+							<p class="text-sm leading-relaxed text-pretty">{scenario.brief.situation}</p>
+						</div>
+
+						<div>
+							<p class="mb-1.5 text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">
+								เส้นเรื่องที่รออยู่
+							</p>
+							<ul class="space-y-1 text-sm">
+								{#each scenario.brief.hooks as hook (hook)}
+									<li>· {hook}</li>
+								{/each}
+							</ul>
+						</div>
+
+						<div>
+							<p class="mb-1.5 text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">
+								ตัวละครสำคัญ
+							</p>
+							<ul class="space-y-1 text-sm">
+								{#each scenario.brief.npcs as npc (npc.name)}
+									<li>· <span class="font-medium">{npc.name}</span> — {npc.role}</li>
+								{/each}
+							</ul>
+						</div>
+
+						<hr class="border-border/60" />
+
+						<p class="text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">
+							เลือกฮีโร่พร้อมเล่น
+						</p>
+						{#each scenario.heroes as hero (hero.name)}
+							<button type="button" class="scenario-card" onclick={() => selectReadyHero(hero)}>
+								<span class="min-w-0 flex-1">
+									<span class="block text-sm font-bold">{hero.name}</span>
+									<span class="block text-xs text-gold">{hero.klass}</span>
+									<span
+										class="mt-1 line-clamp-2 block text-xs leading-relaxed text-muted-foreground"
+										>{hero.background}</span
+									>
+								</span>
+								<span class="shrink-0 text-[11px] text-muted-foreground"
+									>รวม {Object.values(hero.stats).reduce((s, v) => s + v, 0)} แต้ม</span
+								>
+							</button>
+						{/each}
+
+						<div class="rounded-lg border border-dashed border-border/70 p-3.5">
+							<p class="text-xs text-muted-foreground">
+								หรือจะสร้างฮีโร่ของตัวเองในเรื่องนี้ — AI จะจัดค่าให้เข้ากับเรื่องโดยอัตโนมัติ
+							</p>
+							<div class="mt-2 flex flex-wrap gap-1.5">
+								{#each scenario.suggestedConcepts as concept (concept)}
+									<button
+										type="button"
+										class="tone-chip"
+										title="คลิกเพื่อใช้คอนเซปต์นี้"
+										onclick={() => {
+											heroConcept = concept;
+											buildOwnHero();
+										}}
+									>
+										{concept}
+									</button>
+								{/each}
+							</div>
+							<Button variant="outline" size="sm" class="mt-2.5" onclick={buildOwnHero}>
+								สร้างฮีโร่เองในเรื่องนี้
+							</Button>
+						</div>
+					</section>
+				{/if}
+			{:else if step === 'world'}
 				<!-- Step 1: setting + tone -->
 				<section class="space-y-5">
 					<div>
@@ -350,6 +547,15 @@
 			{:else if step === 'hero' && brief}
 				<!-- Step 3: hero creation -->
 				<section class="space-y-4">
+					{#if scenario}
+						<button
+							type="button"
+							class="text-xs text-muted-foreground transition-colors hover:text-foreground"
+							onclick={() => (step = 'scenario')}
+						>
+							← กลับไปเรื่อง "{scenario.title}"
+						</button>
+					{/if}
 					{#if !proposal}
 						<div class="space-y-4">
 							<div class="grid gap-3 sm:grid-cols-2">
@@ -414,6 +620,19 @@
 									class="mb-1 block text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase"
 									for="hero-concept">คอนเซปต์ฮีโร่</label
 								>
+								{#if scenario}
+									<div class="mb-1.5 flex flex-wrap gap-1.5">
+										{#each scenario.suggestedConcepts as concept (concept)}
+											<button
+												type="button"
+												class="tone-chip {heroConcept === concept ? 'tone-active' : ''}"
+												onclick={() => (heroConcept = concept)}
+											>
+												{concept}
+											</button>
+										{/each}
+									</div>
+								{/if}
 								<Input
 									id="hero-concept"
 									bind:value={heroConcept}
@@ -548,6 +767,43 @@
 		box-shadow: 0 24px 64px oklch(0 0 0 / 55%);
 	}
 
+	.mode-tab {
+		border-radius: var(--radius-md);
+		border: 1px solid transparent;
+		padding: 0.35rem 0.9rem;
+		font-size: 0.8rem;
+		color: var(--color-muted-foreground);
+		transition:
+			color 0.12s var(--ease-out),
+			border-color 0.12s var(--ease-out),
+			background-color 0.12s var(--ease-out);
+	}
+	.mode-active {
+		border-color: color-mix(in oklch, var(--color-gold) 55%, transparent);
+		background: color-mix(in oklch, var(--color-gold) 10%, transparent);
+		color: var(--color-gold);
+		font-weight: 600;
+	}
+
+	.scenario-card {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		width: 100%;
+		border-radius: var(--radius-lg);
+		border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);
+		background: color-mix(in oklch, var(--color-card) 55%, transparent);
+		padding: 0.75rem 0.95rem;
+		text-align: left;
+		transition:
+			border-color 0.15s var(--ease-out),
+			background-color 0.15s var(--ease-out),
+			transform 0.12s var(--ease-out);
+	}
+	.scenario-card:active {
+		transform: scale(0.98);
+	}
+
 	.setting-card {
 		border-radius: var(--radius-lg);
 		border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);
@@ -656,6 +912,7 @@
 	}
 
 	@media (hover: hover) and (pointer: fine) {
+		.scenario-card:hover,
 		.setting-card:hover,
 		.tone-chip:hover {
 			border-color: color-mix(in oklch, var(--color-gold) 40%, transparent);
@@ -672,6 +929,7 @@
 		.msg-enter {
 			animation: none;
 		}
+		.scenario-card,
 		.setting-card,
 		.step-btn,
 		.tone-chip {

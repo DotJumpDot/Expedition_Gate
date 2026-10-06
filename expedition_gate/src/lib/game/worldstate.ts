@@ -284,7 +284,7 @@ export type HeroProposal = z.infer<typeof HeroProposalSchema>;
 export const NpcSchema = z.object({
 	id: z.string().min(1),
 	name: z.string().min(1).max(60),
-	role: z.string().max(60).default(''),
+	role: z.string().max(100).default(''),
 	disposition: z.number().int().min(-3).max(3).default(0),
 	location: z.string().max(120).default(''),
 	status: z.string().max(60).default('มีชีวิต'),
@@ -396,9 +396,9 @@ export interface WorldBrief {
 
 export const WorldBriefSchema = z.object({
 	name: z.string().min(1).max(80),
-	terrain: z.string().min(1).max(900),
-	situation: z.string().min(1).max(600),
-	hooks: z.array(z.string().min(1).max(200)).min(1).max(5),
+	terrain: z.string().min(1).max(1600),
+	situation: z.string().min(1).max(1200),
+	hooks: z.array(z.string().min(1).max(300)).min(1).max(5),
 	npcs: z
 		.array(z.object({ name: z.string().min(1).max(60), role: z.string().max(80).default('') }))
 		.max(4)

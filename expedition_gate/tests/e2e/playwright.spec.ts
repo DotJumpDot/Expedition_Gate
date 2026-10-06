@@ -15,8 +15,9 @@ async function playTurn(page: import('@playwright/test').Page, text: string) {
 test('create world → 5 turns → checkpoint → restore', async ({ page }) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
 
-	// --- wizard: world brief (stub answers instantly)
+	// --- wizard: world brief (stub answers instantly) — switch to build-your-own mode
 	await page.getByRole('button', { name: /สร้างโลกใหม่/ }).click();
+	await page.getByRole('button', { name: /สร้างโลกเอง/ }).click();
 	await page.getByRole('button', { name: 'สร้างโลก', exact: true }).click();
 	await expect(page.getByRole('heading', { name: 'ทุ่งประตูหิน' })).toBeVisible();
 	await page.getByRole('button', { name: 'โลกนี้แล้ว — สร้างฮีโร่' }).click();
@@ -72,6 +73,7 @@ test('mobile viewport: rail becomes a drawer', async ({ page }) => {
 	// Missing campaign redirects to the gate; use a fresh one instead.
 	await page.goto('/', { waitUntil: 'networkidle' });
 	await page.getByRole('button', { name: /สร้างโลกใหม่/ }).click();
+	await page.getByRole('button', { name: /สร้างโลกเอง/ }).click();
 	await page.getByRole('button', { name: 'สร้างโลก', exact: true }).click();
 	await page.getByRole('button', { name: 'โลกนี้แล้ว — สร้างฮีโร่' }).click();
 	await page.locator('#hero-name').fill('ค่ำ');
@@ -87,4 +89,32 @@ test('mobile viewport: rail becomes a drawer', async ({ page }) => {
 	await expect(drawer).toBeVisible();
 	await expect(drawer.getByText('ตัวละครที่พบ')).toBeVisible();
 	await page.getByLabel('ปิดแผงฮีโร่').click({ force: true }); // scrim sits behind the drawer
+});
+
+test('เริ่มทันที: scenario → ready-made hero → opening streams (no AI generation)', async ({
+	page
+}) => {
+	await page.goto('/', { waitUntil: 'networkidle' });
+
+	await page.getByRole('button', { name: /เริ่มทันที/ }).click();
+	await expect(page.getByRole('heading', { name: /เริ่มทันที/ })).toBeVisible();
+
+	// pick a scenario — the story detail must render without any model call
+	await page
+		.getByRole('button', { name: /ขุนนางแดนน้ำแข็ง/ })
+		.first()
+		.click();
+	await expect(page.getByText('สถานการณ์ของคุณ')).toBeVisible();
+	await expect(page.getByText('พิธีรับรองทายาท').first()).toBeVisible();
+
+	// pick the ready-made hero — jumps straight to the tweakable stat view
+	await page.getByRole('button', { name: /เอเดริก เวลฮาร์ด/ }).click();
+	await expect(page.getByText('ปูมหลัง')).toBeVisible();
+	await expect(page.getByRole('button', { name: 'เริ่มการผจญภัย' })).toBeEnabled();
+	await page.getByRole('button', { name: 'เริ่มการผจญภัย' }).click();
+
+	// the opening narrates the AUTHORED situation (stub narrates it verbatim-ish)
+	await expect(page).toHaveURL(/\/campaign\//, { timeout: 15_000 });
+	await expect(page.getByText('เริ่มต้นการผจญภัย')).toBeVisible({ timeout: 30_000 });
+	await playTurn(page, 'ลุกจากเตียงและมองหาฮัลวาร์');
 });

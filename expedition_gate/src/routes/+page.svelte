@@ -21,6 +21,7 @@
 	} = $props();
 
 	let wizardOpen = $state(false);
+	let wizardMode = $state<'scenario' | 'custom'>('scenario');
 	let confirmDelete = $state<string | null>(null);
 	let fileInput: HTMLInputElement | undefined = $state();
 	let importError = $state('');
@@ -97,8 +98,20 @@
 	</section>
 
 	<section class="gate-rise mt-9 flex flex-col items-center gap-2" style="--stagger: 1">
-		<div class="flex items-center gap-2">
-			<Button size="lg" class="px-6 text-base" onclick={() => (wizardOpen = true)}>
+		<div class="flex flex-wrap items-center justify-center gap-2">
+			<Button
+				size="lg"
+				class="px-6 text-base"
+				onclick={() => ((wizardOpen = true), (wizardMode = 'scenario'))}
+			>
+				<Swords data-icon="inline-start" aria-hidden="true" />
+				เริ่มทันที
+			</Button>
+			<Button
+				variant="outline"
+				size="lg"
+				onclick={() => ((wizardOpen = true), (wizardMode = 'custom'))}
+			>
 				<Compass data-icon="inline-start" aria-hidden="true" />
 				สร้างโลกใหม่
 			</Button>
@@ -196,7 +209,7 @@
 </div>
 
 {#if wizardOpen}
-	<WorldWizard onclose={() => (wizardOpen = false)} />
+	<WorldWizard onclose={() => (wizardOpen = false)} initialMode={wizardMode} />
 {/if}
 
 <style>

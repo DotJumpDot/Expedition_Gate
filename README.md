@@ -9,7 +9,10 @@ All game UI and game content is **Thai**; the repo is documented in English.
 
 ## What's in the game (v1 — P0–P4 complete)
 
-**Create** — 3-step wizard: pick one of **15 world presets** (ดาบและเวทมนตร์ · สถาบันเวทมนตร์ · ขุนนางแดนน้ำแข็ง · ระบบพลังลับ · ขุนนางตกอับ · ผู้สั่งการเวลา · ราชสำนักจักรวรรดิตะวันออก · จอมยุทธ์ · จอมมารกลับชาติ · โจรสลัด · หลังวันสิ้นโลก · จักรกลไอน้ำ · ไซไฟ · สยองขวัญ · ตำนานไทย) — **every preset's world description is editable** and saveable as your own preset (localStorage) — + tone chips → AI writes the world brief (regenerate with 🎲) → describe your hero with 11 class options or a fully custom class (name + ability description), and the AI proposes stats, kit, and background; tweak the 52-point stat buy yourself or reroll.
+**Create** — two paths in one wizard:
+
+- **เริ่มทันที (quick start)** — 5 hand-authored **ready-to-play scenarios** (ผู้กลับชาติขุนนางแดนน้ำแข็ง · ไต่ชั้นสถาบันเวทมนตร์ · ระบบพลังลับ · ขุนนางตกอับ นักดาบพเนจร · ผู้สั่งการเวลา): full story, situation, hooks, and named NPCs already written; pick a ready-made hero that fits (stats/kit/background included, still tweakable) or build your own inside that story — play instantly, no generation wait. Scenario files live in `src/lib/game/scenarios.ts` and are edited like prompts.
+- **สร้างโลกเอง** — 15 world presets (every description editable, saveable as your own preset) + tone chips → AI writes the world brief → hero with 11 classes or a fully custom class (name + ability description); the AI proposes stats and kit, and the 52-point buy stays tweakable either way.
 
 **Play** — free-text input always available, plus quick actions (⚔️ โจมตี · 🔍 ตรวจสอบ · 💬 พูดคุย · 🏃 หนี) and a dice tray (pick stat + DC). **The app does all the math server-side** — d20+mod vs DC, weapon damage, crits, HP/MP/gold/XP, declared-spell มานา costs (tiered 3/5/8, fizzles when short), and potion use (ใช้ button on recognized items — heal 2d6+4 / มานา 1d6+7) — and the GM narrates the already-resolved result as streaming Thai novel prose (dialogue lines, 📊 status blocks only when something mechanical changed). Botched a roll? Spend 1 แต้มดวง (LUK) to reroll the last check with fate twisting back. At 0 HP the dying hero rolls death saves (d20 ≥ 10, three fails = the end).
 
