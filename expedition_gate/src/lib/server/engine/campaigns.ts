@@ -173,9 +173,15 @@ export function saveGmTurn(input: {
 	content: string;
 	state: WorldState;
 	stateStale: boolean;
+	extraMeta?: Record<string, unknown>;
 }): number {
 	const db = getDb();
-	appendMessage({ campaignId: input.campaignId, role: 'gm', content: input.content });
+	appendMessage({
+		campaignId: input.campaignId,
+		role: 'gm',
+		content: input.content,
+		meta: input.extraMeta
+	});
 	const [row] = db
 		.select({ turnCount: campaigns.turnCount })
 		.from(campaigns)

@@ -16,8 +16,12 @@ import {
 import {
 	SCENE_TAGS,
 	serializeWorldState,
+	HeroProposalSchema,
+	SETTING_PRESETS,
 	WorldBriefSchema,
 	WorldStateSchema,
+	type HeroProposal,
+	type SettingKey,
 	type WorldBrief,
 	type WorldState
 } from './worldstate';
@@ -33,6 +37,12 @@ export interface GmTurnContext {
 	playerInput: string;
 	/** Opening scene: narrate the campaign's first beat instead of reacting. */
 	opening?: boolean;
+	/** Narration length hint (settings: สั้น/กลาง/ยาว). */
+	lengthHint?: string;
+	/** 📊 status blocks disabled (settings extras off). */
+	extrasOff?: boolean;
+	/** Player's runtime GM-prompt override (P4 editor) — LAST instruction wins. */
+	gmOverride?: string;
 }
 
 /** Assemble the full GM message array (system + history + turn user message). */
@@ -44,6 +54,19 @@ export function buildGmMessages(ctx: GmTurnContext): ChatMessage[] {
 		WORLD_STATE: serializeWorldState(ctx.state),
 		MEMORY: memory.summaryText || '（เพิ่งเริ่มต้นการผจญภัย — ยังไม่มีเหตุการณ์ก่อนหน้า）'
 	});
+
+	// Last-instruction-wins overrides (Docs/04 lesson #2) sit at the very END.
+	const overrides: string[] = [];
+	if (ctx.lengthHint) overrides.push(`ความยาวคำตอบ: ${ctx.lengthHint}`);
+	if (ctx.extrasOff) {
+		overrides.push('ห้ามใส่บล็อก 📊 สถานะท้ายคำตอบในทุกกรณี — ทับกฎรูปแบบการเขียนข้ออื่นทั้งหมด');
+	}
+	const custom = ctx.gmOverride?.trim();
+	if (custom) overrides.push(custom);
+	const systemFinal =
+		overrides.length > 0
+			? `${system}\n\n## โหมดตั้งค่า (คำสั่งนี้ทับกฎก่อนหน้าทั้งหมด)\n${overrides.map((line) => `- ${line}`).join('\n')}`
+			: system;
 
 	const quickFacts = `วันที่ ${ctx.state.world.day} (${ctx.state.world.timeOfDay}) · ${ctx.state.world.location}`;
 
@@ -59,7 +82,7 @@ export function buildGmMessages(ctx: GmTurnContext): ChatMessage[] {
 	}
 
 	return [
-		{ role: 'system', content: system },
+		{ role: 'system', content: systemFinal },
 		...windowToChatMessages(memory.window),
 		{ role: 'user', content: userParts.join('\n') }
 	];
@@ -145,14 +168,10 @@ export function parseJsonLoose(raw: string): unknown {
 
 // --- world brief -----------------------------------------------------------
 
-export const SETTING_PRESETS = {
-	sword_sorcery: 'ดาบและเวทมนตร์',
-	scifi: 'ไซไฟ',
-	horror: 'สยองขวัญ',
-	thai_legend: 'ตำนานไทย (แถบอีสาน/ล้านนา)',
-	custom: 'กำหนดเอง'
-} as const;
-export type SettingKey = keyof typeof SETTING_PRESETS;
+// Re-exported from the isomorphic worldstate module so server callers keep
+// their import paths; client components must import from worldstate directly.
+export { SETTING_PRESETS, HeroProposalSchema } from './worldstate';
+export type { SettingKey, HeroProposal } from './worldstate';
 
 export async function generateWorldBrief(
 	input: { setting: SettingKey; tone: string[]; premise?: string },
@@ -172,31 +191,6 @@ export async function generateWorldBrief(
 }
 
 // --- hero proposal ---------------------------------------------------------
-
-export const HeroProposalSchema = z.object({
-	stats: WorldStateSchema.shape.hero.shape.stats,
-	weapon: z.object({
-		key: z.enum(['dagger', 'sword', 'axe', 'greatweapon', 'bow']),
-		label: z.string().min(1)
-	}),
-	armor: z.object({
-		key: z.enum(['none', 'cloth', 'leather', 'chain', 'plate']),
-		label: z.string().min(1)
-	}),
-	inventory: z
-		.array(
-			z.object({
-				name: z.string().min(1),
-				qty: z.number().int().min(1),
-				note: z.string().optional()
-			})
-		)
-		.min(1)
-		.max(8),
-	gold: z.number().int().min(0).max(500),
-	background: z.string().min(1).max(900)
-});
-export type HeroProposal = z.infer<typeof HeroProposalSchema>;
 
 export async function generateHeroProposal(
 	input: { brief: WorldBrief; name: string; concept: string; klass: string },

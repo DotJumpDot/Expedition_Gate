@@ -56,7 +56,10 @@
 		const res = await fetch(`/api/campaigns/${campaignId}/checkpoints/${id}/restore`, {
 			method: 'POST'
 		});
-		if (res.ok) onrestored();
+		if (res.ok) {
+			await refresh(); // the auto-snapshot of the abandoned branch appears immediately
+			onrestored();
+		}
 	}
 
 	function formatTime(iso: string): string {

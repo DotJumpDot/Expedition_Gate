@@ -40,13 +40,13 @@ Phases with a definition of done. Work in order; each phase ends committed with 
 - **Done when**: closing the tab overnight and resuming feels seamless (recap card + coherent continuation).
   - Machinery proven: 69 unit tests + E2E (chips cache, checkpoint round-trip, 8-turn consolidation). Overnight-feel playtest with real Gemma is the user's step.
 
-## P3 — Feel & polish
+## P3 — Feel & polish ✅ (2026-10-06)
 
-- [ ] Motion pass: dice roll animation, damage shake, panel transitions, streaming text reveal (respect `prefers-reduced-motion` throughout)
-- [ ] Responsive/mobile pass (rail → bottom tabs, phone-width testing like the sibling app)
-- [ ] Playwright e2e on the fake llama (create world → 5 turns → checkpoint → restore)
-- [ ] CJK auto-retry + ⚠ chip; connection-lost states
-- [ ] Settings: model URL, narration length seg (สั้น/กลาง/ยาว), extras toggle (📊 on/off)
+- [x] Motion pass: dice roll animation, damage shake, panel transitions, streaming text reveal (respect `prefers-reduced-motion` throughout)
+- [x] Responsive/mobile pass (rail → bottom tabs, phone-width testing like the sibling app)
+- [x] Playwright e2e on the fake llama (create world → 5 turns → checkpoint → restore)
+- [x] CJK auto-retry + ⚠ chip; connection-lost states
+- [x] Settings: model URL, narration length seg (สั้น/กลาง/ยาว), extras toggle (📊 on/off)
 
 ## P4 — Depth (post-v1, pick by interest)
 

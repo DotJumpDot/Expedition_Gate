@@ -5,12 +5,14 @@
 		content,
 		role,
 		aborted = false,
-		streaming = false
+		streaming = false,
+		cjkLeak = false
 	}: {
 		content: string;
 		role: 'player' | 'gm' | 'system';
 		aborted?: boolean;
 		streaming?: boolean;
+		cjkLeak?: boolean;
 	} = $props();
 
 	const blocks = $derived(
@@ -37,7 +39,12 @@
 		{#if aborted}
 			<p class="mb-1 text-xs text-muted-foreground">⏹ หยุดกลางคัน — บทนี้ไม่ถูกบันทึก</p>
 		{/if}
-		<div class="space-y-3">
+		{#if cjkLeak}
+			<p class="mb-1 text-xs text-muted-foreground">
+				⚠ ตรวจพบอักษรจีนหลุดรอดในบทนี้ (เขียนใหม่อัตโนมัติแล้วแต่ยังเหลืออยู่)
+			</p>
+		{/if}
+		<div class="stream-wrap space-y-3" data-streaming={streaming}>
 			{#each blocks as block, i (i)}
 				{#if block.type === 'dialogue'}
 					<div class="flex flex-col items-start" style="animation-delay: {Math.min(i * 30, 120)}ms">
@@ -60,6 +67,17 @@
 {/if}
 
 <style>
+	/* Streaming reveal: a soft gold edge glows only while the GM is talking. */
+	.stream-wrap {
+		border-left: 2px solid transparent;
+		padding-left: 0.75rem;
+		margin-left: -0.875rem;
+		transition: border-color 0.6s var(--ease-out);
+	}
+	.stream-wrap[data-streaming='true'] {
+		border-left-color: color-mix(in oklch, var(--color-gold) 45%, transparent);
+	}
+
 	.dialogue-card {
 		max-width: 92%;
 		border-left: 2px solid var(--color-gold);

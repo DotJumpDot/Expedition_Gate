@@ -4,6 +4,31 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
+	// Pre-warm the dep optimizer: without this, the first visit to the game
+	// screen triggers a mid-navigation "optimized dependencies changed" reload.
+	optimizeDeps: {
+		include: [
+			'@microsoft/fetch-event-source',
+			'@lucide/svelte/icons/chevron-left',
+			'@lucide/svelte/icons/history',
+			'@lucide/svelte/icons/panel-left',
+			'@lucide/svelte/icons/settings',
+			'@lucide/svelte/icons/dices',
+			'@lucide/svelte/icons/send',
+			'@lucide/svelte/icons/square',
+			'@lucide/svelte/icons/compass',
+			'@lucide/svelte/icons/scroll-text',
+			'@lucide/svelte/icons/swords',
+			'@lucide/svelte/icons/trash-2',
+			'@lucide/svelte/icons/sparkles',
+			'@lucide/svelte/icons/x',
+			'@lucide/svelte/icons/plus',
+			'@lucide/svelte/icons/minus',
+			'@lucide/svelte/icons/bookmark-plus',
+			'@lucide/svelte/icons/skull',
+			'@lucide/svelte/icons/door-open'
+		]
+	},
 	plugins: [
 		tailwindcss(),
 		sveltekit({

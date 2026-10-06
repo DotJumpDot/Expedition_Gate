@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { WorldState } from '$lib/server/engine/worldstate';
+	import type { WorldState } from '$lib/game/worldstate';
 
-	let { state }: { state: WorldState } = $props();
+	let { world }: { world: WorldState } = $props();
 
 	const STATUS_TH: Record<string, { label: string; cls: string }> = {
 		active: { label: 'กำลังทำ', cls: 'text-gold border-gold/35 bg-gold/10' },
@@ -10,11 +10,11 @@
 	};
 </script>
 
-{#if state.quests.length}
+{#if world.quests.length}
 	<div class="space-y-2">
 		<h3 class="text-[11px] font-bold tracking-[0.15em] text-muted-foreground uppercase">เควส</h3>
 		<ul class="space-y-2">
-			{#each state.quests as quest (quest.id)}
+			{#each world.quests as quest (quest.id)}
 				{@const status = STATUS_TH[quest.status] ?? STATUS_TH.active}
 				<li class="rounded-lg border border-border/60 bg-card/50 p-2.5">
 					<div class="flex items-start justify-between gap-2">

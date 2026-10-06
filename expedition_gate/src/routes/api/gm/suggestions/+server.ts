@@ -7,6 +7,7 @@ import {
 	setMessageMeta
 } from '$lib/server/engine/campaigns';
 import { generateSuggestions } from '$lib/server/engine/gm';
+import { resolveLlamaBaseUrl } from '$lib/server/llama';
 
 /**
  * POST /api/gm/suggestions — choice chips for the latest GM turn.
@@ -14,9 +15,19 @@ import { generateSuggestions } from '$lib/server/engine/gm';
  * cached pool so the setting can change without re-calling the model.
  */
 export const POST: RequestHandler = async ({ request }) => {
-	const body = (await request.json()) as { campaignId?: string; n?: number };
+	const body = (await request.json()) as { campaignId?: string; n?: number; baseUrl?: string };
 	const campaignId = body.campaignId ?? '';
 	if (!campaignId) return json({ error: 'ไม่มี campaignId' }, { status: 400 });
+
+	let baseUrl: string;
+	try {
+		baseUrl = resolveLlamaBaseUrl(body.baseUrl);
+	} catch (err) {
+		return json(
+			{ error: err instanceof Error ? err.message : 'GM URL ไม่ถูกต้อง' },
+			{ status: 400 }
+		);
+	}
 
 	const row = getCampaign(campaignId);
 	if (!row) return json({ error: 'ไม่พบการผจญภัย' }, { status: 404 });
@@ -36,7 +47,8 @@ export const POST: RequestHandler = async ({ request }) => {
 	const result = await generateSuggestions({
 		narration: lastGm.content,
 		quickFacts: `วันที่ ${state.world.day} (${state.world.timeOfDay}) · ${state.world.location}`,
-		n: 6 // generate the max pool; the client slices to the user's setting
+		n: 6, // generate the max pool; the client slices to the user's setting
+		baseUrl
 	});
 
 	if (!result.ok) return json({ chips: [] });

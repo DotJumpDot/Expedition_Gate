@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { generateWorldBrief, SETTING_PRESETS, type SettingKey } from '$lib/server/engine/gm';
+import { resolveLlamaBaseUrl } from '$lib/server/llama';
 
 /**
  * POST /api/campaigns/brief — wizard step 1: generate a world brief preview.
@@ -11,6 +12,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		setting?: string;
 		tone?: string[];
 		premise?: string;
+		baseUrl?: string;
 	};
 
 	const setting = (body.setting ?? 'sword_sorcery') as SettingKey;
@@ -18,11 +20,24 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ error: 'ฉากไม่ถูกต้อง' }, { status: 400 });
 	}
 
-	const result = await generateWorldBrief({
-		setting,
-		tone: Array.isArray(body.tone) ? body.tone.slice(0, 4) : [],
-		premise: body.premise?.slice(0, 400)
-	});
+	let baseUrl: string;
+	try {
+		baseUrl = resolveLlamaBaseUrl(body.baseUrl);
+	} catch (err) {
+		return json(
+			{ error: err instanceof Error ? err.message : 'GM URL ไม่ถูกต้อง' },
+			{ status: 400 }
+		);
+	}
+
+	const result = await generateWorldBrief(
+		{
+			setting,
+			tone: Array.isArray(body.tone) ? body.tone.slice(0, 4) : [],
+			premise: body.premise?.slice(0, 400)
+		},
+		baseUrl
+	);
 
 	if (!result.ok) {
 		return json({ error: `สร้างโลกไม่สำเร็จ (${result.error})` }, { status: 502 });

@@ -4,9 +4,9 @@
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import { STAT_KEYS, STAT_LABELS_TH, type Stats } from '$lib/server/engine/rules';
-	import type { HeroProposal } from '$lib/server/engine/gm';
-	import type { WorldBrief, WorldState } from '$lib/server/engine/worldstate';
+	import { STAT_KEYS, STAT_LABELS_TH, type Stats } from '$lib/game/rules';
+	import type { HeroProposal } from '$lib/game/worldstate';
+	import type { WorldBrief, WorldState } from '$lib/game/worldstate';
 
 	let {
 		campaignId,

@@ -3,9 +3,9 @@
 	import { Compass, Minus, Plus, Sparkles, X } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import { STAT_KEYS, STAT_LABELS_TH, type Stats } from '$lib/server/engine/rules';
-	import { SETTING_PRESETS, type HeroProposal } from '$lib/server/engine/gm';
-	import type { WorldBrief } from '$lib/server/engine/worldstate';
+	import { STAT_KEYS, STAT_LABELS_TH, type Stats } from '$lib/game/rules';
+	import { SETTING_PRESETS, type HeroProposal } from '$lib/game/worldstate';
+	import type { WorldBrief } from '$lib/game/worldstate';
 
 	let { onclose }: { onclose: () => void } = $props();
 

@@ -2,7 +2,7 @@
 	import { Dices, Send, Square } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
-	import { STAT_KEYS, STAT_LABELS_TH, type StatKey } from '$lib/server/engine/rules';
+	import { STAT_KEYS, STAT_LABELS_TH, type StatKey } from '$lib/game/rules';
 	import type { SendKind } from '$lib/stores/campaign.svelte';
 
 	let {
@@ -19,6 +19,7 @@
 	let diceOpen = $state(false);
 	let diceStat = $state<StatKey>('spi');
 	let diceDc = $state(15);
+	let diceRolling = $state(false);
 
 	const DC_OPTIONS = [
 		{ value: 8, label: 'ง่ายมาก' },
@@ -49,8 +50,12 @@
 
 	function submitDice() {
 		if (busy) return;
+		diceRolling = true;
 		onsend('roll', `ทอยเช็ค ${STAT_LABELS_TH[diceStat]} (DC ${diceDc})`, diceStat, diceDc);
-		diceOpen = false;
+		setTimeout(() => {
+			diceRolling = false;
+			diceOpen = false;
+		}, 550);
 	}
 
 	function onKeydown(event: KeyboardEvent) {
@@ -116,7 +121,10 @@
 						</button>
 					{/each}
 				</div>
-				<Button size="sm" class="self-start" onclick={submitDice}>🎲 ทอยเลย</Button>
+				<Button size="sm" class="self-start" onclick={submitDice}>
+					<span class="dice-face {diceRolling ? 'dice-rolling' : ''}" aria-hidden="true">🎲</span>
+					{diceRolling ? 'กำลังทอย...' : 'ทอยเลย'}
+				</Button>
 			</div>
 		{/if}
 
@@ -204,6 +212,22 @@
 		}
 	}
 
+	@keyframes dice-tumble {
+		0% {
+			transform: rotate(0deg) scale(1);
+		}
+		45% {
+			transform: rotate(300deg) scale(1.25);
+		}
+		100% {
+			transform: rotate(720deg) scale(1);
+		}
+	}
+	.dice-rolling {
+		display: inline-block;
+		animation: dice-tumble 0.55s var(--ease-in-out);
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.quick-chip,
 		.pick-chip {
@@ -211,6 +235,9 @@
 		}
 		.quick-chip:active {
 			transform: none;
+		}
+		.dice-rolling {
+			animation: none;
 		}
 	}
 </style>

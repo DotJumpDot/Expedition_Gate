@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { WorldState } from '$lib/server/engine/worldstate';
+	import type { WorldState } from '$lib/game/worldstate';
 
-	let { state }: { state: WorldState } = $props();
+	let { world }: { world: WorldState } = $props();
 
 	const DISPOSITION_TH: Record<number, string> = {
 		[-3]: 'เกลียดชัง',
@@ -13,7 +13,7 @@
 		3: 'ภักดี'
 	};
 
-	const alive = $derived(state.npcs.filter((npc) => npc.status === 'มีชีวิต'));
+	const alive = $derived(world.npcs.filter((npc) => npc.status === 'มีชีวิต'));
 </script>
 
 {#if alive.length}

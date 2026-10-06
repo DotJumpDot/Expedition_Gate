@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { WorldState } from '$lib/server/engine/worldstate';
-	import { STAT_LABELS_TH } from '$lib/server/engine/rules';
+	import type { WorldState } from '$lib/game/worldstate';
+	import { STAT_LABELS_TH } from '$lib/game/rules';
 
-	let { state }: { state: WorldState } = $props();
+	let { world }: { world: WorldState } = $props();
 
-	const hero = $derived(state.hero);
+	const hero = $derived(world.hero);
 	const statGroups = $derived([
 		{ label: 'กาย', keys: ['str', 'agi', 'dex', 'vit'] as const },
 		{ label: 'จิต', keys: ['int', 'spi', 'cha'] as const },
@@ -13,6 +13,23 @@
 
 	const hpPct = $derived(hero.maxHp > 0 ? hero.hp / hero.maxHp : 0);
 	const mpPct = $derived(hero.maxMp > 0 ? hero.mp / hero.maxMp : 0);
+
+	// Damage shake / heal pulse — react to HP deltas, never on first render.
+	let hpFx = $state<'hit' | 'heal' | null>(null);
+	let prevHp: number | null = null;
+	$effect(() => {
+		const hp = hero.hp;
+		if (prevHp === null) {
+			prevHp = hp;
+			return;
+		}
+		if (hp !== prevHp) {
+			hpFx = hp < prevHp ? 'hit' : 'heal';
+			prevHp = hp;
+			const timer = setTimeout(() => (hpFx = null), 700);
+			return () => clearTimeout(timer);
+		}
+	});
 </script>
 
 <div class="space-y-4">
@@ -27,7 +44,7 @@
 	</header>
 
 	<div class="space-y-2.5">
-		<div>
+		<div class="hp-block {hpFx === 'hit' ? 'hp-hit' : hpFx === 'heal' ? 'hp-heal' : ''}">
 			<div class="mb-1 flex items-baseline justify-between text-xs">
 				<span class="font-semibold text-hp">พลังชีวิต</span>
 				<span class="tabular-nums">{hero.hp}/{hero.maxHp}</span>
@@ -126,6 +143,37 @@
 		transform-origin: left center;
 		border-radius: 9999px;
 		transition: transform 0.5s var(--ease-out);
+	}
+
+	/* Damage shake / heal pulse — short, causal, once per change. */
+	@keyframes hp-shake {
+		20% {
+			transform: translateX(-4px);
+		}
+		45% {
+			transform: translateX(3px);
+		}
+		70% {
+			transform: translateX(-2px);
+		}
+	}
+	@keyframes hp-glow {
+		30% {
+			filter: brightness(1.35);
+		}
+	}
+	.hp-hit {
+		animation: hp-shake 0.45s var(--ease-out);
+	}
+	.hp-heal {
+		animation: hp-glow 0.6s var(--ease-out);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.hp-hit,
+		.hp-heal {
+			animation: none;
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {

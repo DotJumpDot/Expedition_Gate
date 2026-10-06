@@ -51,6 +51,40 @@ export function llamaUrl(): string {
 	return LLAMA_URL.replace(/\/+$/, '');
 }
 
+/**
+ * Guard for client-supplied model URLs (settings): the app is LOCAL-ONLY AI —
+ * story content must never leave the machine/LAN. Accepts http(s) URLs whose
+ * host is loopback or a private/LAN address; anything else is rejected.
+ */
+export function resolveLlamaBaseUrl(raw: string | undefined | null): string {
+	const value = raw?.trim();
+	if (!value) return llamaUrl();
+	let url: URL;
+	try {
+		url = new URL(value);
+	} catch {
+		throw new Error('URL ของ GM ไม่ถูกต้อง');
+	}
+	if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+		throw new Error('GM URL ต้องเป็น http/https เท่านั้น');
+	}
+	const host = url.hostname.toLowerCase();
+	const local =
+		host === 'localhost' ||
+		host === '::1' ||
+		host.endsWith('.local') ||
+		host.endsWith('.lan') ||
+		/^127\.\d+\.\d+\.\d+$/.test(host) ||
+		/^10\.\d+\.\d+\.\d+$/.test(host) ||
+		/^192\.168\.\d+\.\d+$/.test(host) ||
+		/^172\.(1[6-9]|2\d|3[01])\.\d+\.\d+$/.test(host) ||
+		/^169\.254\.\d+\.\d+$/.test(host);
+	if (!local) {
+		throw new Error('GM ต้องทำงานบนเครื่องนี้หรือเครือข่ายภายในเท่านั้น (ห้ามคลาวด์)');
+	}
+	return value.replace(/\/+$/, '');
+}
+
 function timeoutSignal(timeoutMs?: number, external?: AbortSignal): AbortSignal | undefined {
 	if (!timeoutMs && !external) return undefined;
 	const signals: AbortSignal[] = [];

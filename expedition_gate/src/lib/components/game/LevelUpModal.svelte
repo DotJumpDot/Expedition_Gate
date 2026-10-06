@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { Minus, Plus, Sparkles } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { STAT_KEYS, STAT_LABELS_TH, xpToNext, type Stats } from '$lib/server/engine/rules';
-	import type { WorldState } from '$lib/server/engine/worldstate';
+	import { STAT_KEYS, STAT_LABELS_TH, xpToNext, type Stats } from '$lib/game/rules';
+	import type { WorldState } from '$lib/game/worldstate';
 
 	let {
 		world,

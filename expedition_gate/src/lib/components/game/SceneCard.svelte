@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type { WorldState } from '$lib/server/engine/worldstate';
+	import type { WorldState } from '$lib/game/worldstate';
 
-	let { state }: { state: WorldState } = $props();
+	let { world }: { world: WorldState } = $props();
 
-	const scene = $derived(state.world);
+	const scene = $derived(world.world);
 	const TIME_ICON: Record<string, string> = {
 		เช้า: '🌅',
 		สาย: '☀️',

@@ -3,7 +3,8 @@
  * SQLite is the source; this rune store refreshes per turn via SSE events).
  */
 import { fetchEventSource } from '@microsoft/fetch-event-source';
-import type { WorldState } from '$lib/server/engine/worldstate';
+import type { WorldState } from '$lib/game/worldstate';
+import { settings } from './settings.svelte';
 
 /** Thrown for 4xx/5xx opens — stops fetch-event-source from retrying. */
 class FatalError extends Error {}
@@ -32,6 +33,8 @@ function createSession() {
 	let ended = $state<string | null>(null);
 	let recap = $state('');
 	let chips = $state<string[]>([]);
+	let cjkLeak = $state(false);
+	let offline = $state(false);
 	let controller: AbortController | null = null;
 
 	let localSeq = 1_000_000;
@@ -50,6 +53,7 @@ function createSession() {
 		ended = null;
 		recap = '';
 		chips = [];
+		cjkLeak = false;
 		controller = null;
 	}
 
@@ -100,6 +104,7 @@ function createSession() {
 		streaming = '';
 		resolutionLine = '';
 		chips = [];
+		cjkLeak = false;
 		messages.push({
 			id: `local-${localSeq++}`,
 			seq: localSeq,
@@ -120,7 +125,7 @@ function createSession() {
 					seq: localSeq,
 					role: 'gm',
 					content: streaming,
-					meta: aborted ? { aborted: true } : {}
+					meta: { ...(aborted ? { aborted: true } : {}), ...(cjkLeak ? { cjkLeak: true } : {}) }
 				});
 			}
 			streaming = '';
@@ -135,7 +140,11 @@ function createSession() {
 				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({
 					campaignId,
-					input: { kind, text: playerText, stat, dc }
+					input: { kind, text: playerText, stat, dc },
+					...(settings.modelUrl ? { baseUrl: settings.modelUrl } : {}),
+					narrationLength: settings.narrationLength,
+					extrasOff: settings.extrasOff,
+					...(settings.gmOverride.trim() ? { gmOverride: settings.gmOverride } : {})
 				}),
 				signal: controller.signal,
 				openWhenHidden: true,
@@ -155,6 +164,7 @@ function createSession() {
 						message?: string;
 						state?: WorldState;
 						stale?: boolean;
+						cjkLeak?: boolean;
 					};
 					try {
 						data = JSON.parse(ev.data);
@@ -173,6 +183,7 @@ function createSession() {
 							stale = data.stale ?? false;
 							break;
 						case 'done':
+							cjkLeak = data.cjkLeak === true;
 							finalize(false);
 							if (state?.hero.hp === 0) ended = 'dead';
 							void fetchChips();
@@ -220,7 +231,11 @@ function createSession() {
 			const res = await fetch('/api/gm/suggestions', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ campaignId, n: 6 })
+				body: JSON.stringify({
+					campaignId,
+					n: 6,
+					...(settings.modelUrl ? { baseUrl: settings.modelUrl } : {})
+				})
 			});
 			const data = (await res.json()) as { chips?: string[] };
 			chips = data.chips ?? [];
@@ -319,6 +334,12 @@ function createSession() {
 		},
 		get chips() {
 			return chips;
+		},
+		get offline() {
+			return offline;
+		},
+		setOffline(value: boolean) {
+			offline = value;
 		},
 		reset,
 		load,

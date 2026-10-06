@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { generateHeroProposal } from '$lib/server/engine/gm';
+import { resolveLlamaBaseUrl } from '$lib/server/llama';
 import { WorldBriefSchema } from '$lib/server/engine/worldstate';
 
 /**
@@ -13,6 +14,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		name?: string;
 		concept?: string;
 		klass?: string;
+		baseUrl?: string;
 	};
 
 	const brief = WorldBriefSchema.safeParse(body.brief);
@@ -20,12 +22,25 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ error: 'world brief ไม่ถูกต้อง' }, { status: 400 });
 	}
 
-	const result = await generateHeroProposal({
-		brief: brief.data,
-		name: body.name?.slice(0, 40) ?? '',
-		concept: body.concept?.slice(0, 300) ?? '',
-		klass: body.klass?.slice(0, 40) || 'นักผจญภัย'
-	});
+	let baseUrl: string;
+	try {
+		baseUrl = resolveLlamaBaseUrl(body.baseUrl);
+	} catch (err) {
+		return json(
+			{ error: err instanceof Error ? err.message : 'GM URL ไม่ถูกต้อง' },
+			{ status: 400 }
+		);
+	}
+
+	const result = await generateHeroProposal(
+		{
+			brief: brief.data,
+			name: body.name?.slice(0, 40) ?? '',
+			concept: body.concept?.slice(0, 300) ?? '',
+			klass: body.klass?.slice(0, 40) || 'นักผจญภัย'
+		},
+		baseUrl
+	);
 
 	if (!result.ok) {
 		return json({ error: `สร้างฮีโร่ไม่สำเร็จ (${result.error})` }, { status: 502 });
