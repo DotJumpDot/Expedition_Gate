@@ -12,7 +12,9 @@ export default tseslint.config(
 			'node_modules',
 			'drizzle',
 			'coverage',
-			'tests/fake-llama/server.mjs'
+			// Deliberately untyped standalone Node scripts (ts-nocheck policy).
+			'tests/fake-llama/server.mjs',
+			'scripts/fetch-assets.mjs'
 		]
 	},
 	js.configs.recommended,

@@ -53,8 +53,9 @@ export function llamaUrl(): string {
 
 /**
  * Guard for client-supplied model URLs (settings): the app is LOCAL-ONLY AI —
- * story content must never leave the machine/LAN. Accepts http(s) URLs whose
- * host is loopback or a private/LAN address; anything else is rejected.
+ * story content must never leave the machine/LAN. Allowlist by textual shape
+ * (fail-closed): loopback, IPv6 loopback/ULA/link-local, RFC1918, link-local
+ * v4, and *.local/*.lan hostnames pass; every public name is rejected.
  */
 export function resolveLlamaBaseUrl(raw: string | undefined | null): string {
 	const value = raw?.trim();
@@ -68,12 +69,30 @@ export function resolveLlamaBaseUrl(raw: string | undefined | null): string {
 	if (url.protocol !== 'http:' && url.protocol !== 'https:') {
 		throw new Error('GM URL ต้องเป็น http/https เท่านั้น');
 	}
-	const host = url.hostname.toLowerCase();
+	if (url.username || url.password) {
+		throw new Error('ห้ามมีข้อมูลล็อกอินใน GM URL');
+	}
+	// URL.hostname keeps brackets for IPv6 — strip them before matching shapes.
+	const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+	const v6Local =
+		host === '::1' ||
+		host === '::' ||
+		host.startsWith('fc') ||
+		host.startsWith('fd') ||
+		host.startsWith('fe8') ||
+		host.startsWith('fe9') ||
+		host.startsWith('fea') ||
+		host.startsWith('feb') ||
+		host.startsWith('::ffff:127.') ||
+		host.startsWith('::ffff:10.') ||
+		host.startsWith('::ffff:192.168.');
 	const local =
 		host === 'localhost' ||
-		host === '::1' ||
+		host.endsWith('.localhost') ||
 		host.endsWith('.local') ||
 		host.endsWith('.lan') ||
+		host.endsWith('.internal') ||
+		v6Local ||
 		/^127\.\d+\.\d+\.\d+$/.test(host) ||
 		/^10\.\d+\.\d+\.\d+$/.test(host) ||
 		/^192\.168\.\d+\.\d+$/.test(host) ||

@@ -7,7 +7,9 @@ const { assertSafeAssetUrl } = await import('../../scripts/fetch-assets.mjs');
 describe('fetch-assets URL guard (golden rule #7)', () => {
 	it('accepts http/https public IP literals without DNS', async () => {
 		await expect(assertSafeAssetUrl('https://93.184.216.34/art.png')).resolves.toBeTruthy();
-		await expect(assertSafeAssetUrl('http://opengameart.org/sites/default/files/x.png')).resolves.toBeTruthy();
+		await expect(
+			assertSafeAssetUrl('http://opengameart.org/sites/default/files/x.png')
+		).resolves.toBeTruthy();
 	});
 
 	it('rejects non-http schemes', async () => {

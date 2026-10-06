@@ -7,13 +7,20 @@ import {
 	check,
 	damage,
 	describeCheck,
+	rollDie,
 	WEAPONS,
 	type CheckResult,
 	type Rng,
 	type StatKey,
 	type WeaponKey
 } from './rules';
-import type { WorldState } from './worldstate';
+import {
+	DEATH_SAVE_DC,
+	DEATH_SAVE_MAX_FAILS,
+	deathConditionsAfter,
+	countDeathFails,
+	type WorldState
+} from './worldstate';
 
 export type TurnKind = 'free' | 'opening' | 'attack' | 'search' | 'talk' | 'flee' | 'roll';
 
@@ -36,9 +43,14 @@ export interface ResolvedTurn {
 		xp?: number;
 		luckPoints?: number;
 	};
+	/**
+	 * App-owned condition patch (death-save markers) — applied to the state the
+	 * tracker copies from AND merged over its output (app wins for its markers).
+	 */
+	appConditions?: string[];
 	/** Structured roll record for the message meta (audit trail). */
 	rolls?: Array<{
-		kind: 'check' | 'damage';
+		kind: 'check' | 'damage' | 'death-save';
 		detail: CheckResult | { weapon: string; total: number };
 	}>;
 }
@@ -49,7 +61,41 @@ const QUICK_DC = { attack: 13, search: 15, talk: 15, flee: 13 } as const;
 export function resolveTurn(input: TurnInput, state: WorldState, rng: Rng): ResolvedTurn {
 	const appMath: ResolvedTurn['appMath'] = {};
 
-	if (input.kind === 'free' || input.kind === 'opening') {
+	if (input.kind === 'opening') {
+		return { appMath };
+	}
+
+	// Docs/02 death saves: at 0 HP the hero is dying — the app rolls d20 vs 10
+	// each turn; success stabilizes at 1 HP, the third fail ends the campaign.
+	if (state.hero.hp === 0) {
+		const die = rollDie(20, rng);
+		const success = die >= DEATH_SAVE_DC;
+		const fails = success
+			? 0
+			: Math.min(countDeathFails(state.hero.conditions) + 1, DEATH_SAVE_MAX_FAILS);
+		const result: CheckResult = {
+			die,
+			mod: 0,
+			total: die,
+			dc: DEATH_SAVE_DC,
+			outcome: success ? 'success' : 'fail',
+			margin: die - DEATH_SAVE_DC
+		};
+		if (success) appMath.hp = 1;
+		const line = success
+			? `เช็คของรอดตาย (ระบบทอยแล้ว ใช้ผลนี้เท่านั้น): d20(${die}) vs ${DEATH_SAVE_DC} → สำเร็จ ฮีโร่ดิ้นรนขึ้นมาได้และฟื้นคืนที่ 1 HP`
+			: fails >= DEATH_SAVE_MAX_FAILS
+				? `เช็คของรอดตาย (ระบบทอยแล้ว ใช้ผลนี้เท่านั้น): d20(${die}) vs ${DEATH_SAVE_DC} → พลาดครบ ${DEATH_SAVE_MAX_FAILS} ครั้ง — ฮีโร่สิ้นใจ`
+				: `เช็คของรอดตาย (ระบบทอยแล้ว ใช้ผลนี้เท่านั้น): d20(${die}) vs ${DEATH_SAVE_DC} → พลาด (ครั้งที่ ${fails}/${DEATH_SAVE_MAX_FAILS}) ฮีโร่ยังรีบตัวเองอยู่`;
+		return {
+			resolutionLine: line,
+			appMath,
+			appConditions: deathConditionsAfter(state.hero.conditions, fails),
+			rolls: [{ kind: 'death-save', detail: result }]
+		};
+	}
+
+	if (input.kind === 'free') {
 		return { appMath };
 	}
 

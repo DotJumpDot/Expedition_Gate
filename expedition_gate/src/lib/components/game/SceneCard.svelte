@@ -26,7 +26,9 @@
 	}
 
 	let library = $state<SceneEntry[]>([]);
-	let recent = $state<string[]>([]);
+	// Anti-repeat recency is heuristic bookkeeping, not render state — a plain
+	// variable avoids mutating $state inside $derived (unsafe in Svelte 5).
+	let recent: string[] = [];
 	let override = $state<string | null>(null);
 	let pickerOpen = $state(false);
 

@@ -178,6 +178,41 @@ export const WorldStateSchema = z.object({
 export type WorldState = z.infer<typeof WorldStateSchema>;
 
 // ---------------------------------------------------------------------------
+// Death saves (Docs/02: hero at 0 HP = dying — d20 ≥ 10 to stabilize, 3 tries).
+// The app owns these markers; the state tracker copies them from `current`.
+// ---------------------------------------------------------------------------
+
+export const DEATH_SAVE_DC = 10;
+export const DEATH_SAVE_MAX_FAILS = 3;
+
+function deathMarker(count: number): string {
+	return `นับความตาย ${count}`;
+}
+
+export function countDeathFails(conditions: string[]): number {
+	let max = 0;
+	for (const condition of conditions) {
+		const match = condition.match(/^นับความตาย (\d)$/);
+		if (match) max = Math.max(max, Number(match[1]));
+	}
+	return max;
+}
+
+/** App-owned condition patch after a death-save roll. */
+export function deathConditionsAfter(
+	conditions: string[],
+	fails: number // 0 = stabilized (markers cleared), 1..3 = dying count
+): string[] {
+	const cleaned = conditions.filter((condition) => !/^นับความตาย \d$/.test(condition));
+	return fails > 0 ? [...cleaned, deathMarker(fails)] : cleaned;
+}
+
+/** A saved state is truly dead only at 0 HP AND the third failed save. */
+export function isHeroDead(hero: { hp: number; conditions: string[] }): boolean {
+	return hero.hp === 0 && countDeathFails(hero.conditions) >= DEATH_SAVE_MAX_FAILS;
+}
+
+// ---------------------------------------------------------------------------
 // Factories
 // ---------------------------------------------------------------------------
 

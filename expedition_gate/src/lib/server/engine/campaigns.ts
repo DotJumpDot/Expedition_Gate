@@ -9,6 +9,7 @@ import { applyLevelUp, maxHp, maxMp, STAT_KEYS, STAT_MAX, xpToNext, type Stats }
 import { consolidateChronicle, consolidateSessionSummary, type HeroProposal } from './gm';
 import {
 	initialWorldState,
+	isHeroDead,
 	WorldBriefSchema,
 	WorldStateSchema,
 	type Hero,
@@ -195,7 +196,8 @@ export function saveGmTurn(input: {
 			turnCount,
 			updatedAt: new Date(),
 			lastPlayedAt: new Date(),
-			...(input.state.hero.hp === 0 ? { ended: 'dead' } : {})
+			// Docs/02 death saves: truly dead only at 0 HP AND the third failed save.
+			...(isHeroDead(input.state.hero) ? { ended: 'dead' } : {})
 		})
 		.where(eq(campaigns.id, input.campaignId))
 		.run();
@@ -210,7 +212,7 @@ const SUMMARY_EVERY = 8;
 const CHRONICLE_EVERY = 20;
 
 /** Fire after a turn completes; failures keep the old memory (never fatal). */
-export async function maybeConsolidate(campaignId: string): Promise<void> {
+export async function maybeConsolidate(campaignId: string, baseUrl?: string): Promise<void> {
 	const row = getCampaign(campaignId);
 	if (!row) return;
 	const { turnCount, sessionSummary, chronicle } = row;
@@ -224,7 +226,7 @@ export async function maybeConsolidate(campaignId: string): Promise<void> {
 
 	const db = getDb();
 	if (rebuildChronicle) {
-		const result = await consolidateChronicle({ existing: chronicle, events });
+		const result = await consolidateChronicle({ existing: chronicle, events, baseUrl });
 		if (result.ok) {
 			db.update(campaigns)
 				.set({ chronicle: result.text })
@@ -233,7 +235,7 @@ export async function maybeConsolidate(campaignId: string): Promise<void> {
 		}
 	}
 	if (rebuildSummary) {
-		const result = await consolidateSessionSummary({ existing: sessionSummary, events });
+		const result = await consolidateSessionSummary({ existing: sessionSummary, events, baseUrl });
 		if (result.ok) {
 			db.update(campaigns)
 				.set({ sessionSummary: result.text })
@@ -660,7 +662,7 @@ export function deleteCampaign(id: string) {
 export function historyWindow(campaignId: string, count = 14) {
 	const db = getDb();
 	const rows = db
-		.select({ role: messages.role, content: messages.content })
+		.select({ seq: messages.seq, role: messages.role, content: messages.content })
 		.from(messages)
 		.where(and(eq(messages.campaignId, campaignId)))
 		.orderBy(desc(messages.seq))

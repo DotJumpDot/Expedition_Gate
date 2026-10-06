@@ -68,7 +68,9 @@ describe('campaign export / import (P4)', () => {
 	});
 
 	it('rejects garbage payloads and broken state', () => {
-		expect(importCampaign({ gate: 1, exportedAt: '', campaign: null as never, messages: [] })).toBeNull();
+		expect(
+			importCampaign({ gate: 1, exportedAt: '', campaign: null as never, messages: [] })
+		).toBeNull();
 		const id = createCampaign({
 			brief: BRIEF,
 			hero: heroFromProposal({ name: 'ตะวัน', concept: '', klass: 'นักเวท' }, PROPOSAL),
@@ -83,9 +85,15 @@ describe('campaign export / import (P4)', () => {
 
 describe('scene-art manifest integrity (P4)', () => {
 	it('every entry carries full license attribution and valid vocabulary tags', () => {
-		const manifest = JSON.parse(
-			readFileSync(resolve('assets/manifest.json'), 'utf8')
-		) as { images: Array<{ file: string; tags: string[]; source: string; license: string; author: string }> };
+		const manifest = JSON.parse(readFileSync(resolve('assets/manifest.json'), 'utf8')) as {
+			images: Array<{
+				file: string;
+				tags: string[];
+				source: string;
+				license: string;
+				author: string;
+			}>;
+		};
 		expect(manifest.images.length).toBeGreaterThan(0);
 		for (const entry of manifest.images) {
 			expect(entry.file, 'file').toBeTruthy();

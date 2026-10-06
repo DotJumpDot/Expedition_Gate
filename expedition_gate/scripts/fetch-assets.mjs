@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+// @ts-nocheck — deliberately untyped standalone Node script (tests import it for the URL guards).
 /**
  * fetch-assets.mjs — re-download / regenerate the scene-art library after a
  * fresh clone (Docs/02 § Scene illustration, AGENTS.md golden rule #7).

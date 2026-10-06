@@ -11,8 +11,9 @@ import {
 import { buildGmMessages, updateWorldState } from '$lib/server/engine/gm';
 import { mulberry32 } from '$lib/server/engine/rules';
 import { resolveTurn, type TurnInput } from '$lib/server/engine/turn';
-import { finishTurn, registerTurn } from '$lib/server/engine/turnRuntime';
+import { finishTurn, isTurnRunning, registerTurn } from '$lib/server/engine/turnRuntime';
 import { complete, resolveLlamaBaseUrl, stream } from '$lib/server/llama';
+import { isHeroDead, type WorldState } from '$lib/game/worldstate';
 import { LENGTH_TOKENS, LENGTH_HINTS, type NarrationLength } from '$lib/stores/settings.svelte';
 
 /** CJK leak detector (Docs/04 #6) — Han/CJK ideographs in Thai prose. */
@@ -23,12 +24,13 @@ const CJK_RE = /[\u2e80-\u2eff\u3000-\u303f\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufa
  * player input → app resolves mechanics → GM SSE stream → save → state update.
  *
  * SSE protocol (one JSON object per event):
- *   {type:'resolution', line}   dice facts, before the narration starts
- *   {type:'delta', text}        narration chunks
+ *   {type:'resolution', line}    dice facts, before the narration starts
+ *   {type:'delta', text}         narration chunks
+ *   {type:'replace', text}       CJK-rewrite replaced the whole narration
  *   {type:'state', state, stale} fresh world state after the turn
- *   {type:'done', cjkLeak?}     turn complete and saved; cjkLeak = leak survived retry
- *   {type:'aborted'}            stopped mid-stream — nothing saved (player msg kept)
- *   {type:'error', message}     upstream/timeout failure
+ *   {type:'done', cjkLeak?, ended?} turn complete and saved
+ *   {type:'aborted'}             stopped mid-stream — nothing saved (player msg kept)
+ *   {type:'error', message}      upstream/timeout failure
  */
 export const POST: RequestHandler = async ({ request }) => {
 	const body = (await request.json()) as {
@@ -56,6 +58,9 @@ export const POST: RequestHandler = async ({ request }) => {
 	const row = getCampaign(campaignId);
 	if (!row) return jsonError(404, 'ไม่พบการผจญภัยนี้');
 	if (row.ended) return jsonError(409, 'การผจญภัยนี้จบลงแล้ว');
+	// One live GM turn per campaign — a second concurrent POST would collide on
+	// the message seq unique index mid-stream.
+	if (isTurnRunning(campaignId)) return jsonError(409, 'เทิร์นก่อนหน้ายังเล่นไม่จบ');
 
 	const brief = parseBrief(row.worldBrief);
 	const state = parseState(row.stateJson);
@@ -69,7 +74,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const playerText =
 		input.kind === 'opening' ? '（เริ่มต้นการผจญภัย）' : input.text.trim().slice(0, 2000);
 
-	appendMessage({
+	const playerSeq = appendMessage({
 		campaignId,
 		role: 'player',
 		content: playerText,
@@ -83,7 +88,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	const gmMessages = buildGmMessages({
 		brief,
 		state,
-		history: historyWindow(campaignId, 14).filter((message) => message.content !== playerText),
+		history: historyWindow(campaignId, 14).filter((message) => message.seq !== playerSeq),
 		memory: { chronicle: row.chronicle, sessionSummary: row.sessionSummary },
 		resolutionLine: resolved.resolutionLine,
 		playerInput: playerText,
@@ -92,6 +97,17 @@ export const POST: RequestHandler = async ({ request }) => {
 		extrasOff: body.extrasOff === true,
 		gmOverride: body.gmOverride?.slice(0, 2000)
 	});
+
+	// The tracker copies `current`; app-owned death-save markers ride along and
+	// are re-applied over its output (app wins for its own markers).
+	const current: WorldState = structuredClone(state);
+	let trackerState = current;
+	if (resolved.appConditions) {
+		trackerState = {
+			...trackerState,
+			hero: { ...trackerState.hero, conditions: resolved.appConditions }
+		};
+	}
 
 	const turn = registerTurn(campaignId);
 	const encoder = new TextEncoder();
@@ -121,7 +137,9 @@ export const POST: RequestHandler = async ({ request }) => {
 					}
 				}
 
-				if ((turn.aborted || request.signal.aborted) && !narration.trimEnd().endsWith('…')) {
+				// Stopped mid-stream (either side): the turn is NOT saved — only
+				// completed turns persist (sibling-app rule).
+				if (turn.aborted || request.signal.aborted) {
 					send({ type: 'aborted' });
 					return;
 				}
@@ -149,6 +167,8 @@ export const POST: RequestHandler = async ({ request }) => {
 						});
 						if (rewrite.content.trim() && !CJK_RE.test(rewrite.content)) {
 							narration = rewrite.content.trim();
+							// The client already streamed the leaky text — replace it wholesale.
+							send({ type: 'replace', text: narration });
 						}
 					} catch {
 						// rewrite is best-effort; leak flag below covers the failure
@@ -157,11 +177,11 @@ export const POST: RequestHandler = async ({ request }) => {
 				}
 
 				// State update after a completed turn — zod + retry inside; on
-				// failure we keep the previous state and flag it stale.
-				let next: ReturnType<typeof parseState> = null;
+				// failure we keep the tracker-input state and flag it stale.
+				let next: WorldState | null = null;
 				let stale = true;
 				const updated = await updateWorldState({
-					current: state,
+					current: trackerState,
 					playerInput: playerText,
 					narration,
 					appMath: resolved.appMath,
@@ -171,20 +191,32 @@ export const POST: RequestHandler = async ({ request }) => {
 					next = updated.state;
 					stale = false;
 				}
+				// Authoritative merge #2: app math + the app's death-save markers
+				// survive whatever the tracker did (idempotent absolute values).
+				const fallback: WorldState = next ?? trackerState;
+				const finalState: WorldState = {
+					...fallback,
+					hero: {
+						...fallback.hero,
+						...resolved.appMath,
+						...(resolved.appConditions ? { conditions: resolved.appConditions } : {})
+					}
+				};
 
+				const endedNow = isHeroDead(finalState.hero) ? 'dead' : null;
 				saveGmTurn({
 					campaignId,
 					content: narration,
-					state: next ?? state,
+					state: finalState,
 					stateStale: stale,
 					extraMeta: cjkLeak ? { cjkLeak: true } : undefined
 				});
-				if (next) send({ type: 'state', state: next, stale });
-				send({ type: 'done', cjkLeak });
+				send({ type: 'state', state: finalState, stale });
+				send({ type: 'done', cjkLeak, ...(endedNow ? { ended: endedNow } : {}) });
 
 				// Memory consolidation (every 8/20 turns) — background-grade:
 				// failure keeps the old memory and never breaks the turn.
-				void maybeConsolidate(campaignId).catch(() => {});
+				void maybeConsolidate(campaignId, baseUrl).catch(() => {});
 			} catch (err) {
 				send({ type: 'error', message: err instanceof Error ? err.message : String(err) });
 			} finally {

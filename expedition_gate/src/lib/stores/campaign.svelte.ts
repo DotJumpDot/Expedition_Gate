@@ -165,6 +165,7 @@ function createSession() {
 						state?: WorldState;
 						stale?: boolean;
 						cjkLeak?: boolean;
+						ended?: 'dead' | 'epilogue';
 					};
 					try {
 						data = JSON.parse(ev.data);
@@ -178,6 +179,10 @@ function createSession() {
 						case 'delta':
 							streaming += data.text ?? '';
 							break;
+						case 'replace':
+							// CJK rewrite: the streamed text is superseded wholesale.
+							streaming = data.text ?? '';
+							break;
 						case 'state':
 							if (data.state) state = data.state;
 							stale = data.stale ?? false;
@@ -185,7 +190,8 @@ function createSession() {
 						case 'done':
 							cjkLeak = data.cjkLeak === true;
 							finalize(false);
-							if (state?.hero.hp === 0) ended = 'dead';
+							// Only the server decides death (3rd failed death save).
+							if (data.ended) ended = data.ended;
 							void fetchChips();
 							break;
 						case 'aborted':
@@ -208,7 +214,10 @@ function createSession() {
 			} else if (!(err instanceof DOMException && err.name === 'AbortError')) {
 				error = 'ขาดการเชื่อมต่อระหว่างเล่าเรื่อง — ข้อความชุดนี้ไม่ถูกบันทึก';
 			}
-			finalize(controller === null);
+			// A hard client abort means the server discarded this turn —
+			// show the partial as aborted, never as a saved message.
+			const wasAbort = err instanceof DOMException && err.name === 'AbortError';
+			finalize(wasAbort || controller === null);
 		}
 	}
 
@@ -227,6 +236,11 @@ function createSession() {
 	/** Choice chips for the latest GM turn (server caches per message). */
 	async function fetchChips(): Promise<void> {
 		if (!campaignId || ended) return;
+		// 0 = off (roadmap P2): no model call at all, not just hidden chips.
+		if (settings.chipCount === 0) {
+			chips = [];
+			return;
+		}
 		try {
 			const res = await fetch('/api/gm/suggestions', {
 				method: 'POST',

@@ -26,7 +26,8 @@ Phases with a definition of done. Work in order; each phase ends committed with 
 - [x] Stop mid-turn (⏹ button → `/api/gm/stop` flag + client AbortController — both, Windows lesson)
 - [x] Quick actions (⚔️ 🔍 💬 🏃) + free text both work
 - **Done when**: a full session of ~10 turns keeps HP/gold/inventory consistent and reads like a Thai novel.
-  - Machinery proven: 52 unit tests + `tests/e2e-smoke.mjs` (full wizard→turns→stop→persist cycle against the fake llama). The "reads like a Thai novel with real Gemma" playtest is the user's next step.
+  - Machinery proven: unit tests + `tests/e2e-smoke.mjs` (full wizard→turns→stop→persist cycle against the fake llama). The "reads like a Thai novel with real Gemma" playtest is the user's next step.
+  - Death saves (Docs/02) were retrofitted in the 2026-10-06 recheck audit: at 0 HP the app rolls d20 vs 10 each turn — success stabilizes at 1 HP, the third fail ends the campaign.
 
 ## P2 — Campaign living ✅ (2026-10-06)
 

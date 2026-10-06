@@ -34,13 +34,29 @@
 
 	onMount(() => {
 		void check();
-		const timer = setInterval(() => void check(), 30_000);
-		const onVisibility = () => {
-			if (document.visibilityState === 'visible') void check();
+		// Poll only while the tab is visible — no background battery drain.
+		let timer: ReturnType<typeof setInterval> | undefined;
+		const start = () => {
+			if (timer === undefined) timer = setInterval(() => void check(), 30_000);
 		};
+		const stop = () => {
+			if (timer !== undefined) {
+				clearInterval(timer);
+				timer = undefined;
+			}
+		};
+		const onVisibility = () => {
+			if (document.visibilityState === 'visible') {
+				void check();
+				start();
+			} else {
+				stop();
+			}
+		};
+		start();
 		document.addEventListener('visibilitychange', onVisibility);
 		return () => {
-			clearInterval(timer);
+			stop();
 			document.removeEventListener('visibilitychange', onVisibility);
 		};
 	});
