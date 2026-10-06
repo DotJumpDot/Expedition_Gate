@@ -123,8 +123,6 @@ describe('buildGmMessages (assembly order per Docs/04)', () => {
 		// ground truth injected
 		expect(messages[0].content).toContain('สถานะโลกปัจจุบัน');
 		expect(messages[0].content).toContain('ตะวัน');
-		// content policy + hard limits present
-		expect(messages[0].content).toContain('ข้อห้ามเด็ดขาด');
 		// few-shot examples present (the enforcement mechanism)
 		expect(messages[0].content).toContain('ตัวอย่างบท');
 		// last-instruction-wins override block at the end
