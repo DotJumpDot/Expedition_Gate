@@ -22,8 +22,8 @@ Hero-sheet display grouping: **กาย** (STR·AGI·DEX·VIT) / **จิต** 
 - **Range 1–10 at creation** (point-buy: **52 points**, min 1 each — or let the AI allocate from the hero concept).
 - **Check modifier by stat value:** 1–2 → −2 · 3–4 → −1 · 5–6 → 0 · 7–8 → +1 · 9–10 → +2.
 - **HP** = 20 + VIT × 4. **มานา (MP)** = 8 + (INT + SPI) × 2 — both mind stats feed the pool so spirit-caster heroes aren't INT-walled.
-- **Spell costs**: minor flavor magic = narration only; a declared spell/ability costs มานา 3–10 by tier (the app deducts, never the model).
-- AGI vs DEX overlap was debated (merge considered) — kept separate for RO identity; if GM playtests show the model constantly picking the wrong one of the pair, merge them then, not before.
+- **Spell costs**: minor flavor magic = narration only; a declared spell/ability costs มานา 3–10 by tier (the app deducts, never the model). *(v1 status: design intent — มานา changes currently come from the state tracker narrating declared spells; an app-side spell-cost parser is a future refinement.)*
+- AGI vs DEX overlap was debated (merge considered) — kept separate for RO identity; if GM playtests show the model constantly picking the wrong one of the pair, merge them then, not before. *(v1: quick actions hard-pin the stat — attack → weapon stat, search → SPI, talk → CHA, flee → AGI — so the model never picks.)*
 - **Damage reduction** from armor: cloth 0 · leather 1 · chain 2 · plate 3 (+shield 1). Flat, no dice.
 - **Leveling**: XP thresholds double per level (L1→2 = 100 XP); +2 stat points per level, +HP(VIT×2) +MP(INT×2). Soft cap L10 in v1 (numbers tunable later).
 
@@ -32,13 +32,13 @@ Hero-sheet display grouping: **กาย** (STR·AGI·DEX·VIT) / **จิต** 
 - **Core check**: `d20 + stat mod` vs **DC** — 8 ง่ายมาก · 12 ง่าย · 15 ปกติ · 18 ยาก · 22 แทบเป็นไปไม่ได้.
 - **Nat 20** = critical success (narrated big). **Nat 1** = fumble (complication, never instant death).
 - **Damage dice** by weapon: มีด d4 · ดาบ/กระบอง d6 · ขวาน/คทา d8 · อาวุธใหญ่ d10 · ธนู d6 (DEX), +STR mod on melee.
-- **LUK**: `แต้มดวง` = LUK value, refresh each session; spend 1 to reroll any die or force "เป็นไปได้" on one declared action.
+- **LUK**: `แต้มดวง` = LUK value, refresh each session; spend 1 to reroll any die or force "เป็นไปได้" on one declared action. *(v1 status: the pool ships — initialized = LUK at creation, shown on the hero sheet, tracked in state — but the spend-to-reroll action is NOT wired yet; future refinement.)*
 - **Opposed checks**: both sides roll d20+mod, high wins (NPC mods improvised by GM from fiction: ทหารเก่า ≈ 7, ปรมาจารย์ ≈ 10).
 - Server-side RNG, results logged in the message record. **How the model learns the result**: the turn's context includes a line like `ผลการตัดสิน (ระบบทอยแล้ว ใช้ผลนี้เท่านั้น): d20(14) + DEX(+1) = 15 vs DC 15 → สำเร็จ` — the GM narrates the outcome, never re-rolls, never contradicts it.
 
 ## Combat (lightweight, narrative-first)
 
-- Initiative = AGI check at combat start; order held until combat ends.
+- Initiative = AGI check at combat start; order held until combat ends. *(v1: initiative lives in GM narration, not app math — no order tracker.)*
 - A turn = one action + one move, narrated cinematically. No grid, no miniatures — theater of the mind.
 - Enemies are brief stat lines the GM invents within the world state (`npcs[]`): e.g. `โจรป่า — HP 12, ดาบ d6, โดด ≈ AGI6`.
 - Hero at 0 HP = **dying** (death saves: d20 ≥ 10 to stabilize, 3 ครั้ง). Actual permadeath = campaign ends → epilogue → "ประตูบานใหม่" (new run in the same world, world state persists). Roguelite-friendly without being punishing.

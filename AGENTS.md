@@ -2,7 +2,7 @@
 
 **Single-player AI-GM adventure RPG.** A D&D-style tabletop experience where the AI is the Game Master — narrator, referee, and every NPC — with unlimited directions for the story to go. Runs 100% locally against the user's own llama-server. Sibling project of `C:\Code\Novel's_Model` (same user, same machine, shared lessons).
 
-> **This file + `Docs/` are the complete project context.** A fresh session should read this file first, then the Doc relevant to the task. The application lives in **`expedition_gate/`** — **P0–P4 are COMPLETE** (2026-10-06: scaffold, GM loop, campaign living, feel & polish, depth — see `Docs/05_ROADMAP.md`). Open items: sound design (opt-in, needs audio assets) and ongoing scene-art curation. P5 stays closed (explicitly-not-promised doors).
+> **This file + `Docs/` are the complete project context.** A fresh session should read this file first, then the Doc relevant to the task. The application lives in **`expedition_gate/`** — **P0–P4 are COMPLETE** (2026-10-06: scaffold, GM loop, campaign living, feel & polish, depth — see `Docs/05_ROADMAP.md`), then independently re-audited the same day (12 real bugs found + fixed — death saves, abort persistence, double-turn guard, IPv6 URL allowlist, …) and pushed to `origin/main`. Verification at last commit: **86 unit tests (13 files) · 2 Playwright specs · node E2E smoke · svelte-check 0/0 · ESLint/Prettier clean · production build green.** Open items: sound design (opt-in, needs audio assets) and ongoing scene-art curation. P5 stays closed (explicitly-not-promised doors).
 
 **Language rule: communicate with the user in ENGLISH only. All game UI and game content is THAI.**
 
@@ -14,8 +14,8 @@
 | Layout | **Desktop-first** web app; responsive/mobile pass comes later (user plays this one mostly on PC) |
 | Framework | **SvelteKit 2 + Svelte 5 (runes) + TypeScript** — backend routes + frontend in ONE project |
 | Styling | Tailwind CSS + shadcn-svelte, dark-fantasy theme |
-| Animation | svelte/transition (built-in) + **motion** (motion.dev — official Svelte support; Framer Motion is React-only) |
-| Client state | **Svelte 5 runes** (`.svelte.ts` stores) — NO Zustand (React-coupled) / NO TanStack Query (localhost doesn't need a cache layer); forms via **Superforms**, GM stream via **@microsoft/fetch-event-source** |
+| Animation | svelte/transition (built-in) + CSS keyframes — carried ALL v1 polish (dice tumble, damage shake, streaming reveal, scene crossfade). **motion** (motion.dev) is installed but unused; door stays open for spring/physics — don't add it without a concrete need |
+| Client state | **Svelte 5 runes** (`.svelte.ts` stores) — NO Zustand (React-coupled) / NO TanStack Query (localhost doesn't need a cache layer); forms are plain `fetch` + zod API routes (**Superforms was the plan, dropped at P0**: every form here is a JS-driven dialog, no progressive-enhancement requirement); GM stream via **@microsoft/fetch-event-source** |
 | Database | **SQLite** via better-sqlite3 (WAL mode) + Drizzle ORM |
 | Testing | **Vitest** + @testing-library/svelte + happy-dom (Jest-equivalent API — see `Docs/01_TECH_STACK.md` for why Jest was swapped) |
 | AI backend | Local llama-server, OpenAI-compatible API. Default `http://127.0.0.1:8080/v1`, override via env `LLAMA_URL`. Never cloud. |
@@ -48,13 +48,34 @@ C:\Code\Expedition_Gate\
 │   ├── 02_GAME_DESIGN.md      ← game loop, stats/dice/HP, hero creation, turn pipeline, scene art
 │   ├── 03_WORLD_STATE.md      ← SQLite schema, world-state JSON, update pipeline, memory tiers
 │   ├── 04_GM_PROMPT.md        ← GM system prompt architecture + content policy + prompt lessons
-│   └── 05_ROADMAP.md          ← phases P0–P5 with definition-of-done
+│   ├── 05_ROADMAP.md          ← phases P0–P5 with definition-of-done
+│   └── START_PROMPT.md        ← session-start prompt to paste into a fresh chat
 └── expedition_gate\           ← THE APP (SvelteKit — all code + tooling live here)
-    ├── package.json · vite.config.ts · tsconfig.json · eslint.config · .prettierrc
+    ├── package.json · vite.config.ts · tsconfig.json · eslint.config · .prettierrc · playwright.config.ts
     ├── src\
-    │   ├── routes\            ← app shell, gate screen, /campaign/[id], api/ (+server.ts) routes
-    │   └── lib\               ← components · server (db/llama/engine/prompts) · stores · ui
-    ├── tests\                 ← *.test.ts units · fake-llama\ stub server
+    │   ├── env.ts             ← LLAMA_URL via defineEnvVars ($app/env/private in Kit 3)
+    │   ├── routes\
+    │   │   ├── +layout.svelte · +page.svelte/+page.server.ts   ← app shell + gate screen (campaign list, import, wizard)
+    │   │   ├── campaign\[id]\  ← the game screen (load + page)
+    │   │   └── api\
+    │   │       ├── campaigns\            ← create/list/delete · brief · hero-proposal
+    │   │       │   └── [id]\             ← checkpoints (+restore) · level-up · epilogue · rebirth · export
+    │   │       ├── campaigns\import\     ← single-json campaign import
+    │   │       ├── gm\                   ← turn (SSE) · stop · suggestions
+    │   │       ├── llama\health\         ← model online check (status chip)
+    │   │       └── scenes\               ← scene-art manifest (availability-flagged)
+    │   └── lib\
+    │       ├── game\          ← ISOMORPHIC rules.ts (stats/dice/DC/damage/XP) + worldstate.ts (zod WorldStateSchema, SETTING_PRESETS, death saves) — importable from client AND server
+    │       ├── narration.ts  ← dialogue/narration/📊 parser (glue never crosses newlines)
+    │       ├── components\   ← GmStatusChip · WorldWizard · game\ (NarrationCard, HeroSheet, SceneCard, QuestList, NpcPanel, ChoiceChips, CommandBar, CheckpointManager, LevelUpModal, DeathOverlay, RecapCard, WorldCodex)
+    │       ├── server\
+    │       │   ├── db\       ← schema.ts (campaigns/messages/checkpoints) + client.ts (better-sqlite3, WAL)
+    │       │   ├── llama.ts  ← stream()/complete()/health() + resolveLlamaBaseUrl (local-only allowlist)
+    │       │   ├── engine\   ← turn.ts (resolveTurn: dice/damage/death saves) · campaigns.ts (CRUD, checkpoints, export/import, rebirth, memory cadence) · memory.ts (window/summary/chronicle assembly) · gm.ts (prompt builders + one-retry JSON calls) · turnRuntime.ts (double-turn + stop flags)
+    │       │   └── prompts\  ← gm · worldbrief · hero · update-state · suggestions · session-summary · chronicle · epilogue (.md, versioned) + index.ts loader
+    │       ├── stores\        ← campaign.svelte.ts (session mirror, SSE handling) · settings.svelte.ts (localStorage)
+    │       └── ui\            ← shadcn-svelte copies (button, card, input, popover, progress, …)
+    ├── tests\                 ← engine\ units (rules, worldstate, turn, narration, gm-pipeline, memory, suggestions, campaigns-p2, export-import, fetch-assets, recheck) · db\ · fake-llama\ (stub + its own tests) · e2e-smoke.mjs · e2e\ (Playwright)
     ├── scripts\fetch-assets.mjs
     ├── drizzle\               ← checked-in migration SQL
     ├── assets\manifest.json   ← scene-art library manifest (COMMITTED; binaries re-download via scripts/fetch-assets.mjs)

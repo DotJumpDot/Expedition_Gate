@@ -63,6 +63,10 @@ Phases with a definition of done. Work in order; each phase ends committed with 
 - [x] Campaign export/import (single `.json` file with messages + state) — export button in the game header, import on the Gate screen; round-trip tested
 - [x] Bestiary / world wiki auto-built from `lore` + npcs — "บันทึกแห่งโลก" (WorldCodex) panel: lore, full NPC roster with statuses, quests, flags, recent events
 
+### Post-P4 recheck audit ✅ (2026-10-06)
+
+A full independent audit of everything above found **12 real bugs, all fixed and regression-tested** (`tests/engine/recheck.test.ts`): missing death saves, aborted turns persisted as complete, no double-turn guard, history filter by content-equality, CJK-rewrite desync, hard-abort mislabeled finality, chips still calling the model at count 0, consolidation ignoring the test baseUrl, a `$state` mutation inside `$derived`, IPv6-bracket + credentialed URL gaps in the llama allowlist, hidden-tab polling, import body cap + optimizer drift. Gates re-verified after: **86 unit tests · 2 Playwright specs · node E2E smoke · svelte-check 0/0 · ESLint/Prettier clean · production build green.** History rewritten to one-line commit messages and pushed (`d81821e`).
+
 ## P5 — Future doors (explicitly NOT promised)
 
 - **Multiplayer** (the "MMO" door): friends join the same campaign via LAN — reference AnyWorld; SvelteKit server already centralizes state, but turn ownership + sync is a project of its own

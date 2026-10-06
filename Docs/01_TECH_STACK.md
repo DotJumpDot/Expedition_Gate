@@ -4,7 +4,7 @@
 
 The user's requirement: one framework handling **backend + frontend together**, a real UI/animation library (no hand-rolled single-file HTML), SQLite, and Jest-class testing. He flagged Next.js as feeling "heavy and slow" and floated SvelteKit or Astro.
 
-- **SvelteKit 2** — chosen. One project: Svelte components for UI, `+page.server.ts` / `+server.ts` routes for the backend, Vite under the hood (fast dev server, instant HMR). Ships the *smallest* runtime of the big three — a local game wants snappy, not heavy. Transitions are a first-class language feature.
+- **SvelteKit 2** — chosen. One project: Svelte components for UI, `+page.server.ts` / `+server.ts` routes for the backend, Vite under the hood (fast dev server, instant HMR). Ships the *smallest* runtime of the big three — a local game wants snappy, not heavy. Transitions are a first-class language feature. (**Reality:** `sv create` at P0 installed **SvelteKit 3 / Svelte 5.57 / Vite 8 (rolldown/oxc) / TS 6** — the current generation of the same decided stack; Kit-3 specifics live in `AGENTS.md` § Working gotchas.)
 - **Next.js (React)** — rejected. Heavier dev experience, React's runtime + hydration cost buys nothing for a single-player local app, and its Jest-era testing story is exactly the "old and heavy" feeling he reacted against.
 - **Astro** — rejected. Content-site oriented (blogs, docs, marketing). A constantly-interactive game UI would end up as Svelte islands inside Astro scaffolding — paying for a framework that isn't doing the work.
 
@@ -14,19 +14,19 @@ The user's requirement: one framework handling **backend + frontend together**, 
 
 | Layer | Choice | Notes |
 |---|---|---|
-| Framework | **SvelteKit 2, Svelte 5 (runes)** | `$state / $derived / $effect` — no stores needed |
+| Framework | **SvelteKit 3 (the "SvelteKit 2" decision — see reality note above), Svelte 5 (runes)** | `$state / $derived / $effect` — no stores needed |
 | Language | **TypeScript, strict** | No `any` in domain code |
-| Styling | **Tailwind CSS** | Design tokens in CSS vars, dark-fantasy theme |
-| UI kit | **shadcn-svelte** (bits-ui) | Dialog, sheet, tabs, toast, select — owns a11y; copy-in components we can theme |
-| Animation | **svelte/transition** + **motion** (motion.dev) | `motion` has official Svelte support; use for spring/physics gestures, svelte/transition for enter/leave |
-| Forms | **Superforms** + zod | SvelteKit-native form validation; ONE zod schema shared client + server (creation wizards, settings) |
-| SSE client | **@microsoft/fetch-event-source** | browser-side SSE over POST with abort/retry — native EventSource can't POST; used for the GM turn stream |
-| Icons | **@lucide/svelte** | UI chrome icons; in-game action icons stay emoji (matches the sibling app's tone) |
+| Styling | **Tailwind CSS v4** | `@theme` oklch tokens, dark-fantasy theme |
+| UI kit | **shadcn-svelte** (bits-ui) | button, card, input, popover, progress, separator, badge — owns a11y; copy-in components we theme |
+| Animation | **svelte/transition + CSS keyframes** | Carried ALL v1 polish (dice tumble, shake, streaming reveal, crossfades), always behind `prefers-reduced-motion`; hover only under `@media (hover:hover) and (pointer:fine)`. **motion** (motion.dev) installed but unused — spring/physics door stays open |
+| Forms | **plain `fetch` + zod** | Superforms was the plan, dropped at P0: every form is a JS-driven dialog (wizard, settings, checkpoints) — no progressive-enhancement requirement. zod validates API bodies server-side |
+| SSE client | **@microsoft/fetch-event-source** | browser-side SSE over POST with abort — native EventSource can't POST; used for the GM turn stream (its `FatalError` isn't exported → local class) |
+| Icons | **@lucide/svelte** | UI chrome icons (deep-imported, 9 icons pre-warmed in `optimizeDeps`); in-game action icons stay emoji |
 | Database | **better-sqlite3** (WAL) + **Drizzle ORM** | Sync driver is fine for single-user; Drizzle = typed schema + **parameterized queries only** |
-| Validation | **zod** | World-state JSON, API bodies, LLM JSON outputs |
-| AI client | hand-rolled `fetch` wrapper | OpenAI-compatible `/v1/chat/completions`; stream + non-stream; **the browser never talks to llama-server directly** — SvelteKit server routes proxy it (same pattern as Novel's Model) |
-| Testing | **Vitest** + **@testing-library/svelte** + happy-dom | Unit + component; MSW or `vi.stubGlobal('fetch')` for LLM mocks; Playwright added at P3 for e2e |
-| Env | `.env` → `LLAMA_URL` (default `http://127.0.0.1:8080/v1`), `PORT` | Never commit `.env` |
+| Validation | **zod v4** | World-state JSON, API bodies, LLM JSON outputs |
+| AI client | hand-rolled `fetch` wrapper (`lib/server/llama.ts`) | OpenAI-compatible `/v1/chat/completions`; `stream()` / `complete()` / `health()` with explicit `baseUrl` override for tests + `resolveLlamaBaseUrl` local-only allowlist; **the browser never talks to llama-server directly** |
+| Testing | **Vitest** + **@testing-library/svelte** + happy-dom + **Playwright** | Unit + component + route handlers; Playwright browser e2e since P3 |
+| Env | `src/env.ts` → `LLAMA_URL` (default `http://127.0.0.1:8080/v1`) | Kit 3 pattern (`defineEnvVars` + `$app/env/private`); never commit `.env` |
 
 ## State management — no Zustand, no query lib (decided 2026-10-06)
 
@@ -45,37 +45,63 @@ The server (SQLite) is the source of truth; the client rune store is a reactive 
 
 Deliberately NOT adopted (don't add without updating this section first): markdown renderers (the narration renderer is a hand-built core asset, sibling-app lineage — dialogue splitting rules don't survive markdown), i18n (Thai-only UI by design), uuid/dayjs (`crypto.randomUUID()` / `Intl` built-ins), a state machine lib (a `phase` string enum suffices for the campaign lifecycle). Virtualization door: when campaigns grow long, either render-cap the narration column (last N blocks + "โหลดย้อนหลัง" button — the v1 choice) or adopt @tanstack/virtual.
 
-## Project structure (created at P0)
+## Project structure (as shipped, P0–P4)
 
 The app lives in `expedition_gate/` at the repo root (user decision 2026-10-06 — root keeps only `AGENTS.md`, `README.md`, `Docs/`). All paths below are relative to `expedition_gate/`.
 
 ```
 src/
+├── env.ts                            ← LLAMA_URL via defineEnvVars (Kit 3 env pattern)
 ├── routes/
 │   ├── +layout.svelte                ← app shell (campaign list / campaign view switch)
-│   ├── /                             ← Gate screen: campaign list + "สร้างโลกใหม่"
-│   ├── /campaign/[id]/+page.svelte   ← the game screen (narration | hero sheet | quests)
+│   ├── +page.svelte / +page.server.ts← Gate screen: campaign list + import + สร้างโลกใหม่ wizard
+│   ├── campaign/[id]/+page.*         ← the game screen (load + three-zone layout)
 │   └── api/
-│       ├── +server.ts …
-│       ├── /api/campaigns/*.ts       ← CRUD: create world, list, delete, checkpoints
-│       ├── /api/gm/turn.ts           ← POST: player input → (mechanics) → GM stream (SSE)
-│       ├── /api/gm/stop.ts           ← POST: abort in-flight turn (flag polled per delta)
-│       ├── /api/dice.ts              ← POST: roll (server-side RNG, returns roll + resolution)
-│       └── /api/llama/health.ts      ← GET: model online? (name + ctx for the status chip)
+│       ├── campaigns/+server.ts      ← POST create · GET list
+│       ├── campaigns/[id]/+server.ts ← GET one · DELETE
+│       │   └── …/checkpoints/…       ← GET list · POST create · POST restore (archives branch)
+│       │   └── …/level-up · epilogue · rebirth · export
+│       ├── campaigns/brief · hero-proposal · import
+│       ├── gm/turn/+server.ts        ← POST: input → mechanics → GM SSE stream → save
+│       ├── gm/stop/+server.ts        ← POST: per-campaign stop flag (polled per delta)
+│       ├── gm/suggestions/+server.ts ← POST: choice chips (major-decision aware)
+│       ├── llama/health/+server.ts   ← GET: model online? (status chip)
+│       └── scenes/+server.ts         ← GET: scene-art manifest, availability-flagged
 ├── lib/
-│   ├── components/                   ← Svelte components (Narration, HeroSheet, QuestLog, DiceTray, StatBlock…)
+│   ├── game/                         ← ISOMORPHIC (client+server): rules.ts (stats, DC table,
+│   │                                   dice, damage, XP) · worldstate.ts (WorldStateSchema,
+│   │                                   SETTING_PRESETS, death saves) — Kit 3 forbids client
+│   │                                   value imports from $lib/server/**, hence this module
+│   ├── narration.ts                  ← dialogue `ชื่อ : "…"` / narration / 📊 parser
+│   ├── components/
+│   │   ├── GmStatusChip · WorldWizard
+│   │   └── game/                     ← NarrationCard · HeroSheet · SceneCard · QuestList ·
+│   │                                   NpcPanel · ChoiceChips · CommandBar (quick actions +
+│   │                                   dice tray) · CheckpointManager · LevelUpModal ·
+│   │                                   DeathOverlay · RecapCard · WorldCodex
 │   ├── server/
-│   │   ├── db/                       ← drizzle schema.ts + client (better-sqlite3, WAL)
-│   │   ├── llama.ts                  ← stream() + complete() + health(); timeouts; SSE parse
-│   │   ├── engine/                   ← rules.ts (dice, mods, damage) · worldstate.ts (zod + apply) · memory.ts (tiers)
-│   │   └── prompts/                  ← gm.md (GM system prompt, versioned) · worldbrief.md · hero.md · update-state.md
-│   ├── stores/                       ← campaign session state ($state runes in .svelte.ts files)
+│   │   ├── db/                       ← schema.ts (campaigns/messages/checkpoints) + client.ts
+│   │   ├── llama.ts                  ← stream()/complete()/health() + local-only URL allowlist
+│   │   ├── engine/                   ← turn.ts (resolveTurn) · campaigns.ts (CRUD/checkpoints/
+│   │   │                                export/import/rebirth/consolidation cadence) · memory.ts
+│   │   │                                (window + summary/chronicle assembly) · gm.ts (prompt
+│   │   │                                builders + one-retry JSON) · turnRuntime.ts (double-turn
+│   │   │                                + stop flags) · rules.ts/worldstate.ts (server shims)
+│   │   └── prompts/                  ← gm · worldbrief · hero · update-state · suggestions ·
+│   │                                   session-summary · chronicle · epilogue (.md, versioned)
+│   ├── stores/                       ← campaign.svelte.ts · settings.svelte.ts (localStorage)
 │   └── ui/                           ← shadcn-svelte copies + theme
-├── tests/                            ← *.test.ts next to units; *.svelte.test.ts for components · fake-llama/ stub
-├── scripts/fetch-assets.mjs          ← re-download scene art from the committed manifest
-└── static/
-    └── assets/scenes/                ← scene-art image binaries (gitignored)
+tests/
+├── engine/                           ← rules · worldstate · turn · narration · gm-pipeline ·
+│                                      memory · suggestions · campaigns-p2 · export-import ·
+│                                      fetch-assets · recheck (audit regression tests)
+├── db/client.test.ts
+├── fake-llama/                       ← stub server (server.mjs) + its own tests
+├── e2e-smoke.mjs                     ← node full-stack E2E vs the stub
+└── e2e/                              ← Playwright spec + config (boots stub + dev itself)
+scripts/fetch-assets.mjs              ← re-download scene art from the committed manifest
 assets/manifest.json                  ← COMMITTED scene-art manifest {file, tags, setting, source, license, author}[]
+static/assets/scenes/                 ← scene-art image binaries (gitignored)
 data/gate.db                          ← SQLite file (gitignored)
 ```
 
@@ -86,14 +112,16 @@ data/gate.db                          ← SQLite file (gitignored)
 3. **Two call classes**: streaming for player-facing narration; short `complete()` (non-stream, temperature 0.2–0.4, JSON mode prompt + zod parse + **one retry feeding the parse error back**) for world brief, hero gen, state updates, recaps.
 4. **max_tokens generosity**: Gemma thinking-mode can burn the whole budget on reasoning and return empty content. GM narration: 3,000+ tokens, reasoning off. State updates: reasoning off, compact JSON.
 
-## Testing strategy
+## Testing strategy (as shipped)
 
-- **Unit (pure TS, no DOM)** — dice (seeded RNG → deterministic), stat mods, damage calc, XP thresholds, zod schema accept/reject, prompt builder (snapshot), world-state apply/reduce.
-- **Component (@testing-library/svelte)** — HeroSheet renders state, QuestLog statuses, narration renderer splits dialogue/narration correctly, dice tray interactions.
-- **Route handlers** — `vi.stubGlobal('fetch')` with canned OpenAI-shaped responses (incl. SSE chunks) → assert stream passthrough, stop-flag break, DB writes.
-- **Fake llama server** (`tests/fake-llama/`) — a tiny Node http server speaking `/v1/chat/completions` + `/v1/models`, scriptable (slow stream, JSON-mode outputs, CJK-leak fixture). Used for manual + Playwright runs so we NEVER test against the user's live 8080.
-- Coverage bar: `engine/` and `db/` at ~100% line coverage; components behavioral (queries + user events), not line-count theater.
-- `npm run test` (Vest-style watch off in CI mode), `npm run test:ui` for the Vitest UI, `npm run check` = `svelte-check` + `tsc`.
+**86 unit tests across 13 files, all green at P4 close** — plus a node E2E smoke and 2 Playwright specs. Everything runs against the fake stub, never a live model.
+
+- **Engine units** (`tests/engine/`) — seeded-RNG dice determinism, stat mods, damage/DR, XP thresholds, death saves, world-state zod accept/reject + serialization caps, turn resolution (attack/crit/quick-action DCs), narration parser (dialogue split never crosses newlines), GM pipeline (prompt assembly, loose JSON parse, one-retry, suggestion voice guard), memory tiers + consolidation cadence, campaign CRUD/checkpoint round-trip (branch archive), export/import round-trip, fetch-assets URL guards, and `recheck.test.ts` (regression tests from the 2026-10-06 audit).
+- **Component tests** (`@testing-library/svelte` + happy-dom in `tests/setup.ts`) — behavioral DOM assertions, never screenshots (vision tools hallucinated elements on this machine before).
+- **fake-llama stub** (`tests/fake-llama/server.mjs`, port 8090) — a tiny Node server speaking `/v1/chat/completions` + `/v1/models`. Scenarios per request via `model: 'fake:<name>'` (`ok` `json` `hero` `state` `cjk` `reasoning-burn` `slow` `empty`) or server-wide via `GET /__scenario/<name>`; non-stream JSON calls also route by prompt content (world-brief/hero/state-tracker/suggestions/summary/epilogue prompts get their fixture automatically). Happy-dom's `fetch` can't hit real sockets → server-side tests that talk to the stub use `// @vitest-environment node`.
+- **Full-stack E2E** — `npm run fake-llama` + `LLAMA_URL=http://127.0.0.1:8090/v1 npm run dev` + `npm run e2e` (node smoke: wizard → opening → attack → stop-mid-turn → persistence → chips cache → checkpoint round-trip → 8-turn consolidation → cleanup). `npm run e2e:pw` boots the stub + dev server itself (Playwright `webServers`, isolated `gate.e2e.db`) and drives the real browser: create world → turns → checkpoint → restore.
+- Commands: `npm test` · `npm run test:watch` · `npm run test:ui` · `npm run e2e` · `npm run e2e:pw` · `npm run check` (svelte-check) · `npm run lint` (prettier + eslint).
+- Coverage bar: `engine/` behavioral-complete by scenario; components by interaction, not line-count theater.
 
 ## Conventions
 

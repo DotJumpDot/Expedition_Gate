@@ -2,49 +2,58 @@
 
 The world state is the single source of truth about "what is true in the game". The model narrates; **the state records**. This is the anti-hallucination backbone — the difference between this and AI Dungeon's decade-old coherence problem is that state lives in OUR database, not in the model's fading context window.
 
-## SQLite schema (Drizzle, `lib/server/db/schema.ts`)
+## SQLite schema (Drizzle, `lib/server/db/schema.ts` — as shipped)
 
 ```ts
 campaigns   { id, title, setting, tone, worldBrief, stateJson,    // world-state JSON (below)
+              stateStale,           // true when the last state-tracker call failed → ⚠ chip
+              stateV: 1,            // world-state schema version (zod literal)
+              turnCount,            // completed GM turns (drives consolidation cadence)
+              sessionSummary,       // ≤900 chars, rebuilt every 8 turns
+              chronicle,            // ≤2600 chars, rebuilt every 20 turns
               createdAt, updatedAt, lastPlayedAt, ended: null|'dead'|'epilogue' }
 messages    { id, campaignId, seq, role: 'player'|'gm'|'system',
-              content, meta,   // meta: {dice?, resolution?, stateDiff?, sugCache?}
-              createdAt }
-checkpoints { id, campaignId, note, stateJson, messagesUpTo: seq, createdAt }
+              content, meta,   // meta: {dice/rolls?, resolution?, stateDiff?, sugCache?, …} — engine-owned
+              createdAt, UNIQUE(campaignId, seq) }
+checkpoints { id, campaignId, note, stateJson, messagesUpTo: seq,
+              meta: { auto?, archivedMessages? },   // restore archives the abandoned branch here
+              createdAt, INDEX(campaignId) }        // CHECKPOINT_CAP = 30
 ```
 
 - `stateJson` is a JSON blob validated by a **zod schema** — the app never trusts it unvalidated, wherever it came from (LLM, migration, import).
-- Messages are append-only; a GM turn may be aborted mid-stream (only completed turns save — same rule as the sibling app's stop feature).
-- WAL mode; every turn = one transaction (messages + state together).
+- Messages are append-only; a GM turn aborted mid-stream is NEVER saved (server discards it — client abort alone isn't trusted, Windows lesson). One completed turn = one transaction (messages + state together, WAL mode).
+- **Checkpoints never destroy history**: creating one snapshots state + `messagesUpTo`; restoring one first auto-snapshots the current timeline into `meta.archivedMessages` — a restore round-trip brings the abandoned branch back intact (proven in E2E).
 
 ## World-state zod schema (v1)
 
 ```ts
 WorldState = {
+  stateV: 1,
   hero: {
     name, concept, klass,
     level, xp,
     stats: { str, agi, dex, vit, int, spi, cha, luk },  // 1..10 each (8 stats — see 02_GAME_DESIGN)
     hp, maxHp, mp, maxMp,
-    conditions: string[],                          // ['พิษ', 'บาดเจ็บขาซ้าย']
+    conditions: string[],                          // ['พิษ', 'นับความตาย 2']  (app-owned death markers)
     equipment: { weapon?, armor?, accessory? },
-    inventory: { name, qty, note? }[],
+    inventory: { name, qty, note? }[],              // ≤8
     gold, luckPoints,
   },
   world: {
     day, timeOfDay: 'เช้า'|'สาย'|'บ่าย'|'เย็น'|'กลางคืน',
     location,          // "หมู่บ้านท่าไม้ — ร้านของชำของลุงหมึก"
     weather, era,
-    sceneTag,        // controlled vocabulary from assets/manifest.json (02 § Scene illustration)
+    sceneTag,        // zod enum over the manifest's controlled vocabulary (default 'gate')
     flags: Record<string, boolean>,                // 'เปิดประตูวิหาร': true
-    lore: string[],                                // bounded list of discovered facts
+    lore: string[],                                // ≤40 discovered facts
   },
   npcs: { id, name, role, disposition,   // -3..+3 scale, Thai gloss on render
-          location, status, note }[],    // status: 'มีชีวิต'|'ตาย'|'หายตัว'…
-  quests: { id, title, status: 'active'|'done'|'failed',
+          location, status, note }[],    // ≤60; status: 'มีชีวิต'|'ตาย'|'หายตัว'…
+  quests: { id, title, status: 'active'|'done'|'failed',   // ≤30
             steps: string[], note? }[],
-  recentEvents: string[],   // bounded ~20, newest last (deque)
-}
+  recentEvents: string[],   // ≤20, newest last (deque)
+  majorDecision: boolean,   // set by the state tracker when a beat ends on a cliffhanger
+}                                                        // → ✨ major-mode choice chips
 ```
 
 Budget: the serialized state stays ≤ ~2.5k tokens. `lore` capped 40 (oldest pruned by importance=order), `npcs` capped 60 (dead/absent NPCs compacted to one line), `recentEvents` 20. Migration story: zod schema versioned (`stateV: 1`) — additive fields only within v1; a v2 needs a migration + tests.
@@ -65,9 +74,11 @@ Three tiers injected into every GM prompt — evolved from the sibling app's aut
 
 | Tier | What | Size | Built |
 |---|---|---|---|
-| **Window** | Last N messages verbatim | ~6k chars / 12 msgs | rolling slice of `messages` |
-| **Session summary** | "เซสชันนี้เกิดอะไรขึ้น" running summary | ≤ 900 chars | background consolidation call every 8 turns (merge-based: existing summary + new exchange → updated summary, early facts survive) |
-| **Chronicle** | Whole-campaign structured memory: ความสัมพันธ์สำคัญ / เหตุการณ์ใหญ่ / ข้อเท็จจริงที่ต้องจำ / ศัตรูและหนี้เลือด | ≤ 2,600 chars | consolidation every 20 turns (or `force`), prompt includes existing chronicle so early facts persist; huge histories chunked head-4k + tail-8k (sibling app's `_story_consolidate` pattern) |
+| **Window** | Last N messages verbatim (chat history array) | 6,000 chars / 12 msgs (whichever first; whole rows only) | rolling slice of `messages` (`buildMemory`) |
+| **Session summary** | "เซสชันนี้เกิดอะไรขึ้น" running summary | ≤ 900 chars | `maybeConsolidate` after every 8th completed turn — merge-based (existing summary + digest → updated summary, early facts survive) |
+| **Chronicle** | Whole-campaign structured memory: ความสัมพันธ์สำคัญ / เหตุการณ์ใหญ่ / ข้อเท็จจริงที่ต้องจำ / ศัตรูและหนี้เลือด | ≤ 2,600 chars | `maybeConsolidate` after every 20th completed turn — prompt includes the existing chronicle so early facts persist |
+
+Consolidation input is a compact `ผู้เล่น: … / GM: …` digest of the last **16 exchanges**, capped at 8,000 chars. Both calls use the one-retry JSON/complete pattern; on failure the old memory is kept silently (never blocks play). Consolidation runs background after the turn's `done` — never on the streaming path.
 
 Prompt assembly order (system prompt): GM persona + rules → **world state (ground truth)** → chronicle → session summary → style/format rules → few-shot examples. Window messages follow as chat history. (Last-instruction-wins ordering matters — see `04_GM_PROMPT.md`.)
 
