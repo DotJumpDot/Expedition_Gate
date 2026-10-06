@@ -106,6 +106,13 @@ The player clarified that "preset" meant **published-adventure-style ready-to-pl
 - [x] Brief/NPC schema caps raised (terrain 1600, situation 1200, hooks 300 chars, NPC role 100) so authored scenarios are richer than AI output — zod is the only gate.
 - [x] Tests: 120 → **124** (`tests/engine/scenarios.test.ts`: schema conformance, 52-point buys, unique ids, class-vocabulary drift guard); Playwright e2e gains a เริ่มทันที spec (scenario → ready hero → opening → turn). All gates green.
 
+### Gate redesign: pages instead of modals + color themes (2026-10-06, same day) ✅
+
+- [x] **Creation flow is a page**: the wizard modal became `/adventures/new` (tabs เริ่มทันที / สร้างโลกเอง, deep-linkable via `?scenario=<id>` / `?mode=custom`); ESC and ปิด return to the gate.
+- [x] **Main menu scenario tiles**: the campaign list moved off the gate — it now shows the 5 ready-to-play stories as picture cards (scene art as background on the left 50%, masked fade toward the center, text on the right; art picked per story from the scene library, graceful emoji fallback). Each scenario declares its `image` in `scenarios.ts`.
+- [x] **/adventures page**: the full campaign list (resume/delete) lives behind a new การผจญภัย header button; gate keeps a "การผจญภัยของคุณ →" link.
+- [x] **Color themes**: 6 themes — มืดแฟนตาซี (default), สว่างกระดาษ, Monokai Soda, Monokai Night, ซากุระ สว่าง, ซากุระ มืด — as `[data-theme]` token blocks in app.css applied on `<html>` from settings (ธีมสี picker with per-theme swatch previews). Game colors (gold/HP/มานา/XP/ember) are now var-indirected so every chip, bar, and 📊 block follows the theme; vignette, scrollbars, selection, scene shade, and scrims tokenized too.
+
 ## P5 — Future doors (explicitly NOT promised)
 
 - **Multiplayer** (the "MMO" door): friends join the same campaign via LAN — reference AnyWorld; SvelteKit server already centralizes state, but turn ownership + sync is a project of its own

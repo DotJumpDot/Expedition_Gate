@@ -439,7 +439,7 @@
 		position: fixed;
 		inset: 0;
 		z-index: 30;
-		background: oklch(0.1 0.01 75 / 55%);
+		background: color-mix(in oklch, var(--color-background) 55%, black);
 		backdrop-filter: blur(3px);
 	}
 

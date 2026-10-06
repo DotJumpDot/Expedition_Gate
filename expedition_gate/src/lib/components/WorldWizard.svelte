@@ -10,11 +10,11 @@
 	import { settings, type CustomPreset } from '$lib/stores/settings.svelte';
 
 	let {
-		onclose,
-		initialMode = 'scenario'
+		initialMode = 'scenario',
+		initialScenarioId = ''
 	}: {
-		onclose: () => void;
 		initialMode?: 'scenario' | 'custom';
+		initialScenarioId?: string;
 	} = $props();
 
 	type Step = 'world' | 'brief' | 'hero' | 'scenario';
@@ -173,6 +173,10 @@
 
 	// --- เริ่มทันที (ready-to-play scenarios) ---
 
+	// Deep link (?scenario=<id>) lands directly on that story's detail.
+	const linked = SCENARIOS.find((entry) => entry.id === initialScenarioId);
+	if (linked) selectScenario(linked);
+
 	function selectScenario(entry: Scenario) {
 		scenario = entry;
 		readyHero = null;
@@ -244,17 +248,20 @@
 		}
 	}
 
+	function leave() {
+		if (briefLoading || heroLoading || creating) return;
+		void goto('/');
+	}
+
 	function onKeydown(event: KeyboardEvent) {
-		if (event.key === 'Escape' && !briefLoading && !heroLoading && !creating) onclose();
+		if (event.key === 'Escape' && !briefLoading && !heroLoading && !creating) leave();
 	}
 </script>
 
 <svelte:window onkeydown={onKeydown} />
 
-<div class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8">
-	<button class="wizard-scrim" aria-label="ปิด" onclick={onclose}></button>
-
-	<div class="wizard-card msg-enter" role="dialog" aria-modal="true" aria-label="สร้างโลกใหม่">
+<div class="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
+	<div class="wizard-card msg-enter" role="form" aria-label="สร้างการผจญภัยใหม่">
 		<header class="flex items-center justify-between border-b border-border/60 px-5 py-3.5">
 			<h2 class="text-base font-bold">
 				{#if step === 'scenario'}
@@ -267,8 +274,9 @@
 					สร้างนักสำรวจ
 				{/if}
 			</h2>
-			<Button variant="ghost" size="icon-sm" onclick={onclose} disabled={creating}>
+			<Button variant="ghost" size="sm" onclick={leave} disabled={creating}>
 				<X class="size-4" aria-hidden="true" />
+				ปิด
 			</Button>
 		</header>
 
@@ -296,7 +304,7 @@
 			</button>
 		</div>
 
-		<div class="max-h-[70vh] overflow-y-auto px-5 py-4">
+		<div class="px-5 py-4">
 			{#key `${mode}:${step}:${scenario?.id ?? ''}:${proposal ? 'p' : 'e'}`}
 				<div class="step-enter">
 					{#if mode === 'scenario' && step === 'scenario'}
@@ -785,18 +793,9 @@
 </div>
 
 <style>
-	.wizard-scrim {
-		position: absolute;
-		inset: 0;
-		background: oklch(0.1 0.01 75 / 70%);
-		backdrop-filter: blur(6px);
-		animation: wizard-fade 0.2s ease backwards;
-	}
-
 	.wizard-card {
 		position: relative;
 		width: 100%;
-		max-width: 640px;
 		border-radius: calc(var(--radius-lg) + 4px);
 		border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);
 		background:
@@ -950,11 +949,6 @@
 		animation: card-rise 0.28s var(--ease-out) backwards;
 	}
 
-	@keyframes wizard-fade {
-		from {
-			opacity: 0;
-		}
-	}
 	@keyframes card-rise {
 		from {
 			opacity: 0;
@@ -976,8 +970,8 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.wizard-scrim,
-		.msg-enter {
+		.msg-enter,
+		.step-enter {
 			animation: none;
 		}
 		.scenario-card,

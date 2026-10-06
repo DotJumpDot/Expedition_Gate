@@ -136,14 +136,18 @@
 }
 
 /*
-	Expedition's Gate — dark-fantasy theme.
-	Dark-only by design: :root carries the dark values directly; .dark mirrors
-	them so shadcn components behave as if the dark variant were always on.
+	Expedition's Gate — dark-fantasy base theme + swappable color themes.
+	:root carries the dark values directly; .dark mirrors them so shadcn
+	components behave as if the dark variant were always on. Other themes are
+	`[data-theme='…']` blocks (set on <html> from the settings store) that
+	override the same tokens — components only ever consume the variables.
 	Palette: deep umber charcoal + parchment ivory + ember gold, blood red for
 	destructive, arcane blue for มานา. All oklch.
 */
 :root,
 .dark {
+	color-scheme: dark;
+
 	--radius: 0.5rem;
 
 	--background: oklch(0.155 0.012 75);
@@ -186,6 +190,237 @@
 	--sidebar-accent-foreground: oklch(0.902 0.028 82);
 	--sidebar-border: oklch(0.902 0.028 82 / 10%);
 	--sidebar-ring: oklch(0.74 0.13 70);
+
+	/* Game-semantic raw values — theme blocks override THESE; @theme inline
+	   maps the Tailwind --color-* names onto them (utilities follow themes). */
+	--gold: oklch(0.8 0.14 85);
+	--hp: oklch(0.62 0.19 25);
+	--hp-deep: oklch(0.45 0.17 27);
+	--mana: oklch(0.66 0.1 262);
+	--mana-deep: oklch(0.42 0.09 265);
+	--xp: oklch(0.66 0.1 152);
+	--ember: oklch(0.7 0.16 55);
+	--blood: oklch(0.5 0.18 27);
+}
+
+/* ============ Theme: light parchment ============ */
+[data-theme='light'] {
+	color-scheme: light;
+	--background: oklch(0.975 0.008 85);
+	--foreground: oklch(0.33 0.03 70);
+	--card: oklch(0.995 0.005 85);
+	--card-foreground: oklch(0.33 0.03 70);
+	--popover: oklch(0.99 0.006 85);
+	--popover-foreground: oklch(0.33 0.03 70);
+	--primary: oklch(0.55 0.12 70);
+	--primary-foreground: oklch(0.99 0.005 85);
+	--secondary: oklch(0.935 0.012 85);
+	--secondary-foreground: oklch(0.35 0.03 70);
+	--muted: oklch(0.945 0.01 85);
+	--muted-foreground: oklch(0.5 0.025 75);
+	--accent: oklch(0.925 0.025 80);
+	--accent-foreground: oklch(0.35 0.03 70);
+	--destructive: oklch(0.55 0.2 27);
+	--border: oklch(0.33 0.03 70 / 14%);
+	--input: oklch(0.33 0.03 70 / 18%);
+	--ring: oklch(0.55 0.12 70);
+	--chart-1: oklch(0.55 0.12 70);
+	--chart-2: oklch(0.5 0.1 152);
+	--chart-3: oklch(0.5 0.11 300);
+	--chart-4: oklch(0.55 0.18 25);
+	--chart-5: oklch(0.5 0.09 240);
+	--sidebar: oklch(0.955 0.01 85);
+	--sidebar-foreground: oklch(0.33 0.03 70);
+	--sidebar-primary: oklch(0.55 0.12 70);
+	--sidebar-primary-foreground: oklch(0.99 0.005 85);
+	--sidebar-accent: oklch(0.925 0.025 80);
+	--sidebar-accent-foreground: oklch(0.35 0.03 70);
+	--sidebar-border: oklch(0.33 0.03 70 / 14%);
+	--sidebar-ring: oklch(0.55 0.12 70);
+	--gold: oklch(0.52 0.11 75);
+	--hp: oklch(0.55 0.19 25);
+	--hp-deep: oklch(0.42 0.16 27);
+	--mana: oklch(0.5 0.12 262);
+	--mana-deep: oklch(0.38 0.1 265);
+	--xp: oklch(0.5 0.11 152);
+	--ember: oklch(0.6 0.15 55);
+	--blood: oklch(0.45 0.17 27);
+}
+
+/* ============ Theme: Monokai Soda ============ */
+[data-theme='monokai-soda'] {
+	color-scheme: dark;
+	--background: #1a1a19;
+	--foreground: #f8f8f0;
+	--card: #22221f;
+	--card-foreground: #f8f8f0;
+	--popover: #262622;
+	--popover-foreground: #f8f8f0;
+	--primary: #e6db74;
+	--primary-foreground: #1a1a19;
+	--secondary: #2d2d28;
+	--secondary-foreground: #f8f8f0;
+	--muted: #2a2a26;
+	--muted-foreground: #a1a196;
+	--accent: #49483e;
+	--accent-foreground: #f8f8f0;
+	--destructive: #f92672;
+	--border: #f8f8f01f;
+	--input: #f8f8f029;
+	--ring: #e6db74;
+	--chart-1: #e6db74;
+	--chart-2: #a6e22e;
+	--chart-3: #ae81ff;
+	--chart-4: #f92672;
+	--chart-5: #66d9ef;
+	--sidebar: #1e1e1c;
+	--sidebar-foreground: #f8f8f0;
+	--sidebar-primary: #e6db74;
+	--sidebar-primary-foreground: #1a1a19;
+	--sidebar-accent: #49483e;
+	--sidebar-accent-foreground: #f8f8f0;
+	--sidebar-border: #f8f8f01f;
+	--sidebar-ring: #e6db74;
+	--gold: #e6db74;
+	--hp: #f92672;
+	--hp-deep: #a32053;
+	--mana: #66d9ef;
+	--mana-deep: #3f93ad;
+	--xp: #a6e22e;
+	--ember: #fd971f;
+	--blood: #f92672;
+}
+
+/* ============ Theme: Monokai Night ============ */
+[data-theme='monokai-night'] {
+	color-scheme: dark;
+	--background: #141413;
+	--foreground: #fcfcfa;
+	--card: #1c1b1a;
+	--card-foreground: #fcfcfa;
+	--popover: #211f20;
+	--popover-foreground: #fcfcfa;
+	--primary: #ffd866;
+	--primary-foreground: #141413;
+	--secondary: #262425;
+	--secondary-foreground: #fcfcfa;
+	--muted: #232122;
+	--muted-foreground: #939293;
+	--accent: #363436;
+	--accent-foreground: #fcfcfa;
+	--destructive: #ff6188;
+	--border: #fcfcfa1f;
+	--input: #fcfcfa29;
+	--ring: #ffd866;
+	--chart-1: #ffd866;
+	--chart-2: #a9dc76;
+	--chart-3: #ab9df2;
+	--chart-4: #ff6188;
+	--chart-5: #78dce8;
+	--sidebar: #191818;
+	--sidebar-foreground: #fcfcfa;
+	--sidebar-primary: #ffd866;
+	--sidebar-primary-foreground: #141413;
+	--sidebar-accent: #363436;
+	--sidebar-accent-foreground: #fcfcfa;
+	--sidebar-border: #fcfcfa1f;
+	--sidebar-ring: #ffd866;
+	--gold: #ffd866;
+	--hp: #ff6188;
+	--hp-deep: #b83f5e;
+	--mana: #78dce8;
+	--mana-deep: #4aa4b0;
+	--xp: #a9dc76;
+	--ember: #fc9867;
+	--blood: #ff6188;
+}
+
+/* ============ Theme: Sakura (light) ============ */
+[data-theme='sakura-light'] {
+	color-scheme: light;
+	--background: #fdf5f7;
+	--foreground: #45283a;
+	--card: #fffbfc;
+	--card-foreground: #45283a;
+	--popover: #fffafb;
+	--popover-foreground: #45283a;
+	--primary: #c05683;
+	--primary-foreground: #fff5f8;
+	--secondary: #f7e3ec;
+	--secondary-foreground: #4a2d3e;
+	--muted: #f5e6ed;
+	--muted-foreground: #8a6478;
+	--accent: #f9dce8;
+	--accent-foreground: #45283a;
+	--destructive: #d2406a;
+	--border: #45283a1f;
+	--input: #45283a29;
+	--ring: #c05683;
+	--chart-1: #c05683;
+	--chart-2: #4e9a68;
+	--chart-3: #7a6bc9;
+	--chart-4: #d2406a;
+	--chart-5: #d97e4a;
+	--sidebar: #fbeef3;
+	--sidebar-foreground: #45283a;
+	--sidebar-primary: #c05683;
+	--sidebar-primary-foreground: #fff5f8;
+	--sidebar-accent: #f9dce8;
+	--sidebar-accent-foreground: #45283a;
+	--sidebar-border: #45283a1f;
+	--sidebar-ring: #c05683;
+	--gold: #b84d7e;
+	--hp: #d2406a;
+	--hp-deep: #9c2f52;
+	--mana: #7a6bc9;
+	--mana-deep: #5a4fa3;
+	--xp: #4e9a68;
+	--ember: #d97e4a;
+	--blood: #a12d4e;
+}
+
+/* ============ Theme: Sakura (dark) ============ */
+[data-theme='sakura-dark'] {
+	color-scheme: dark;
+	--background: #211a20;
+	--foreground: #f4e6ee;
+	--card: #2a2128;
+	--card-foreground: #f4e6ee;
+	--popover: #2f252c;
+	--popover-foreground: #f4e6ee;
+	--primary: #f0a3c4;
+	--primary-foreground: #2a1420;
+	--secondary: #382c34;
+	--secondary-foreground: #f4e6ee;
+	--muted: #332831;
+	--muted-foreground: #b394a6;
+	--accent: #45333f;
+	--accent-foreground: #f4e6ee;
+	--destructive: #e5638c;
+	--border: #f4e6ee1f;
+	--input: #f4e6ee29;
+	--ring: #f0a3c4;
+	--chart-1: #f0a3c4;
+	--chart-2: #7cc99a;
+	--chart-3: #a89df0;
+	--chart-4: #e5638c;
+	--chart-5: #e89a6b;
+	--sidebar: #251d23;
+	--sidebar-foreground: #f4e6ee;
+	--sidebar-primary: #f0a3c4;
+	--sidebar-primary-foreground: #2a1420;
+	--sidebar-accent: #45333f;
+	--sidebar-accent-foreground: #f4e6ee;
+	--sidebar-border: #f4e6ee1f;
+	--sidebar-ring: #f0a3c4;
+	--gold: #f0a3c4;
+	--hp: #e5638c;
+	--hp-deep: #a53f60;
+	--mana: #a89df0;
+	--mana-deep: #776cb8;
+	--xp: #7cc99a;
+	--ember: #e89a6b;
+	--blood: #e5638c;
 }
 
 @theme inline {
@@ -229,15 +464,16 @@
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-ring: var(--sidebar-ring);
 
-	/* Game-semantic colors (HP / มานา / ทอง / XP / ไฟอีมเบอร์) */
-	--color-hp: oklch(0.62 0.19 25);
-	--color-hp-deep: oklch(0.45 0.17 27);
-	--color-mana: oklch(0.66 0.1 262);
-	--color-mana-deep: oklch(0.42 0.09 265);
-	--color-gold: oklch(0.8 0.14 85);
-	--color-xp: oklch(0.66 0.1 152);
-	--color-ember: oklch(0.7 0.16 55);
-	--color-blood: oklch(0.5 0.18 27);
+	/* Game-semantic colors — mapped onto the per-theme raw vars above so
+	   utilities (text-gold, bg-hp…) follow the active theme. */
+	--color-hp: var(--hp);
+	--color-hp-deep: var(--hp-deep);
+	--color-mana: var(--mana);
+	--color-mana-deep: var(--mana-deep);
+	--color-gold: var(--gold);
+	--color-xp: var(--xp);
+	--color-ember: var(--ember);
+	--color-blood: var(--blood);
 
 	--font-sans:
 		'Leelawadee UI', 'Noto Sans Thai', 'Sarabun', 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -254,7 +490,7 @@
 	}
 
 	html {
-		color-scheme: dark;
+		transition: background-color 0.25s var(--ease-out);
 	}
 
 	body {
@@ -263,10 +499,13 @@
 		font-family: var(--font-sans);
 		-webkit-font-smoothing: antialiased;
 		text-rendering: optimizeLegibility;
+		transition:
+			background-color 0.25s var(--ease-out),
+			color 0.25s var(--ease-out);
 	}
 
 	::selection {
-		background: oklch(0.74 0.13 70 / 30%);
+		background: color-mix(in oklch, var(--color-primary) 30%, transparent);
 	}
 
 	:focus-visible {
@@ -277,14 +516,14 @@
 	/* Thin, quiet scrollbars that match the theme */
 	* {
 		scrollbar-width: thin;
-		scrollbar-color: oklch(0.902 0.028 82 / 18%) transparent;
+		scrollbar-color: color-mix(in oklch, var(--color-foreground) 18%, transparent) transparent;
 	}
 	*::-webkit-scrollbar {
 		width: 8px;
 		height: 8px;
 	}
 	*::-webkit-scrollbar-thumb {
-		background: oklch(0.902 0.028 82 / 18%);
+		background: color-mix(in oklch, var(--color-foreground) 18%, transparent);
 		border-radius: 9999px;
 	}
 	*::-webkit-scrollbar-track {
@@ -307,9 +546,21 @@
 		z-index: -10;
 		pointer-events: none;
 		background:
-			radial-gradient(ellipse 80% 55% at 50% 18%, oklch(0.7 0.16 55 / 7%), transparent 70%),
-			radial-gradient(ellipse 120% 90% at 50% 110%, oklch(0.35 0.05 70 / 45%), transparent 60%),
-			linear-gradient(to bottom, oklch(0.18 0.014 75), oklch(0.13 0.012 75));
+			radial-gradient(
+				ellipse 80% 55% at 50% 18%,
+				color-mix(in oklch, var(--primary) 9%, transparent),
+				transparent 70%
+			),
+			radial-gradient(
+				ellipse 120% 90% at 50% 110%,
+				color-mix(in oklch, var(--foreground) 14%, transparent),
+				transparent 60%
+			),
+			linear-gradient(
+				to bottom,
+				var(--background),
+				color-mix(in oklch, var(--background) 88%, black)
+			);
 	}
 
 	/* Gate-screen entrance: fade + rise, staggered per element (see markup). */

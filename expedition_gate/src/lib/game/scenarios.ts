@@ -33,6 +33,8 @@ export interface Scenario {
 	icon: string;
 	title: string;
 	tagline: string;
+	/** Scene-art file (assets/manifest.json) used as the card picture on the gate. */
+	image: string;
 	/** Which scene-art bucket illustrates this world. */
 	setting: string;
 	tones: string[];
@@ -54,6 +56,7 @@ export const SCENARIOS: Scenario[] = [
 		id: 'frozen_north_noble',
 		icon: '❄️',
 		title: 'ผู้กลับชาติขุนนางแดนน้ำแข็ง',
+		image: 'pd-friedrich-eismeer.jpg',
 		tagline:
 			'คุณคือทายาทผู้กลับชาติมาเกิด — เวทน้ำแข็งในสายเลือด บัลลังก์น้ำแข็งที่รอใครสักคนแข็งแกร่งพอ',
 		setting: 'sword_sorcery',
@@ -132,6 +135,7 @@ export const SCENARIOS: Scenario[] = [
 		id: 'magic_academy',
 		icon: '🎓',
 		title: 'ไต่ชั้นสถาบันเวทมนตร์',
+		image: 'pd-friedrich-toreingang.jpg',
 		tagline: 'จากเหรียญทองแดงอันดับสุดท้าย สู่จอมเวทอันดับหนึ่ง — ถ้ารอดจากการดวลเวทก่อนพรุ่งนี้',
 		setting: 'sword_sorcery',
 		tones: ['ผจญภัย'],
@@ -207,6 +211,7 @@ export const SCENARIOS: Scenario[] = [
 		id: 'system_power',
 		icon: '💠',
 		title: 'ระบบพลังลับ',
+		image: 'rain.svg',
 		tagline: 'ผู้ใช้คนแรกของระบบที่ไม่มีใครเห็น — ภารกิจแรก: รอดจากสถานีรถไฟใต้ดินก่อนเที่ยง',
 		setting: 'custom',
 		tones: ['ผจญภัย', 'มืดมน'],
@@ -285,6 +290,7 @@ export const SCENARIOS: Scenario[] = [
 		id: 'fallen_noble_sword',
 		icon: '🗡️',
 		title: 'ขุนนางตกอับ นักดาบพเนจร',
+		image: 'pd-martin-wrath.jpg',
 		tagline:
 			'ตระกูลล่มในคืนเดียว เหลือดาบหนึ่งเล่มกับชื่อที่เป็นคำสาป — เดินตามรอยเพลิงกลับไปหาคนจุด',
 		setting: 'sword_sorcery',
@@ -366,6 +372,7 @@ export const SCENARIOS: Scenario[] = [
 		id: 'time_control',
 		icon: '⏳',
 		title: 'ผู้สั่งการเวลา',
+		image: 'pd-friedrich-two-men-moon.jpg',
 		tagline:
 			'หยุดเวลาได้ 6 วินาที ทุกครั้งมีราคา — คืนที่นาฬิกากลางเมืองเดินถอยหลังเป็นครั้งแรกในรอบร้อยปี',
 		setting: 'custom',

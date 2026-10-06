@@ -190,8 +190,8 @@
 		inset: 0;
 		background: linear-gradient(
 			to right,
-			oklch(0.155 0.012 75 / 82%) 20%,
-			oklch(0.155 0.012 75 / 55%) 100%
+			color-mix(in oklch, var(--color-background) 84%, transparent) 20%,
+			color-mix(in oklch, var(--color-background) 55%, transparent) 100%
 		);
 	}
 

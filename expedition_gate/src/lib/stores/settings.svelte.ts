@@ -75,6 +75,50 @@ export const FONT_OPTIONS: FontOption[] = [
 
 export type HeroSide = 'left' | 'right';
 
+export type ThemeKey =
+	'dark' | 'light' | 'monokai-soda' | 'monokai-night' | 'sakura-light' | 'sakura-dark';
+
+export interface ThemeOption {
+	key: ThemeKey;
+	labelTh: string;
+	/** Card preview: [background, primary/accent, mana] hex/oklch strings. */
+	preview: [string, string, string];
+}
+
+/** Color themes (app.css `[data-theme='…']` blocks). Applied on <html>. */
+export const THEME_OPTIONS: ThemeOption[] = [
+	{
+		key: 'dark',
+		labelTh: 'มืดแฟนตาซี (ค่าเริ่มต้น)',
+		preview: ['oklch(0.155 0.012 75)', 'oklch(0.8 0.14 85)', 'oklch(0.66 0.1 262)']
+	},
+	{
+		key: 'light',
+		labelTh: 'สว่างกระดาษ',
+		preview: ['oklch(0.975 0.008 85)', 'oklch(0.52 0.11 75)', 'oklch(0.5 0.12 262)']
+	},
+	{
+		key: 'monokai-soda',
+		labelTh: 'Monokai Soda',
+		preview: ['#1a1a19', '#e6db74', '#66d9ef']
+	},
+	{
+		key: 'monokai-night',
+		labelTh: 'Monokai Night',
+		preview: ['#141413', '#ffd866', '#78dce8']
+	},
+	{
+		key: 'sakura-light',
+		labelTh: 'ซากุระ สว่าง',
+		preview: ['#fdf5f7', '#c05683', '#7a6bc9']
+	},
+	{
+		key: 'sakura-dark',
+		labelTh: 'ซากุระ มืด',
+		preview: ['#211a20', '#f0a3c4', '#a89df0']
+	}
+];
+
 /** Player-saved world presets (wizard: "บันทึกเป็นพรีเซ็ตของฉัน"). */
 export interface CustomPreset {
 	label: string;
@@ -116,6 +160,7 @@ function createSettings() {
 	let fontKey = $state<FontKey>('sarabun');
 	let fontScale = $state(100);
 	let heroSide = $state<HeroSide>('right');
+	let theme = $state<ThemeKey>('dark');
 	let customPresets = $state<CustomPreset[]>(loadCustomPresets());
 
 	if (typeof localStorage !== 'undefined') {
@@ -129,6 +174,7 @@ function createSettings() {
 				fontKey: FontKey;
 				fontScale: number;
 				heroSide: HeroSide;
+				theme: ThemeKey;
 			}>;
 			if (typeof raw.chipCount === 'number') chipCount = clampChips(raw.chipCount);
 			if (
@@ -147,6 +193,9 @@ function createSettings() {
 			}
 			if (typeof raw.fontScale === 'number') fontScale = clampScale(raw.fontScale);
 			if (raw.heroSide === 'left' || raw.heroSide === 'right') heroSide = raw.heroSide;
+			if (THEME_OPTIONS.some((option) => option.key === raw.theme)) {
+				theme = raw.theme as ThemeKey;
+			}
 		} catch {
 			// corrupted settings — keep defaults
 		}
@@ -172,7 +221,8 @@ function createSettings() {
 					gmOverride,
 					fontKey,
 					fontScale,
-					heroSide
+					heroSide,
+					theme
 				})
 			);
 		}
@@ -213,6 +263,13 @@ function createSettings() {
 	function setFontScale(value: number) {
 		fontScale = clampScale(value);
 		persist();
+	}
+
+	function setTheme(value: ThemeKey) {
+		if (THEME_OPTIONS.some((option) => option.key === value)) {
+			theme = value;
+			persist();
+		}
 	}
 
 	function setHeroSide(value: HeroSide) {
@@ -274,6 +331,10 @@ function createSettings() {
 		get heroSide() {
 			return heroSide;
 		},
+		get theme() {
+			return theme;
+		},
+		setTheme,
 		get customPresets() {
 			return customPresets;
 		},

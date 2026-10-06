@@ -1,31 +1,30 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import { Compass, FileUp, ScrollText, Swords, Trash2 } from '@lucide/svelte';
+	import { onMount } from 'svelte';
+	import { fade } from 'svelte/transition';
+	import { Compass, FileUp, ScrollText, Swords } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import WorldWizard from '$lib/components/WorldWizard.svelte';
-	import { SETTING_PRESETS } from '$lib/game/worldstate';
+	import { SCENARIOS } from '$lib/game/scenarios';
 
-	let {
-		data
-	}: {
-		data: {
-			campaigns: Array<{
-				id: string;
-				title: string;
-				setting: string;
-				heroName: string | null;
-				day: number | null;
-				lastPlayedAt: string | null;
-			}>;
-		};
-	} = $props();
-
-	let wizardOpen = $state(false);
-	let wizardMode = $state<'scenario' | 'custom'>('scenario');
-	let confirmDelete = $state<string | null>(null);
 	let fileInput: HTMLInputElement | undefined = $state();
 	let importError = $state('');
 	let importing = $state(false);
+
+	/** Scene-art manifest entries (available only) — scenario tiles pull art by file. */
+	let artByFile = $state<Map<string, string>>(new Map());
+
+	onMount(async () => {
+		try {
+			const res = await fetch('/api/scenes', { cache: 'no-store' });
+			const data = (await res.json()) as {
+				scenes: Array<{ file: string; url: string; available: boolean }>;
+			};
+			artByFile = new Map(
+				data.scenes.filter((scene) => scene.available).map((scene) => [scene.file, scene.url])
+			);
+		} catch {
+			artByFile = new Map();
+		}
+	});
 
 	async function onImportFile(event: Event) {
 		const input = event.currentTarget as HTMLInputElement;
@@ -42,42 +41,13 @@
 			});
 			const body = (await res.json()) as { id?: string; error?: string };
 			if (!res.ok || !body.id) throw new Error(body.error ?? 'นำเข้าไม่สำเร็จ');
-			await goto(`/campaign/${body.id}`);
+			await import('$app/navigation').then(({ goto }) => goto(`/campaign/${body.id}`));
 		} catch (err) {
 			importError = err instanceof Error ? err.message : 'นำเข้าไม่สำเร็จ';
 			importing = false;
 		} finally {
 			input.value = '';
 		}
-	}
-
-	const SETTING_ICON: Record<string, string> = Object.fromEntries(
-		Object.values(SETTING_PRESETS).map((preset) => [preset.key, preset.icon])
-	);
-
-	function relativeDate(iso: string | null): string {
-		if (!iso) return 'ยังไม่เริ่มเล่น';
-		const date = new Date(iso);
-		const diffMs = Date.now() - date.getTime();
-		const minutes = Math.floor(diffMs / 60_000);
-		if (minutes < 1) return 'เมื่อสักครู่';
-		if (minutes < 60) return `${minutes} นาทีที่แล้ว`;
-		const hours = Math.floor(minutes / 60);
-		if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`;
-		const days = Math.floor(hours / 24);
-		if (days < 30) return `${days} วันที่แล้ว`;
-		return date.toLocaleDateString('th-TH');
-	}
-
-	async function deleteCampaign(id: string) {
-		if (confirmDelete !== id) {
-			confirmDelete = id;
-			setTimeout(() => (confirmDelete = confirmDelete === id ? null : confirmDelete), 3000);
-			return;
-		}
-		confirmDelete = null;
-		await fetch(`/api/campaigns/${id}`, { method: 'DELETE' });
-		data.campaigns = data.campaigns.filter((campaign) => campaign.id !== id);
 	}
 </script>
 
@@ -99,19 +69,11 @@
 
 	<section class="gate-rise mt-9 flex flex-col items-center gap-2" style="--stagger: 1">
 		<div class="flex flex-wrap items-center justify-center gap-2">
-			<Button
-				size="lg"
-				class="px-6 text-base"
-				onclick={() => ((wizardOpen = true), (wizardMode = 'scenario'))}
-			>
+			<Button size="lg" class="px-6 text-base" href="/adventures/new">
 				<Swords data-icon="inline-start" aria-hidden="true" />
 				เริ่มทันที
 			</Button>
-			<Button
-				variant="outline"
-				size="lg"
-				onclick={() => ((wizardOpen = true), (wizardMode = 'custom'))}
-			>
+			<Button variant="outline" size="lg" href="/adventures/new?mode=custom">
 				<Compass data-icon="inline-start" aria-hidden="true" />
 				สร้างโลกใหม่
 			</Button>
@@ -138,129 +100,128 @@
 		{/if}
 	</section>
 
-	<section class="gate-rise mt-14 w-full max-w-3xl" style="--stagger: 2">
-		{#if data.campaigns.length}
-			<div>
-				<h2 class="mb-3 text-[11px] font-bold tracking-[0.18em] text-muted-foreground uppercase">
-					การผจญภัยของคุณ
-				</h2>
-				<ul class="grid gap-3 sm:grid-cols-2">
-					{#each data.campaigns as campaign (campaign.id)}
-						<li>
-							<a
-								href="/campaign/{campaign.id}"
-								class="campaign-card group"
-								aria-label="เล่นต่อ {campaign.title}"
-							>
-								<div class="flex items-start gap-3">
-									<span class="campaign-icon">{SETTING_ICON[campaign.setting] ?? '🌀'}</span>
-									<div class="min-w-0 flex-1">
-										<p class="truncate font-bold">{campaign.title}</p>
-										<p class="mt-0.5 truncate text-xs text-muted-foreground">
-											{campaign.heroName ?? 'ยังไม่มีฮีโร่'}
-											{#if campaign.day}
-												· วันที่ {campaign.day}
-											{/if}
-										</p>
-										<p class="mt-1.5 text-[11px] text-muted-foreground/80">
-											{relativeDate(campaign.lastPlayedAt)}
-										</p>
-									</div>
-									<Swords
-										class="mt-1 size-4 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-gold"
-										aria-hidden="true"
-									/>
-								</div>
-							</a>
-							<div class="-mt-1 flex justify-end">
-								<button
-									type="button"
-									class="delete-btn"
-									onclick={(event) => {
-										event.preventDefault();
-										void deleteCampaign(campaign.id);
-									}}
-								>
-									{#if confirmDelete === campaign.id}
-										ยืนยันการลบ?
-									{:else}
-										<Trash2 class="size-3" aria-hidden="true" /> ลบ
-									{/if}
-								</button>
-							</div>
-						</li>
-					{/each}
-				</ul>
-			</div>
-		{:else}
-			<div
-				class="flex flex-col items-center gap-3 rounded-xl border border-dashed border-border/80 bg-card/40 px-6 py-10 text-center"
+	<!-- เรื่องพร้อมเล่น — rich scenario tiles with scene art -->
+	<section class="gate-rise mt-14 w-full" style="--stagger: 2">
+		<div class="mb-3 flex items-baseline justify-between gap-3">
+			<h2 class="text-[11px] font-bold tracking-[0.18em] text-muted-foreground uppercase">
+				เรื่องพร้อมเล่น — เลือกแล้วเข้าเกมทันที
+			</h2>
+			<a
+				href="/adventures"
+				class="shrink-0 text-xs text-muted-foreground transition-colors hover:text-gold"
 			>
-				<ScrollText aria-hidden="true" class="size-7 text-muted-foreground/70" />
-				<div>
-					<p class="font-semibold">ยังไม่มีการผจญภัย</p>
-					<p class="mt-1 text-sm text-muted-foreground">
-						การผจญภัยทุกเรื่องของคุณจะถูกบันทึกไว้ที่นี่ — เริ่มเรื่องแรกของคุณเอง
-					</p>
-				</div>
-			</div>
-		{/if}
+				การผจญภัยของคุณ →
+			</a>
+		</div>
+		<ul class="grid gap-3.5 md:grid-cols-2">
+			{#each SCENARIOS as scenario (scenario.id)}
+				{@const art = artByFile.get(scenario.image)}
+				<li>
+					<a href="/adventures/new?scenario={scenario.id}" class="scenario-tile group">
+						{#if art}
+							<div
+								class="tile-art"
+								style="background-image: url({art})"
+								in:fade={{ duration: 500 }}
+								aria-hidden="true"
+							></div>
+						{:else}
+							<span class="tile-fallback" aria-hidden="true">{scenario.icon}</span>
+						{/if}
+						<span class="tile-body">
+							<span class="block text-[15px] font-bold text-gold">{scenario.title}</span>
+							<span class="mt-1 block text-xs leading-relaxed text-muted-foreground"
+								>{scenario.tagline}</span
+							>
+							<span
+								class="mt-2 inline-flex items-center gap-1.5 text-[11px] text-muted-foreground/80"
+							>
+								<Swords class="size-3" aria-hidden="true" />
+								{scenario.heroes.length} ฮีโร่พร้อมเล่น · เริ่มได้ทันที
+							</span>
+						</span>
+					</a>
+				</li>
+			{/each}
+		</ul>
+	</section>
+
+	<section class="gate-rise mt-10 w-full text-center" style="--stagger: 3">
+		<p class="text-xs text-muted-foreground">
+			อยากสร้างโลกของตัวเอง?
+			<a href="/adventures/new?mode=custom" class="text-gold transition-opacity hover:opacity-80"
+				>สร้างโลกใหม่จากพรีเซ็ต →</a
+			>
+		</p>
 	</section>
 </div>
 
-{#if wizardOpen}
-	<WorldWizard onclose={() => (wizardOpen = false)} initialMode={wizardMode} />
-{/if}
-
 <style>
-	.campaign-card {
+	.scenario-tile {
+		position: relative;
 		display: block;
+		overflow: hidden;
 		border-radius: var(--radius-lg);
 		border: 1px solid color-mix(in oklch, var(--color-border) 85%, transparent);
-		background: color-mix(in oklch, var(--color-card) 60%, transparent);
-		padding: 0.9rem 1rem;
+		background: color-mix(in oklch, var(--color-card) 65%, transparent);
+		min-height: 128px;
 		transition:
 			border-color 0.15s var(--ease-out),
 			transform 0.15s var(--ease-out);
 	}
-	.campaign-card:active {
-		transform: scale(0.98);
+	.scenario-tile:active {
+		transform: scale(0.985);
 	}
 
-	.campaign-icon {
+	/* Scene art = background, LEFT 50% only, fading out toward the chip's center —
+	   text lives on the right half in normal colors. */
+	.tile-art {
+		position: absolute;
+		inset: 0 auto 0 0;
+		width: 55%;
+		background-size: cover;
+		background-position: center;
+		opacity: 0.9;
+		-webkit-mask-image: linear-gradient(to right, black 30%, transparent 98%);
+		mask-image: linear-gradient(to right, black 30%, transparent 98%);
+	}
+
+	.tile-fallback {
+		position: absolute;
+		inset: 0 auto 0 0;
 		display: grid;
 		place-items: center;
-		width: 40px;
-		height: 40px;
-		border-radius: var(--radius-md);
-		border: 1px solid color-mix(in oklch, var(--color-border) 80%, transparent);
-		background: color-mix(in oklch, var(--color-muted) 55%, transparent);
-		font-size: 1.1rem;
+		width: 30%;
+		font-size: 2rem;
+		opacity: 0.5;
+		-webkit-mask-image: linear-gradient(to right, black 40%, transparent 98%);
+		mask-image: linear-gradient(to right, black 40%, transparent 98%);
 	}
 
-	.delete-btn {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.25rem;
-		margin-top: 0.25rem;
-		padding: 0.15rem 0.5rem;
-		border-radius: 9999px;
-		font-size: 0.68rem;
-		color: var(--color-muted-foreground);
-		transition: color 0.12s var(--ease-out);
+	.tile-body {
+		position: relative;
+		display: block;
+		padding: 1rem 1.1rem 1rem 47%;
+		min-height: 128px;
+	}
+
+	@media (max-width: 480px) {
+		.tile-body {
+			padding-left: 40%;
+		}
 	}
 
 	@media (hover: hover) and (pointer: fine) {
-		.campaign-card:hover {
+		.scenario-tile:hover {
 			border-color: color-mix(in oklch, var(--color-gold) 40%, transparent);
 		}
-		.delete-btn:hover {
-			color: var(--color-destructive);
+		.scenario-tile:hover .tile-art {
+			opacity: 1;
 		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.campaign-card {
+		.scenario-tile {
 			transition: none;
 		}
 	}

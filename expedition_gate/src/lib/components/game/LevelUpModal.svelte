@@ -117,7 +117,7 @@
 	.modal-scrim {
 		position: absolute;
 		inset: 0;
-		background: oklch(0.1 0.01 75 / 70%);
+		background: color-mix(in oklch, var(--color-background) 70%, black);
 		backdrop-filter: blur(5px);
 	}
 

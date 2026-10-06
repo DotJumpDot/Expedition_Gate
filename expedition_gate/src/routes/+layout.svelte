@@ -7,9 +7,10 @@
 
 	let { children }: LayoutProps = $props();
 
-	// Reading preferences (ตั้งค่า → การแสดงผล): font family + UI scale, applied
-	// at the document root so every rem-based size follows the choice.
+	// Reading preferences (ตั้งค่า → การแสดงผล): theme, font family + UI scale,
+	// applied at the document root so everything follows the choice.
 	$effect(() => {
+		document.documentElement.dataset.theme = settings.theme;
 		document.documentElement.style.setProperty('--font-sans', settings.fontStack());
 		document.documentElement.style.fontSize = `${(settings.fontScale / 100) * 16}px`;
 	});
@@ -58,6 +59,32 @@
 				</span>
 			</a>
 			<div class="flex items-center gap-1.5">
+				<a
+					href="/adventures"
+					class="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
+					title="การผจญภัยของคุณ"
+				>
+					<svg
+						aria-hidden="true"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="1.8"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="size-4"
+					>
+						<!-- crossed swords (adventures) -->
+						<path d="M14.5 17.5 3 6V3h3l11.5 11.5" />
+						<path d="m13 19 6-6" />
+						<path d="m16 16 4 4" />
+						<path d="m19 21 2-2" />
+						<path d="M9.5 14.5 21 3v3L9.5 17.5" />
+						<path d="m5 14-4 4" />
+						<path d="m7 17-4 4" />
+					</svg>
+					<span class="hidden sm:inline">การผจญภัย</span>
+				</a>
 				<GmStatusChip />
 				<a
 					href="/settings"

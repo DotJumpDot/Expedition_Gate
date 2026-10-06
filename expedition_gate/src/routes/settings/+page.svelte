@@ -6,8 +6,10 @@
 		settings,
 		LENGTH_HINTS,
 		FONT_OPTIONS,
+		THEME_OPTIONS,
 		type NarrationLength,
 		type FontKey,
+		type ThemeKey,
 		type HeroSide
 	} from '$lib/stores/settings.svelte';
 
@@ -56,6 +58,28 @@
 				<h2 class="settings-h2">การแสดงผล</h2>
 
 				<div class="mt-4 space-y-5">
+					<div>
+						<p class="settings-label">ธีมสี</p>
+						<p class="settings-hint">เปลี่ยนโทนทั้งเกมทันที</p>
+						<div class="mt-2 grid gap-1.5 sm:grid-cols-2 lg:grid-cols-3">
+							{#each THEME_OPTIONS as option (option.key)}
+								<button
+									type="button"
+									class="theme-opt {settings.theme === option.key ? 'theme-opt-active' : ''}"
+									onclick={() => settings.setTheme(option.key as ThemeKey)}
+								>
+									<span class="flex items-center gap-2">
+										<span class="theme-swatch" style="background: {option.preview[0]}">
+											<span class="theme-dot" style="background: {option.preview[1]}"></span>
+											<span class="theme-dot" style="background: {option.preview[2]}"></span>
+										</span>
+										{option.labelTh}
+									</span>
+								</button>
+							{/each}
+						</div>
+					</div>
+
 					<div>
 						<p class="settings-label">ฟอนต์อ่านเรื่อง</p>
 						<p class="settings-hint">ฟอนต์หลักของทั้งเกม — เลือกตามสบายตา</p>
@@ -258,6 +282,39 @@
 			color 0.12s var(--ease-out),
 			border-color 0.12s var(--ease-out),
 			background-color 0.12s var(--ease-out);
+	}
+
+	.theme-opt {
+		display: block;
+		border-radius: var(--radius-md);
+		border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);
+		background: color-mix(in oklch, var(--color-muted) 40%, transparent);
+		padding: 0.5rem 0.7rem;
+		font-size: 0.78rem;
+		text-align: left;
+		transition:
+			border-color 0.12s var(--ease-out),
+			background-color 0.12s var(--ease-out);
+	}
+	.theme-opt-active {
+		border-color: color-mix(in oklch, var(--color-gold) 55%, transparent);
+		background: color-mix(in oklch, var(--color-gold) 10%, transparent);
+	}
+	.theme-swatch {
+		display: inline-grid;
+		grid-template-columns: repeat(2, 1fr);
+		gap: 2px;
+		place-items: center;
+		width: 26px;
+		height: 18px;
+		flex-shrink: 0;
+		border-radius: 5px;
+		border: 1px solid color-mix(in oklch, var(--color-foreground) 25%, transparent);
+	}
+	.theme-dot {
+		width: 7px;
+		height: 7px;
+		border-radius: 9999px;
 	}
 
 	.font-opt {

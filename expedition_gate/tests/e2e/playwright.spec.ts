@@ -15,9 +15,9 @@ async function playTurn(page: import('@playwright/test').Page, text: string) {
 test('create world → 5 turns → checkpoint → restore', async ({ page }) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
 
-	// --- wizard: world brief (stub answers instantly) — switch to build-your-own mode
-	await page.getByRole('button', { name: /สร้างโลกใหม่/ }).click();
-	await page.getByRole('button', { name: /สร้างโลกเอง/ }).click();
+	// --- wizard page: world brief (stub answers instantly) — build-your-own mode
+	await page.getByRole('link', { name: 'สร้างโลกใหม่', exact: true }).click();
+	await expect(page).toHaveURL(/\/adventures\/new/);
 	await page.getByRole('button', { name: 'สร้างโลก', exact: true }).click();
 	await expect(page.getByRole('heading', { name: 'ทุ่งประตูหิน' })).toBeVisible();
 	await page.getByRole('button', { name: 'โลกนี้แล้ว — สร้างฮีโร่' }).click();
@@ -72,8 +72,8 @@ test('mobile viewport: rail becomes a drawer', async ({ page }) => {
 	await page.goto('/campaign/e2e-missing', { waitUntil: 'networkidle' });
 	// Missing campaign redirects to the gate; use a fresh one instead.
 	await page.goto('/', { waitUntil: 'networkidle' });
-	await page.getByRole('button', { name: /สร้างโลกใหม่/ }).click();
-	await page.getByRole('button', { name: /สร้างโลกเอง/ }).click();
+	await page.getByRole('link', { name: 'สร้างโลกใหม่', exact: true }).click();
+	await expect(page).toHaveURL(/\/adventures\/new/);
 	await page.getByRole('button', { name: 'สร้างโลก', exact: true }).click();
 	await page.getByRole('button', { name: 'โลกนี้แล้ว — สร้างฮีโร่' }).click();
 	await page.locator('#hero-name').fill('ค่ำ');
@@ -96,14 +96,9 @@ test('เริ่มทันที: scenario → ready-made hero → opening s
 }) => {
 	await page.goto('/', { waitUntil: 'networkidle' });
 
-	await page.getByRole('button', { name: /เริ่มทันที/ }).click();
-	await expect(page.getByRole('heading', { name: /เริ่มทันที/ })).toBeVisible();
-
-	// pick a scenario — the story detail must render without any model call
-	await page
-		.getByRole('button', { name: /ขุนนางแดนน้ำแข็ง/ })
-		.first()
-		.click();
+	// the gate shows scenario tiles — clicking one deep-links into the flow page
+	await page.getByRole('link', { name: /ขุนนางแดนน้ำแข็ง/ }).click();
+	await expect(page).toHaveURL(/\/adventures\/new\?scenario=frozen_north_noble/);
 	await expect(page.getByText('สถานการณ์ของคุณ')).toBeVisible();
 	await expect(page.getByText('พิธีรับรองทายาท').first()).toBeVisible();
 

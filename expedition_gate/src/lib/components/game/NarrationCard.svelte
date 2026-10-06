@@ -127,7 +127,7 @@
 
 	/* Quoted speech inside narration — warm parchment tint. */
 	.stream-wrap :global(.q) {
-		color: oklch(0.88 0.06 82);
+		color: color-mix(in oklch, var(--color-foreground) 82%, var(--color-gold));
 	}
 
 	/* *stage directions* — italic, hushed. */
