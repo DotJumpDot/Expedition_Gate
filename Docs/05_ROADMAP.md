@@ -28,15 +28,17 @@ Phases with a definition of done. Work in order; each phase ends committed with 
 - **Done when**: a full session of ~10 turns keeps HP/gold/inventory consistent and reads like a Thai novel.
   - Machinery proven: 52 unit tests + `tests/e2e-smoke.mjs` (full wizard→turns→stop→persist cycle against the fake llama). The "reads like a Thai novel with real Gemma" playtest is the user's next step.
 
-## P2 — Campaign living
+## P2 — Campaign living ✅ (2026-10-06)
 
-- [ ] Gate screen: campaign list with resume/delete
-- [ ] Checkpoints (save/restore/auto-snapshot-first) + death → epilogue → new-hero-in-same-world flow
-- [ ] Quest log + NPC list panels driven from world state
-- [ ] Memory tiers: session summary (every 8 turns) + chronicle (every 20)
-- [ ] Choice chips: N tappable player-action options after every GM turn — **count configurable 0–6 in settings (default 3, 0 = off)**, tap = send, free text always available; player-voice guard included (`04_GM_PROMPT.md` #8)
-- [ ] Level-up flow (XP → stat points → sheet edit)
+- [x] Gate screen: campaign list with resume/delete
+- [x] Checkpoints (save/restore/auto-snapshot-first) + death → epilogue → new-hero-in-same-world flow
+  - Restores archive the whole message branch, so a round-trip restore brings the abandoned timeline back intact — nothing is ever lost (proven in E2E).
+- [x] Quest log + NPC list panels driven from world state
+- [x] Memory tiers: session summary (every 8 turns) + chronicle (every 20) — merge-based consolidation prompts (`session-summary.md`, `chronicle.md`), injected into the GM system prompt between ground-truth state and style rules; failures keep the old memory silently
+- [x] Choice chips: N tappable player-action options after every GM turn — **count configurable 0–6 in settings (default 3, 0 = off)**, tap = send, free text always available; player-voice guard included (`04_GM_PROMPT.md` #8: speaker-tag/GM-voice/CJK filters + 6-chip cached pool on the message meta, sliced client-side)
+- [x] Level-up flow (XP → stat points → sheet edit)
 - **Done when**: closing the tab overnight and resuming feels seamless (recap card + coherent continuation).
+  - Machinery proven: 69 unit tests + E2E (chips cache, checkpoint round-trip, 8-turn consolidation). Overnight-feel playtest with real Gemma is the user's step.
 
 ## P3 — Feel & polish
 

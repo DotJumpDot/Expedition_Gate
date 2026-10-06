@@ -2,7 +2,7 @@
 
 **Single-player AI-GM adventure RPG.** A D&D-style tabletop experience where the AI is the Game Master — narrator, referee, and every NPC — with unlimited directions for the story to go. Runs 100% locally against the user's own llama-server. Sibling project of `C:\Code\Novel's_Model` (same user, same machine, shared lessons).
 
-> **This file + `Docs/` are the complete project context.** A fresh session should read this file first, then the Doc relevant to the task. The application lives in **`expedition_gate/`** — **P0 (scaffold) and P1 (the GM loop) are COMPLETE** (2026-10-06, see Repo layout below and `Docs/05_ROADMAP.md` for status).
+> **This file + `Docs/` are the complete project context.** A fresh session should read this file first, then the Doc relevant to the task. The application lives in **`expedition_gate/`** — **P0 (scaffold), P1 (the GM loop), and P2 (campaign living) are COMPLETE** (2026-10-06, see Repo layout below and `Docs/05_ROADMAP.md` for status). Next phase when asked: P3 (feel & polish).
 
 **Language rule: communicate with the user in ENGLISH only. All game UI and game content is THAI.**
 

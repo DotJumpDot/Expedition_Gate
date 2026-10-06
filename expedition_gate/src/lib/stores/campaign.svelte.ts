@@ -29,6 +29,9 @@ function createSession() {
 	let resolutionLine = $state('');
 	let busy = $state(false);
 	let error = $state('');
+	let ended = $state<string | null>(null);
+	let recap = $state('');
+	let chips = $state<string[]>([]);
 	let controller: AbortController | null = null;
 
 	let localSeq = 1_000_000;
@@ -44,6 +47,9 @@ function createSession() {
 		resolutionLine = '';
 		busy = false;
 		error = '';
+		ended = null;
+		recap = '';
+		chips = [];
 		controller = null;
 	}
 
@@ -57,7 +63,14 @@ function createSession() {
 				return false;
 			}
 			const data = (await res.json()) as {
-				campaign: { id: string; title: string; setting: string; stateStale: boolean };
+				campaign: {
+					id: string;
+					title: string;
+					setting: string;
+					stateStale: boolean;
+					ended: string | null;
+					sessionSummary: string;
+				};
 				state: WorldState;
 				messages: UiMessage[];
 			};
@@ -65,7 +78,10 @@ function createSession() {
 			setting = data.campaign.setting;
 			state = data.state;
 			stale = data.campaign.stateStale;
+			ended = data.campaign.ended;
+			recap = data.campaign.sessionSummary;
 			messages = data.messages;
+			if (!ended) void fetchChips();
 			return true;
 		} catch {
 			error = 'โหลดการผจญภัยไม่สำเร็จ';
@@ -83,6 +99,7 @@ function createSession() {
 		error = '';
 		streaming = '';
 		resolutionLine = '';
+		chips = [];
 		messages.push({
 			id: `local-${localSeq++}`,
 			seq: localSeq,
@@ -157,6 +174,8 @@ function createSession() {
 							break;
 						case 'done':
 							finalize(false);
+							if (state?.hero.hp === 0) ended = 'dead';
+							void fetchChips();
 							break;
 						case 'aborted':
 							finalize(true);
@@ -194,6 +213,73 @@ function createSession() {
 		controller?.abort();
 	}
 
+	/** Choice chips for the latest GM turn (server caches per message). */
+	async function fetchChips(): Promise<void> {
+		if (!campaignId || ended) return;
+		try {
+			const res = await fetch('/api/gm/suggestions', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ campaignId, n: 6 })
+			});
+			const data = (await res.json()) as { chips?: string[] };
+			chips = data.chips ?? [];
+		} catch {
+			chips = [];
+		}
+	}
+
+	/** Spend 2 stat points (app math; one level per call). */
+	async function levelUp(
+		allocations: Partial<Record<string, number>>
+	): Promise<{ ok: boolean; error?: string }> {
+		if (!campaignId) return { ok: false, error: 'ไม่พบการผจญภัย' };
+		const res = await fetch(`/api/campaigns/${campaignId}/level-up`, {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ allocations })
+		});
+		const data = (await res.json()) as { state?: WorldState; error?: string };
+		if (!res.ok || !data.state) return { ok: false, error: data.error ?? 'เก็บระดับไม่สำเร็จ' };
+		state = data.state;
+		return { ok: true };
+	}
+
+	/** Death epilogue — narrate the campaign's ending and seal it. */
+	async function writeEpilogue(): Promise<boolean> {
+		if (!campaignId || ended !== 'dead') return false;
+		try {
+			const res = await fetch(`/api/campaigns/${campaignId}/epilogue`, { method: 'POST' });
+			const data = (await res.json()) as { epilogue?: string; error?: string };
+			if (!res.ok || !data.epilogue) {
+				error = data.error ?? 'เขียนบทส่งท้ายไม่สำเร็จ';
+				return false;
+			}
+			messages.push({
+				id: `local-${localSeq++}`,
+				seq: localSeq,
+				role: 'gm',
+				content: data.epilogue,
+				meta: { epilogue: true }
+			});
+			ended = 'epilogue';
+			return true;
+		} catch {
+			error = 'เขียนบทส่งท้ายไม่สำเร็จ';
+			return false;
+		}
+	}
+
+	/** Restore a checkpoint — auto-snapshots the current branch server-side. */
+	async function restoreCheckpoint(checkpointId: string): Promise<boolean> {
+		if (!campaignId) return false;
+		const res = await fetch(`/api/campaigns/${campaignId}/checkpoints/${checkpointId}/restore`, {
+			method: 'POST'
+		});
+		if (!res.ok) return false;
+		return load(campaignId);
+	}
+
 	return {
 		get campaignId() {
 			return campaignId;
@@ -225,10 +311,23 @@ function createSession() {
 		get error() {
 			return error;
 		},
+		get ended() {
+			return ended;
+		},
+		get recap() {
+			return recap;
+		},
+		get chips() {
+			return chips;
+		},
 		reset,
 		load,
 		send,
-		stop
+		stop,
+		fetchChips,
+		levelUp,
+		writeEpilogue,
+		restoreCheckpoint
 	};
 }
 

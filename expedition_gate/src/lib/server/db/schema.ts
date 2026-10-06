@@ -20,6 +20,11 @@ export const campaigns = sqliteTable('campaigns', {
 	stateJson: text('state_json', { mode: 'json' }).notNull().default('{}'),
 	stateStale: integer('state_stale', { mode: 'boolean' }).notNull().default(false),
 	stateV: integer('state_v').notNull().default(1), // world-state schema version
+	// Memory tiers (Docs/03): window lives in messages; these are the
+	// consolidated layers rebuilt by background calls after turns.
+	turnCount: integer('turn_count').notNull().default(0), // completed GM turns
+	sessionSummary: text('session_summary').notNull().default(''), // ≤900 chars
+	chronicle: text('chronicle').notNull().default(''), // ≤2600 chars
 	createdAt: integer('created_at', { mode: 'timestamp_ms' })
 		.notNull()
 		.$defaultFn(() => new Date()),
@@ -58,6 +63,16 @@ export const checkpoints = sqliteTable(
 		note: text('note').notNull().default(''),
 		stateJson: text('state_json', { mode: 'json' }).notNull(),
 		messagesUpTo: integer('messages_up_to').notNull(), // seq ceiling included in this snapshot
+		meta: text('meta', { mode: 'json' }).$type<{
+			auto?: boolean;
+			archivedMessages?: Array<{
+				id: string;
+				seq: number;
+				role: 'player' | 'gm' | 'system';
+				content: string;
+				meta: Record<string, unknown> | null;
+			}>;
+		} | null>(),
 		createdAt: integer('created_at', { mode: 'timestamp_ms' })
 			.notNull()
 			.$defaultFn(() => new Date())

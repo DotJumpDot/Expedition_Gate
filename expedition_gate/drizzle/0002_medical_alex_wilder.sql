@@ -1,0 +1,1 @@
+ALTER TABLE `checkpoints` ADD `meta` text;

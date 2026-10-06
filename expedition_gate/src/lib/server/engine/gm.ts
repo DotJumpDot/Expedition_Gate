@@ -7,7 +7,12 @@ import { z } from 'zod';
 import type { ChatMessage } from '../llama';
 import { complete } from '../llama';
 import { PROMPTS, fill } from '../prompts';
-import { buildMemory, windowToChatMessages, type MemorySlice } from './memory';
+import {
+	buildMemory,
+	windowToChatMessages,
+	type ConsolidatedMemory,
+	type MemorySlice
+} from './memory';
 import {
 	SCENE_TAGS,
 	serializeWorldState,
@@ -21,6 +26,8 @@ export interface GmTurnContext {
 	brief: WorldBrief;
 	state: WorldState;
 	history: Array<{ role: string; content: string }>;
+	/** Consolidated memory layers (chronicle + session summary, P2). */
+	memory?: ConsolidatedMemory;
 	/** Resolved mechanics line for THIS turn (dice already rolled by the app). */
 	resolutionLine?: string;
 	playerInput: string;
@@ -30,7 +37,7 @@ export interface GmTurnContext {
 
 /** Assemble the full GM message array (system + history + turn user message). */
 export function buildGmMessages(ctx: GmTurnContext): ChatMessage[] {
-	const memory: MemorySlice = buildMemory(ctx.history);
+	const memory: MemorySlice = buildMemory(ctx.history, { consolidated: ctx.memory });
 
 	const system = fill(PROMPTS.gm, {
 		WORLD_BRIEF: briefText(ctx.brief),
@@ -114,19 +121,26 @@ async function completeJson(
 	};
 }
 
-/** Tolerant JSON extraction: strips code fences / stray prose around the object. */
+/** Tolerant JSON extraction: strips code fences / stray prose; objects or arrays. */
 export function parseJsonLoose(raw: string): unknown {
 	const text = raw.trim();
 	const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/);
 	const candidate = fenced ? fenced[1] : text;
-	const start = candidate.indexOf('{');
-	const end = candidate.lastIndexOf('}');
-	if (start === -1 || end === -1 || end <= start) return undefined;
-	try {
-		return JSON.parse(candidate.slice(start, end + 1));
-	} catch {
-		return undefined;
+	for (const [open, close] of [
+		['{', '}'],
+		['[', ']']
+	] as const) {
+		const start = candidate.indexOf(open);
+		const end = candidate.lastIndexOf(close);
+		if (start !== -1 && end > start) {
+			try {
+				return JSON.parse(candidate.slice(start, end + 1));
+			} catch {
+				// try the other bracket shape
+			}
+		}
 	}
+	return undefined;
 }
 
 // --- world brief -----------------------------------------------------------
@@ -246,4 +260,123 @@ function stripUndefined<T extends object>(obj: T): Partial<T> {
 		if (value !== undefined) out[key] = value;
 	}
 	return out as Partial<T>;
+}
+
+// --- memory tiers (Docs/03: session summary every 8 turns, chronicle every 20) ---
+
+async function consolidateText(
+	template: string,
+	input: {
+		existing: string;
+		events: string;
+		maxChars: number;
+		baseUrl?: string;
+		maxTokens?: number;
+	}
+): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
+	const prompt = fill(template, {
+		EXISTING: input.existing.trim() || '（ยังไม่มี — นี่คือการสรุปครั้งแรก）',
+		EVENTS: input.events
+	});
+	const result = await complete({
+		messages: [{ role: 'user', content: prompt }],
+		temperature: 0.3,
+		maxTokens: input.maxTokens ?? 900,
+		timeoutMs: 120_000,
+		baseUrl: input.baseUrl
+	});
+	const text = result.content.trim();
+	if (!text || text.length > input.maxChars * 1.5) {
+		return { ok: false, error: 'สรุปยาวเกินหรือว่างเปล่า' };
+	}
+	return { ok: true, text: text.slice(0, input.maxChars) };
+}
+
+/** Merge-based session summary — early facts survive. */
+export async function consolidateSessionSummary(input: {
+	existing: string;
+	events: string;
+	baseUrl?: string;
+}): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
+	return consolidateText(PROMPTS.sessionSummary, { ...input, maxChars: 900, maxTokens: 700 });
+}
+
+/** Whole-campaign chronicle, ≤2600 chars. */
+export async function consolidateChronicle(input: {
+	existing: string;
+	events: string;
+	baseUrl?: string;
+}): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
+	return consolidateText(PROMPTS.chronicle, { ...input, maxChars: 2600, maxTokens: 1800 });
+}
+
+// --- choice chips (Docs/04 #8: player-voice guard, mechanical filter) ---
+
+const SuggestionsSchema = z.array(z.string().min(1).max(120)).min(1).max(8);
+
+/**
+ * Mechanical voice guard — reject anything that smells like NPC/GM voice,
+ * not just prompt-banned (in-context examples beat bans; filters beat both).
+ */
+export function filterSuggestions(chips: string[]): string[] {
+	return chips
+		.map((chip) => chip.trim())
+		.filter((chip) => chip.length >= 4 && chip.length <= 80)
+		.filter((chip) => !/[:：]\s*["“]/.test(chip)) // speaker tags: ชื่อ : "..."
+		.filter((chip) => !/^(GM|ผู้เล่า|นักเล่าเรื่อง)/.test(chip))
+		.filter((chip) => !/^(ตัวละคร|NPC)\b/i.test(chip))
+		.filter((chip) => !/[\u4e00-\u9fff]/.test(chip)) // CJK leak guard
+		.filter((chip, index, all) => all.indexOf(chip) === index); // dedupe
+}
+
+export async function generateSuggestions(input: {
+	narration: string;
+	quickFacts: string;
+	n: number;
+	baseUrl?: string;
+}): Promise<{ ok: true; chips: string[] } | { ok: false; error: string }> {
+	const n = Math.max(1, Math.min(6, Math.round(input.n)));
+	const prompt = fill(PROMPTS.suggestions, {
+		N: String(n),
+		NARRATION: input.narration.slice(-3000),
+		QUICK_FACTS: input.quickFacts
+	});
+	const result = await completeJson([{ role: 'user', content: prompt }], SuggestionsSchema, {
+		baseUrl: input.baseUrl,
+		maxTokens: 500,
+		timeoutMs: 60_000
+	});
+	if (!result.ok) return { ok: false, error: result.error };
+	const chips = filterSuggestions(result.data as string[]);
+	if (chips.length === 0) return { ok: false, error: 'ทางเลือกไม่ผ่านตัวกรองเสียงผู้เล่น' };
+	return { ok: true, chips: chips.slice(0, n) };
+}
+
+// --- epilogue (death → epilogue → ประตูบานใหม่) ---
+
+export async function generateEpilogue(input: {
+	heroName: string;
+	heroClass: string;
+	deathPlace: string;
+	day: number;
+	storySoFar: string;
+	baseUrl?: string;
+}): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
+	const prompt = fill(PROMPTS.epilogue, {
+		HERO_NAME: input.heroName,
+		HERO_CLASS: input.heroClass,
+		DEATH_PLACE: input.deathPlace || 'สนามรบ',
+		DAY: String(input.day),
+		STORY_SO_FAR: input.storySoFar.slice(0, 4000)
+	});
+	const result = await complete({
+		messages: [{ role: 'user', content: prompt }],
+		temperature: 0.8,
+		maxTokens: 2048,
+		timeoutMs: 120_000,
+		baseUrl: input.baseUrl
+	});
+	const text = result.content.trim();
+	if (!text) return { ok: false, error: 'ผู้เล่าเรื่องไม่ตอบกลับ' };
+	return { ok: true, text };
 }

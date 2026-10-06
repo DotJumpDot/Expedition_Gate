@@ -205,6 +205,90 @@ assert(
 );
 
 // 10. cleanup: delete the smoke campaign
+// (moved to the end — P2 checks below still use this campaign)
+
+// 10. P2 — choice chips: cached player-voice suggestions for the latest turn
+const sugRes = await fetch(`${BASE}/api/gm/suggestions`, {
+	method: 'POST',
+	headers: { 'content-type': 'application/json' },
+	body: JSON.stringify({ campaignId, n: 3 })
+});
+const sugData = await sugRes.json();
+assert(
+	Array.isArray(sugData.chips) && sugData.chips.length === 3 && sugData.chips[0].length > 3,
+	'suggestions endpoint returns 3 player-voice chips'
+);
+assert(
+	sugData.chips.every((chip) => !chip.includes(': "')),
+	'no chip carries a speaker tag (voice guard held)'
+);
+// Second call hits the cache — identical order proves it (server stores once).
+const sugAgain = await (
+	await fetch(`${BASE}/api/gm/suggestions`, {
+		method: 'POST',
+		headers: { 'content-type': 'application/json' },
+		body: JSON.stringify({ campaignId, n: 3 })
+	})
+).json();
+assert(
+	JSON.stringify(sugAgain.chips) === JSON.stringify(sugData.chips),
+	'suggestion cache returns the same chips without a model call'
+);
+
+// 11. P2 — checkpoints: save → play past → restore → auto-snapshot + trim
+const cpCreate = await post(`/api/campaigns/${campaignId}/checkpoints`, { note: 'ก่อนตามรอย' });
+assert(cpCreate.status === 201, 'checkpoint created');
+const cps = await (await fetch(`${BASE}/api/campaigns/${campaignId}/checkpoints`)).json();
+assert(cps.checkpoints?.length === 1, 'checkpoint listed');
+
+await playTurn({ kind: 'free', text: 'เดินลึกเข้าไปอีกหน่อย' });
+const beforeRestore = await fetch(`${BASE}/api/campaigns/${campaignId}`).then((r) => r.json());
+
+const cpId = cps.checkpoints[0].id;
+const restoreRes = await fetch(`${BASE}/api/campaigns/${campaignId}/checkpoints/${cpId}/restore`, {
+	method: 'POST'
+});
+assert(restoreRes.ok, 'checkpoint restored');
+const afterRestore = await fetch(`${BASE}/api/campaigns/${campaignId}`).then((r) => r.json());
+assert(
+	afterRestore.messages.length < beforeRestore.messages.length,
+	'restore trimmed messages back to the checkpoint'
+);
+const cpsAfter = await (await fetch(`${BASE}/api/campaigns/${campaignId}/checkpoints`)).json();
+assert(
+	cpsAfter.checkpoints.some((cp) => cp.auto),
+	'restore auto-snapshotted the abandoned branch'
+);
+// Round trip: restore the auto-snapshot → the abandoned branch comes back whole.
+const autoCp = cpsAfter.checkpoints.find((cp) => cp.auto);
+const roundTrip = await fetch(
+	`${BASE}/api/campaigns/${campaignId}/checkpoints/${autoCp.id}/restore`,
+	{ method: 'POST' }
+);
+const afterRoundTrip = await fetch(`${BASE}/api/campaigns/${campaignId}`).then((r) => r.json());
+assert(
+	roundTrip.ok && afterRoundTrip.messages.length === beforeRestore.messages.length,
+	'auto-snapshot restores the abandoned branch completely (nothing is ever lost)'
+);
+
+// 12. P2 — memory tiers: session summary consolidates after 8 completed turns
+const turnsNow = afterRoundTrip.campaign?.turnCount ?? 0;
+const turnsNeeded = Math.max(0, 8 - (turnsNow % 8 === 0 && turnsNow > 0 ? 0 : turnsNow % 8));
+for (let i = 0; i < turnsNeeded; i++) {
+	const t = await playTurn({ kind: 'free', text: `เดินเรื่องต่อรอบ ${i + 1}` });
+	if (!t.events?.some((e) => e.type === 'done')) {
+		console.error('  ! a fill-in turn failed to complete', JSON.stringify(t).slice(0, 200));
+	}
+}
+await new Promise((resolve) => setTimeout(resolve, 1500)); // consolidation is post-done
+const finalCampaign = await fetch(`${BASE}/api/campaigns/${campaignId}`).then((r) => r.json());
+assert(
+	typeof finalCampaign.campaign.sessionSummary === 'string' &&
+		finalCampaign.campaign.sessionSummary.length > 0,
+	'session summary consolidated after the 8-turn mark'
+);
+
+// 13. cleanup: delete the smoke campaign
 const deleteRes = await fetch(`${BASE}/api/campaigns/${campaignId}`, { method: 'DELETE' });
 assert(deleteRes.ok, 'campaign deleted (cleanup)');
 

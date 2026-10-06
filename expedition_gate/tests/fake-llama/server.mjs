@@ -89,11 +89,26 @@ const WORLD_HERO_JSON = JSON.stringify({
 		'ตะวันเป็นลูกหลานของหมอผีเก่าแก่ ถูกขับไล่จากเมืองหลวงจากข้อหาฝึกเวทต้องห้าม และเดินทางมาถึงประตูหินแห่งนี้เพื่อตามหาครูเก่าของตน'
 });
 
+const SUGGESTIONS_JSON = JSON.stringify([
+	'ถามลุงหมึกว่าเห็นอะไรในคืนที่ลูกสาวหาย',
+	'ตามรอยเท้าเข้าไปในป่าไผ่ก่อนที่ฝนจะลบมันหมด',
+	'ขอพักที่โรงเตี๊ยมแล้วฟังข่าวลือของคนท้องถิ่น'
+]);
+
+const SESSION_SUMMARY_TEXT =
+	'ฮีโร่ตะวันมาถึงหมู่บ้านท่าไม้และสอบถามเรื่องรอยเท้ายักษ์ ลุงหมึกเตือนเรื่องป่าไผ่ยามค่ำ พบริบบิ้นแดงผูกที่ต้นไผ่ต้นแรกและตัดสินใจจะตามรอยในเช้าวันถัดไป';
+
+const EPILOGUE_TEXT =
+	'ฝนที่ตกทั้งคืนชะล้างเลือบเลือดบนประตูหินจนสะอาดหมดจด ชาวบ้านท่าไม้จุดธูปขาวไว้ให้ตะวันถึงเจ็ดวัน และต้นไม้ที่เขาปลูกไว้ริมลำธารก็เติบโตเงียบ ๆ ทุกปี ประตูบานนั้นเงียบลงอีกครั้ง — แต่คนที่เดินผ่านมันยังเล่าถึงนักเวทน้อยผู้ไม่ยอมถอยหลัง พงศาวดารของทุ่งประตูหินจารไว้หนึ่งบรรทัด: เขามาถึง และเขาไม่เคยหันหลังกลับ';
+
 const DEFAULT_SCENARIOS = {
 	ok: { content: THAI_NARRATION, finish: 'stop', chunkDelayMs: 5 },
 	json: { content: WORLD_BRIEF_JSON, finish: 'stop', chunkDelayMs: 5 },
 	hero: { content: WORLD_HERO_JSON, finish: 'stop', chunkDelayMs: 5 },
 	state: { content: WORLD_STATE_JSON, finish: 'stop', chunkDelayMs: 5 },
+	suggestions: { content: SUGGESTIONS_JSON, finish: 'stop', chunkDelayMs: 5 },
+	summary: { content: SESSION_SUMMARY_TEXT, finish: 'stop', chunkDelayMs: 5 },
+	epilogue: { content: EPILOGUE_TEXT, finish: 'stop', chunkDelayMs: 5 },
 	cjk: { content: 'ป่าไผ่เงียบสงัด 挑战 อยู่ตรงหน้า', finish: 'stop', chunkDelayMs: 5 },
 	'reasoning-burn': {
 		content: '',
@@ -131,6 +146,9 @@ export function createFakeLlama({ scenarios = DEFAULT_SCENARIOS } = {}) {
 			if (lastUser.includes('ระบบบันทึกสถานะเกม')) return 'state';
 			if (lastUser.includes('ผู้สร้างโลก')) return 'json';
 			if (lastUser.includes('ผู้สร้างตัวละคร')) return 'hero';
+			if (lastUser.includes('ระบบเสนอทางเลือกถัดไป')) return 'suggestions';
+			if (lastUser.includes('ผู้สรุปความจำเซสชัน')) return 'summary';
+			if (lastUser.includes('บทส่งท้าย')) return 'epilogue';
 		}
 		return defaultScenario;
 	};

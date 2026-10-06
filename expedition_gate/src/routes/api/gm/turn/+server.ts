@@ -3,6 +3,7 @@ import {
 	appendMessage,
 	getCampaign,
 	historyWindow,
+	maybeConsolidate,
 	parseBrief,
 	parseState,
 	saveGmTurn
@@ -62,6 +63,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		brief,
 		state,
 		history: historyWindow(campaignId, 14).filter((message) => message.content !== playerText),
+		memory: { chronicle: row.chronicle, sessionSummary: row.sessionSummary },
 		resolutionLine: resolved.resolutionLine,
 		playerInput: playerText,
 		opening: input.kind === 'opening'
@@ -120,6 +122,10 @@ export const POST: RequestHandler = async ({ request }) => {
 				saveGmTurn({ campaignId, content: narration, state: next ?? state, stateStale: stale });
 				if (next) send({ type: 'state', state: next, stale });
 				send({ type: 'done' });
+
+				// Memory consolidation (every 8/20 turns) — background-grade:
+				// failure keeps the old memory and never breaks the turn.
+				void maybeConsolidate(campaignId).catch(() => {});
 			} catch (err) {
 				send({ type: 'error', message: err instanceof Error ? err.message : String(err) });
 			} finally {

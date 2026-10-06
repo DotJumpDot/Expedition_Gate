@@ -25,7 +25,9 @@ export const GET: RequestHandler = async ({ params }) => {
 				tone: JSON.parse(row.tone || '[]') as string[],
 				brief: parseBrief(row.worldBrief),
 				stateStale: row.stateStale,
-				ended: row.ended
+				ended: row.ended,
+				turnCount: row.turnCount,
+				sessionSummary: row.sessionSummary
 			},
 			state,
 			messages: getMessages(row.id).map((message) => ({
