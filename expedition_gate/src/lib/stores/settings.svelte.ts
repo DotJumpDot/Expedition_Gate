@@ -75,6 +75,38 @@ export const FONT_OPTIONS: FontOption[] = [
 
 export type HeroSide = 'left' | 'right';
 
+/** Player-saved world presets (wizard: "บันทึกเป็นพรีเซ็ตของฉัน"). */
+export interface CustomPreset {
+	label: string;
+	description: string;
+}
+
+const CUSTOM_PRESETS_KEY = 'gate.customPresets';
+const MAX_CUSTOM_PRESETS = 12;
+
+function loadCustomPresets(): CustomPreset[] {
+	if (typeof localStorage === 'undefined') return [];
+	try {
+		const raw = JSON.parse(localStorage.getItem(CUSTOM_PRESETS_KEY) ?? '[]') as unknown;
+		if (!Array.isArray(raw)) return [];
+		return raw
+			.filter(
+				(entry): entry is CustomPreset =>
+					typeof entry === 'object' &&
+					entry !== null &&
+					typeof (entry as CustomPreset).label === 'string' &&
+					typeof (entry as CustomPreset).description === 'string'
+			)
+			.slice(0, MAX_CUSTOM_PRESETS)
+			.map((entry) => ({
+				label: entry.label.slice(0, 40),
+				description: entry.description.slice(0, 400)
+			}));
+	} catch {
+		return [];
+	}
+}
+
 function createSettings() {
 	let chipCount = $state(3);
 	let narrationLength = $state<NarrationLength>('medium');
@@ -84,6 +116,7 @@ function createSettings() {
 	let fontKey = $state<FontKey>('sarabun');
 	let fontScale = $state(100);
 	let heroSide = $state<HeroSide>('right');
+	let customPresets = $state<CustomPreset[]>(loadCustomPresets());
 
 	if (typeof localStorage !== 'undefined') {
 		try {
@@ -189,6 +222,28 @@ function createSettings() {
 		}
 	}
 
+	function persistCustomPresets() {
+		if (typeof localStorage !== 'undefined') {
+			localStorage.setItem(CUSTOM_PRESETS_KEY, JSON.stringify(customPresets));
+		}
+	}
+
+	/** Returns false when the list is full or the entry is empty. */
+	function addCustomPreset(preset: CustomPreset): boolean {
+		const label = preset.label.trim().slice(0, 40);
+		const description = preset.description.trim().slice(0, 400);
+		if (!label || !description) return false;
+		if (customPresets.length >= MAX_CUSTOM_PRESETS) return false;
+		customPresets = [...customPresets, { label, description }];
+		persistCustomPresets();
+		return true;
+	}
+
+	function removeCustomPreset(label: string) {
+		customPresets = customPresets.filter((preset) => preset.label !== label);
+		persistCustomPresets();
+	}
+
 	/** CSS font-family stack for the active font choice. */
 	function fontStack(): string {
 		return FONT_OPTIONS.find((option) => option.key === fontKey)?.stack ?? FONT_OPTIONS[0].stack;
@@ -219,6 +274,11 @@ function createSettings() {
 		get heroSide() {
 			return heroSide;
 		},
+		get customPresets() {
+			return customPresets;
+		},
+		addCustomPreset,
+		removeCustomPreset,
 		setChipCount,
 		setNarrationLength,
 		setExtrasOff,

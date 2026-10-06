@@ -16,8 +16,8 @@ import {
 import {
 	SCENE_TAGS,
 	serializeWorldState,
+	settingPreset,
 	HeroProposalSchema,
-	SETTING_PRESETS,
 	WorldBriefSchema,
 	WorldStateSchema,
 	type HeroProposal,
@@ -178,7 +178,7 @@ export async function generateWorldBrief(
 	baseUrl?: string
 ): Promise<{ ok: true; brief: WorldBrief } | { ok: false; error: string }> {
 	const prompt = fill(PROMPTS.worldbrief, {
-		SETTING: SETTING_PRESETS[input.setting],
+		SETTING: settingPreset(input.setting).label,
 		PREMISE: input.premise ? ` โดยมีแนวคิดเรื่องจากผู้เล่น: "${input.premise}"` : '',
 		TONE: input.tone.join(' · ') || 'ผจญภัย'
 	});
@@ -193,7 +193,7 @@ export async function generateWorldBrief(
 // --- hero proposal ---------------------------------------------------------
 
 export async function generateHeroProposal(
-	input: { brief: WorldBrief; name: string; concept: string; klass: string },
+	input: { brief: WorldBrief; name: string; concept: string; klass: string; classNote?: string },
 	baseUrl?: string
 ): Promise<{ ok: true; proposal: HeroProposal } | { ok: false; error: string }> {
 	const prompt = fill(PROMPTS.hero, {
@@ -201,7 +201,7 @@ export async function generateHeroProposal(
 		WORLD_SITUATION: input.brief.situation,
 		HERO_NAME: input.name || 'นักสำรวจนรนาเมก',
 		HERO_CONCEPT: input.concept || 'นักผจญภัยผู้มุ่งหน้าข้ามประตู',
-		HERO_CLASS: input.klass
+		HERO_CLASS: input.klass + (input.classNote ? ` — ${input.classNote}` : '')
 	});
 	const result = await completeJson([{ role: 'user', content: prompt }], HeroProposalSchema, {
 		baseUrl,

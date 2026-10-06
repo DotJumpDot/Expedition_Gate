@@ -88,6 +88,15 @@ Playtest findings fixed + player requests, all verified live against fake-llama 
 - [x] **Layout**: hero rail moved to the right (left/right configurable), อาวุธ·เกราะ / ของติดตัว / เควส / ตัวละครที่พบ are collapsible sections with NPCs last, hero background text removed from the sheet (lives in the codex), auto-scroll follows only while the reader is at the bottom.
 - Tests: 102 → **113** (11 new narration-parser/format tests). Gates re-verified: svelte-check 0/0 · ESLint/Prettier clean · production build green · 2 Playwright specs.
 
+### World presets & class expansion (2026-10-06, same day) ✅
+
+Player request: presets were too Thai-centric and too few, and กำหนดเอง was a dead end.
+
+- [x] **15 world presets** (was 4): each now carries a rich Thai **description that steers the world-brief prompt** (previously only the short label reached the GM) — สถาบันเวทมนตร์, ขุนนางแดนน้ำแข็ง (reincarnated northern noble), ระบบพลังลับ (system power), ขุนนางตกอับ นักดาบพเนจร, ผู้สั่งการเวลา, ราชสำนักจักรวรรดิตะวันออก, จอมยุทธ์บู๊ลิ้ม, ผู้กลับชาติเป็นจอมมาร, ราชาโจรสลัดมหาสมุทร, โลกหลังวันสิ้นโลก, จักรกลไอน้ำ + the originals. Each preset maps to a scene-art bucket.
+- [x] **Editable presets**: the wizard shows the world description for ANY preset in an editable textarea (sent as the premise when changed) + "บันทึกเป็นพรีเซ็ตของฉัน" (localStorage, cap 12, deletable chips).
+- [x] **Classes 6 → 11** (อัศวิน, นักเวทดาบ, นักธนู, นักปราชญ์, นักเล่นแร่แปรธาตุ added) and กำหนดเอง now reveals name + ability-description inputs; the note flows through hero-proposal into the AI prompt (`classNote`).
+- [x] `settingPreset()` fallback keeps old saves working; gate icons derive from the preset map. Tests: 113 → **120** (`tests/engine/presets.test.ts`); full gates + e2e re-verified.
+
 ## P5 — Future doors (explicitly NOT promised)
 
 - **Multiplayer** (the "MMO" door): friends join the same campaign via LAN — reference AnyWorld; SvelteKit server already centralizes state, but turn ownership + sync is a project of its own

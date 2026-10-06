@@ -102,14 +102,159 @@ export type Hero = z.infer<typeof HeroSchema>;
 // --- client-safe constants & schemas (must stay in this isomorphic module:
 // server/engine/gm.ts is server-only and cannot be imported by components) ---
 
-export const SETTING_PRESETS = {
-	sword_sorcery: 'ดาบและเวทมนตร์',
-	scifi: 'ไซไฟ',
-	horror: 'สยองขวัญ',
-	thai_legend: 'ตำนานไทย (แถบอีสาน/ล้านนา)',
-	custom: 'กำหนดเอง'
-} as const;
-export type SettingKey = keyof typeof SETTING_PRESETS;
+export interface SettingPreset {
+	key: string;
+	label: string;
+	/** Steering paragraph injected into the world-brief prompt (empty = player premise only). */
+	description: string;
+	/** Scene-art bucket — which library group illustrates this world. */
+	art: 'sword_sorcery' | 'scifi' | 'horror' | 'thai_legend' | 'any';
+	icon: string;
+}
+
+/**
+ * Built-in world presets. The label names the stage; the description is what
+ * actually steers the GM's world brief (sent as the player premise), so each
+ * one reads like a story hook, not a genre tag. Players can save their own
+ * presets on top of these (settings store → wizard chips).
+ */
+export const SETTING_PRESETS: Record<string, SettingPreset> = {
+	sword_sorcery: {
+		key: 'sword_sorcery',
+		label: 'ดาบและเวทมนตร์',
+		description:
+			'ทวีปคลาสสิกแห่งราชอาณาจักร อัศวิน มังกร และเวทมนตร์โบราณ หอคอยพ่อมด ป่าหวงห้าม และสงครามระหว่างอาณาจักร การผจญภัยสวมบทแบบตะวันตกเต็มรูปแบบ',
+		art: 'sword_sorcery',
+		icon: '⚔️'
+	},
+	magic_academy: {
+		key: 'magic_academy',
+		label: 'สถาบันเวทมนตร์',
+		description:
+			'หอเรียนเวทมนตร์อันดับหนึ่งที่ชนชั้นสูงผูกขาดไว้ ผู้เล่นคือนักเรียนผู้ยากจนหรือตกหล่นที่ต้องไต่จากล่างสุดสู่อันดับต้นด้วยการสอบเวท ดวลเวทระหว่างชั้นปี แก๊งอิทธิพลในสถาบัน หอสมุดต้องห้าม และครูผู้ซ่อนอดีตไว้ใต้อาภรณ์',
+		art: 'sword_sorcery',
+		icon: '🎓'
+	},
+	frozen_north_noble: {
+		key: 'frozen_north_noble',
+		label: 'ขุนนางแดนน้ำแข็ง',
+		description:
+			'ผู้เล่นกลับชาติมาเกิดเป็นทายาทหนุ่มสาวแห่งตระกูลขุนนางผู้ครองแคว้นเหนือกึ๊กขั้วโลก ปราสาทบนภูเขาน้ำแข็ง การเมืองระหว่างตระกูล สัตว์อสูรแดนเยือกเย็น และเวทมนตร์น้ำแข็งที่ไหลอยู่ในสายเลือด ทุกสายตาในแคว้นจ้องดูว่าทายาทคนใหม่จะแข็งแกร่งพอหรือไม่',
+		art: 'sword_sorcery',
+		icon: '❄️'
+	},
+	system_power: {
+		key: 'system_power',
+		label: 'ระบบพลังลับ',
+		description:
+			'หนึ่งวันผู้เล่นตื่นขึ้นมาพร้อม "ระบบ" ที่มีเพียงผู้เดียวที่มองเห็น — ภารกิจ ค่าประสบการณ์ สกิล และร้านค้าลับปรากฏขึ้นหน้าตาเหมือนเกม ทั้งที่โลกรอบตัวเป็นโลกจริงที่ไม่มีใครมีสิ่งนี้ ความลับนี้เป็นทั้งพลังและหายนะถ้าใครรู้',
+		art: 'any',
+		icon: '💠'
+	},
+	fallen_noble_sword: {
+		key: 'fallen_noble_sword',
+		label: 'ขุนนางตกอับ นักดาบพเนจร',
+		description:
+			'ตระกูลขุนนางถูกโค่นล้มในคืนเดียว ที่ดินถูกยึด ชื่อกลายเป็นคำสาป ผู้เล่นคือบุตรผู้รอดพ้นจากไฟไหม้คืนนั้น ถือดาบประจำตระกูลเพียงเล่มเดียว ออกเดินทางในฐานะนักดาบรับจ้าง หาทางฟื้นเกียรติยศและเฉลยว่าใครอยู่เบื้องหลังการล่มสลาย',
+		art: 'sword_sorcery',
+		icon: '🗡️'
+	},
+	time_control: {
+		key: 'time_control',
+		label: 'ผู้สั่งการเวลา',
+		description:
+			'ในมหานครแสนวุ่นวาย ผู้เล่นครอบครองพลังหยุดและย้อนเวลาได้ไม่กี่วินาที แต่ทุกครั้งมีราคาที่ต้องจ่าย องค์กรลับได้กลิ่น ผู้มีอิทธิพลต้องการพลังนี้ไปครอง และเส้นเวลาที่ถูกพลิกซ้ำแล้วซ้ำเล่ากำลังแยกรอยแยกที่โลกไม่ควรมองเห็น',
+		art: 'any',
+		icon: '⏳'
+	},
+	eastern_empire: {
+		key: 'eastern_empire',
+		label: 'ราชสำนักจักรวรรดิตะวันออก',
+		description:
+			'จักรวรรดิกลิ่นอายยุโรปตะวันออก พระราชวังหิมะ แม่ทัพผู้เกรียงไกร และเวทมนตร์สายเลือดโบราณของชนชั้นสูง ราชสำนักเต็มไปด้วยการวางแผนชิงบัลลังก์ ทุกจานเลี้ยงอาจมีพิษ ทุกคำสัญญามีด้านมืด และผู้เล่นเพิ่งถูกดึงเข้าไปอยู่กลางเกมอำนาจนี้',
+		art: 'sword_sorcery',
+		icon: '🏰'
+	},
+	wuxia: {
+		key: 'wuxia',
+		label: 'จอมยุทธ์บู๊ลิ้ม',
+		description:
+			'โลกยุทธจักรแห่งหุบเขาและเมืองโบราณ นิกายใหญ่น้อยแย่งชิงตำราลับและตำแหน่งจอมยุทธ์อันดับหนึ่ง ผู้เล่นคือนักสู้รุ่นใหม่ที่ต้องฝึกฝนศาสตร์ แก้แค้นตระกูล เลือกข้างระหว่างนิกาย และเผชิญโลกนอกยุทธจักรที่ไม่เคยยุติธรรม',
+		art: 'sword_sorcery',
+		icon: '🥋'
+	},
+	demon_lord_reborn: {
+		key: 'demon_lord_reborn',
+		label: 'ผู้กลับชาติเป็นจอมมาร',
+		description:
+			'ผู้เล่นลืมตาขึ้นในร่างของจอมมารที่โลกทั้งใบกลัวและเกลียดชัง กองทัพผนึกมารกำลังเดินทัพมาถึง ขุนนางมารในปราสาทแย่งอำนาจกันเอง และความทรงจำของเจ้าของร่างเดิมยังหลงเหลืออยู่ — ทางเลือกเปิดกว้างว่าจะเป็นจอมมารแบบไหน',
+		art: 'sword_sorcery',
+		icon: '😈'
+	},
+	pirate_sea: {
+		key: 'pirate_sea',
+		label: 'ราชาโจรสลัดมหาสมุทร',
+		description:
+			'ทะเลพันเกาะแห่งกัปตันโจร สมบัติในตำนาน และเรือปริศนาที่ล่องหนกลางหมอก ผู้เล่นเริ่มต้นด้วยเรือเล็กหนึ่งลำและลูกเรือไม่กี่คน ออกล่าแผนที่สมบัติ หลบกองเรือราชนาวี ต่อรองกับเมืองท่าไร้กฎหมาย และเผชิญอสูรทะเลที่ไม่มีใครเชื่อว่ามีจริง',
+		art: 'any',
+		icon: '🏴‍☠️'
+	},
+	post_apoc: {
+		key: 'post_apoc',
+		label: 'โลกหลังวันสิ้นโลก',
+		description:
+			'อารยธรรมล่มสลายไปแล้ว เมืองร้างถูกฝุ่นกลืน สัตว์กลายพันธุ์ครองถนน เหลือเพียงกลุ่มผู้รอดชีวิตแย่งกันหาน้ำสะอาดและซากเทคโนโลยี ผู้เล่นคือนักสำรวจที่เพิ่งขุดพบสิ่งประดิษฐ์ที่อาจเขียนกฎของโลกใหม่ทั้งใบได้',
+		art: 'scifi',
+		icon: '☢️'
+	},
+	steampunk: {
+		key: 'steampunk',
+		label: 'จักรกลไอน้ำกับเวทมนตร์',
+		description:
+			'มหานครที่ไอน้ำ ฟันเฟือง และอาคมขับเคลื่อนกันอยู่ ชนชั้นสูงขี่เรือเหาะเหนือเมฆ ชนชั้นล่างขุดแร่อาคมใต้ดิน ผู้เล่นคือช่างซ่อมจักรกลที่บังเอิญพบแกนเวทมนตร์ต้องสาปซึ่งทั้งบรรษัทใหญ่และราชสำนักต้องการไปครองไม่ว่าจะด้วยวิธีใด',
+		art: 'scifi',
+		icon: '⚙️'
+	},
+	scifi: {
+		key: 'scifi',
+		label: 'ไซไฟ',
+		description:
+			'อนาคตไกลแห่งยานอวกาศ ดาวเคราะห์แปลกใหม่ ปัญญาประดิษฐ์ และเผ่าพันธุ์ต่างดาว สงครามระหว่างดวงดาวกับความลับของจักรวาลรอผู้กล้าอยู่ในห้วงดาว',
+		art: 'scifi',
+		icon: '🚀'
+	},
+	horror: {
+		key: 'horror',
+		label: 'สยองขวัญ',
+		description:
+			'หมู่บ้านที่ความตายไม่จบสิ้น คฤหาสน์ผีสิง คำสาบตกทอดข้ามตระกูล และสิ่งที่จ้องกลับมาจากความมืด เรื่องเล่าที่อาจไม่มีใครรอดกลับมาเล่าให้ฟัง',
+		art: 'horror',
+		icon: '👻'
+	},
+	thai_legend: {
+		key: 'thai_legend',
+		label: 'ตำนานไทย (อีสาน/ล้านนา)',
+		description:
+			'แดนพื้นบ้านไทยตามความเชื่อโบราณ พระเครื่อง ผีปอบ นาคราช หมอผี และป่าลึกที่ห้ามผู้ใดล้ำเดี่ยว ความเชื่อ ความขลัง และสายสัมพันธ์ของคนกับสิ่งที่มองไม่เห็น',
+		art: 'thai_legend',
+		icon: '🪔'
+	},
+	custom: {
+		key: 'custom',
+		label: 'กำหนดเอง',
+		description: '',
+		art: 'any',
+		icon: '✍️'
+	}
+};
+
+/** Campaign setting key — any preset key; user presets all persist as 'custom'. */
+export type SettingKey = string;
+
+/** Preset lookup that never throws — unknown keys (old saves, imports) fall back to custom. */
+export function settingPreset(key: string): SettingPreset {
+	return SETTING_PRESETS[key] ?? SETTING_PRESETS.custom;
+}
 
 export const HeroProposalSchema = z.object({
 	stats: StatsSchema,

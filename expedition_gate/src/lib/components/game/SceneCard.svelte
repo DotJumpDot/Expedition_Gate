@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import Image from '@lucide/svelte/icons/image';
-	import type { WorldState } from '$lib/game/worldstate';
+	import { settingPreset, type WorldState } from '$lib/game/worldstate';
 
 	let {
 		world,
@@ -48,8 +48,11 @@
 	});
 
 	function matches(entry: SceneEntry, tag: string): boolean {
+		// Art is grouped by bucket, not raw setting key — new presets reuse the
+		// closest existing library group (settingPreset fallback: 'any').
+		const bucket = settingPreset(setting).art;
 		return (
-			entry.tags.includes(tag) && (entry.setting.includes('any') || entry.setting.includes(setting))
+			entry.tags.includes(tag) && (entry.setting.includes('any') || entry.setting.includes(bucket))
 		);
 	}
 

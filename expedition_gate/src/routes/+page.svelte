@@ -3,6 +3,7 @@
 	import { Compass, FileUp, ScrollText, Swords, Trash2 } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import WorldWizard from '$lib/components/WorldWizard.svelte';
+	import { SETTING_PRESETS } from '$lib/game/worldstate';
 
 	let {
 		data
@@ -49,13 +50,9 @@
 		}
 	}
 
-	const SETTING_ICON: Record<string, string> = {
-		sword_sorcery: '⚔️',
-		scifi: '🚀',
-		horror: '🕯️',
-		thai_legend: '👻',
-		custom: '🌀'
-	};
+	const SETTING_ICON: Record<string, string> = Object.fromEntries(
+		Object.values(SETTING_PRESETS).map((preset) => [preset.key, preset.icon])
+	);
 
 	function relativeDate(iso: string | null): string {
 		if (!iso) return 'ยังไม่เริ่มเล่น';

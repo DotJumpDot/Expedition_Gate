@@ -4,53 +4,105 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { STAT_KEYS, STAT_LABELS_TH, type Stats } from '$lib/game/rules';
-	import { SETTING_PRESETS, type HeroProposal } from '$lib/game/worldstate';
+	import { SETTING_PRESETS, settingPreset, type HeroProposal } from '$lib/game/worldstate';
 	import type { WorldBrief } from '$lib/game/worldstate';
-	import { settings } from '$lib/stores/settings.svelte';
+	import { settings, type CustomPreset } from '$lib/stores/settings.svelte';
 
 	let { onclose }: { onclose: () => void } = $props();
 
 	type Step = 'world' | 'brief' | 'hero';
 	let step = $state<Step>('world');
 	let setting = $state('sword_sorcery');
+	/** The player-saved preset currently chosen (null = built-in or กำหนดเอง). */
+	let customSelected = $state<CustomPreset | null>(null);
 	let tones = $state<string[]>([]);
-	let premise = $state('');
+	/** Editable world description — pre-filled from the preset, sent as the premise. */
+	let worldDesc = $state(settingPreset('sword_sorcery').description);
 	let brief = $state<WorldBrief | null>(null);
 	let briefLoading = $state(false);
 	let briefError = $state('');
 	let heroName = $state('');
 	let heroConcept = $state('');
 	let heroClass = $state('นักดาบ');
+	let customClassName = $state('');
+	let customClassNote = $state('');
 	let proposal = $state<HeroProposal | null>(null);
 	let heroLoading = $state(false);
 	let heroError = $state('');
 	let stats = $state<Stats | null>(null);
 	let creating = $state(false);
+	let presetName = $state('');
+	let presetSaveMsg = $state('');
 
 	const TONE_OPTIONS = ['มืดมน', 'ผจญภัย', 'ตลกฮา', 'โรแมนติก'];
-	const CLASS_OPTIONS = ['นักดาบ', 'นักเวท', 'โจร', 'นักบวช', 'หมอผี', 'นักล่า', 'กำหนดเอง'];
-	const SETTING_KEYS = Object.keys(SETTING_PRESETS) as Array<keyof typeof SETTING_PRESETS>;
+	const CLASS_OPTIONS = [
+		'นักดาบ',
+		'อัศวิน',
+		'นักเวท',
+		'นักเวทดาบ',
+		'นักธนู',
+		'โจร',
+		'นักบวช',
+		'หมอผี',
+		'นักล่า',
+		'นักปราชญ์',
+		'นักเล่นแร่แปรธาตุ',
+		'กำหนดเอง'
+	];
+	const SETTING_KEYS = Object.keys(SETTING_PRESETS).filter((key) => key !== 'custom');
+	const CUSTOM_CLASS = 'กำหนดเอง';
 
 	const statTotal = $derived(
 		stats ? Object.values(stats).reduce((sum, value) => sum + value, 0) : 0
 	);
 	const pointsLeft = $derived(52 - statTotal);
 
+	function selectPreset(key: string) {
+		setting = key;
+		customSelected = null;
+		worldDesc = settingPreset(key).description;
+	}
+
+	function selectCustomPreset(preset: CustomPreset) {
+		setting = 'custom';
+		customSelected = preset;
+		worldDesc = preset.description;
+	}
+
 	function toggleTone(tone: string) {
 		tones = tones.includes(tone) ? tones.filter((value) => value !== tone) : [...tones, tone];
 	}
+
+	function savePreset() {
+		presetSaveMsg = '';
+		const label = presetName.trim() || settingPreset(setting).label;
+		const ok = settings.addCustomPreset({ label, description: worldDesc.trim() });
+		presetSaveMsg = ok
+			? `บันทึกพรีเซ็ต "${label}" แล้ว`
+			: customPresetsFull
+				? 'พรีเซ็ตของฉันเต็ม (12) — ลบออกก่อนบันทึกใหม่'
+				: 'กรอกรายละเอียดโลกก่อนบันทึก';
+		if (ok) presetName = '';
+	}
+
+	const customPresetsFull = $derived(settings.customPresets.length >= 12);
 
 	async function generateBrief() {
 		briefLoading = true;
 		briefError = '';
 		try {
+			// Built-ins carry their description in the server-side prompt; the
+			// premise is sent when the player edits it or plays a custom preset.
+			const preset = settingPreset(setting);
+			const desc = worldDesc.trim().slice(0, 400);
+			const edited = desc.length > 0 && desc !== preset.description;
 			const res = await fetch('/api/campaigns/brief', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
 				body: JSON.stringify({
 					setting,
 					tone: tones,
-					premise: setting === 'custom' ? premise : undefined,
+					premise: edited ? desc : undefined,
 					...(settings.modelUrl ? { baseUrl: settings.modelUrl } : {})
 				})
 			});
@@ -70,6 +122,8 @@
 		heroLoading = true;
 		heroError = '';
 		try {
+			const isCustom = heroClass === CUSTOM_CLASS;
+			const klass = isCustom ? customClassName.trim().slice(0, 40) || 'นักผจญภัย' : heroClass;
 			const res = await fetch('/api/campaigns/hero-proposal', {
 				method: 'POST',
 				headers: { 'content-type': 'application/json' },
@@ -77,7 +131,8 @@
 					brief,
 					name: heroName,
 					concept: heroConcept,
-					klass: heroClass,
+					klass,
+					classNote: isCustom ? customClassNote.trim().slice(0, 300) || undefined : undefined,
 					...(settings.modelUrl ? { baseUrl: settings.modelUrl } : {})
 				})
 			});
@@ -159,33 +214,79 @@
 				<section class="space-y-5">
 					<div>
 						<p class="mb-2 text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">
-							เลือกฉาก
+							เลือกฉาก (ทุกฉากแก้ได้)
 						</p>
 						<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
 							{#each SETTING_KEYS as key (key)}
 								<button
 									type="button"
-									class="setting-card {setting === key ? 'setting-active' : ''}"
-									onclick={() => (setting = key)}
+									class="setting-card {setting === key && !customSelected ? 'setting-active' : ''}"
+									onclick={() => selectPreset(key)}
 								>
-									{SETTING_PRESETS[key]}
+									{SETTING_PRESETS[key].icon}
+									{SETTING_PRESETS[key].label}
 								</button>
 							{/each}
+							{#each settings.customPresets as preset (preset.label)}
+								<div class="relative">
+									<button
+										type="button"
+										class="setting-card w-full pr-6 {customSelected?.label === preset.label
+											? 'setting-active'
+											: ''}"
+										onclick={() => selectCustomPreset(preset)}
+									>
+										📌 {preset.label}
+									</button>
+									<button
+										type="button"
+										class="preset-x"
+										title="ลบพรีเซ็ตนี้"
+										aria-label="ลบพรีเซ็ต {preset.label}"
+										onclick={() => settings.removeCustomPreset(preset.label)}
+									>
+										<X class="size-3" aria-hidden="true" />
+									</button>
+								</div>
+							{/each}
+							<button
+								type="button"
+								class="setting-card {setting === 'custom' && !customSelected
+									? 'setting-active'
+									: ''}"
+								onclick={() => selectPreset('custom')}
+							>
+								✍️ กำหนดเอง
+							</button>
 						</div>
 					</div>
 
-					{#if setting === 'custom'}
-						<div>
-							<p class="mb-1.5 text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">
-								แนวคิดโลกของคุณ
-							</p>
+					<div>
+						<p class="mb-1.5 text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">
+							รายละเอียดโลก <span class="tracking-normal text-gold normal-case"
+								>(แก้ไขได้ตามใจ)</span
+							>
+						</p>
+						<textarea
+							class="w-full rounded-md border border-input bg-input/30 px-3 py-2 text-sm leading-relaxed"
+							rows="3"
+							maxlength="400"
+							placeholder="อธิบายโลกที่อยากเล่น เช่น จักรวรรดิตะวันออกที่ขุนนางแย่งบัลลังก์ ผู้เล่นคือทายาทตระกูลจมหนี้..."
+							bind:value={worldDesc}></textarea>
+						<div class="mt-1.5 flex items-center gap-1.5">
 							<Input
-								bind:value={premise}
-								placeholder="เช่น เมืองท่าที่เรือมืดแล่นเข้าออกทุกคืนฝน..."
-								class="h-10"
+								bind:value={presetName}
+								placeholder="ตั้งชื่อพรีเซ็ตนี้..."
+								class="h-8 flex-1 text-xs"
 							/>
+							<Button variant="outline" size="sm" onclick={savePreset}
+								>บันทึกเป็นพรีเซ็ตของฉัน</Button
+							>
 						</div>
-					{/if}
+						{#if presetSaveMsg}
+							<p class="mt-1 text-[11px] text-muted-foreground">{presetSaveMsg}</p>
+						{/if}
+					</div>
 
 					<div>
 						<p class="mb-2 text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">
@@ -281,6 +382,31 @@
 											</button>
 										{/each}
 									</div>
+									{#if heroClass === CUSTOM_CLASS}
+										<div class="mt-2.5 space-y-2 rounded-lg border border-gold/30 bg-gold/5 p-3">
+											<label
+												class="block text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase"
+												for="custom-class-name">ชื่ออาชีพของคุณ</label
+											>
+											<Input
+												id="custom-class-name"
+												bind:value={customClassName}
+												placeholder="เช่น นักดาบแห่งกาลเวลา · จอมเวทสายเลือดมังกร"
+												class="h-9"
+											/>
+											<label
+												class="block text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase"
+												for="custom-class-note">อธิบายความสามารถ / สไตล์การเล่น</label
+											>
+											<textarea
+												id="custom-class-note"
+												class="w-full rounded-md border border-input bg-input/30 px-3 py-2 text-sm leading-relaxed"
+												rows="2"
+												maxlength="300"
+												placeholder="เช่น ใช้ดาบคู่กับเวทย้อนเวลาเล็กน้อย หลบหลีกเก่ง แต่ร่างกายเปราะ"
+												bind:value={customClassNote}></textarea>
+										</div>
+									{/if}
 								</div>
 							</div>
 							<div>
@@ -441,6 +567,31 @@
 		border-color: color-mix(in oklch, var(--color-gold) 55%, transparent);
 		background: color-mix(in oklch, var(--color-gold) 10%, transparent);
 		font-weight: 600;
+	}
+
+	.preset-x {
+		position: absolute;
+		top: -6px;
+		right: -6px;
+		z-index: 5;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 18px;
+		height: 18px;
+		border-radius: 9999px;
+		border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);
+		background: var(--color-popover);
+		color: var(--color-muted-foreground);
+		transition:
+			color 0.12s var(--ease-out),
+			border-color 0.12s var(--ease-out);
+	}
+	@media (hover: hover) and (pointer: fine) {
+		.preset-x:hover {
+			color: var(--color-destructive);
+			border-color: color-mix(in oklch, var(--color-destructive) 50%, transparent);
+		}
 	}
 
 	.tone-chip {

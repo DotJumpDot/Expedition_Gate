@@ -14,6 +14,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		name?: string;
 		concept?: string;
 		klass?: string;
+		classNote?: string;
 		baseUrl?: string;
 	};
 
@@ -37,7 +38,8 @@ export const POST: RequestHandler = async ({ request }) => {
 			brief: brief.data,
 			name: body.name?.slice(0, 40) ?? '',
 			concept: body.concept?.slice(0, 300) ?? '',
-			klass: body.klass?.slice(0, 40) || 'นักผจญภัย'
+			klass: body.klass?.slice(0, 40) || 'นักผจญภัย',
+			classNote: body.classNote?.trim().slice(0, 300) || undefined
 		},
 		baseUrl
 	);

@@ -9,7 +9,7 @@ All game UI and game content is **Thai**; the repo is documented in English.
 
 ## What's in the game (v1 — P0–P4 complete)
 
-**Create** — 3-step wizard: pick a setting preset (ดาบและเวทมนตร์ · ไซไฟ · สยองขวัญ · ตำนานไทย · กำหนดเอง) + tone chips → AI writes the world brief (regenerate with 🎲) → describe your hero and the AI proposes stats, kit, and background; tweak the 52-point stat buy yourself or reroll.
+**Create** — 3-step wizard: pick one of **15 world presets** (ดาบและเวทมนตร์ · สถาบันเวทมนตร์ · ขุนนางแดนน้ำแข็ง · ระบบพลังลับ · ขุนนางตกอับ · ผู้สั่งการเวลา · ราชสำนักจักรวรรดิตะวันออก · จอมยุทธ์ · จอมมารกลับชาติ · โจรสลัด · หลังวันสิ้นโลก · จักรกลไอน้ำ · ไซไฟ · สยองขวัญ · ตำนานไทย) — **every preset's world description is editable** and saveable as your own preset (localStorage) — + tone chips → AI writes the world brief (regenerate with 🎲) → describe your hero with 11 class options or a fully custom class (name + ability description), and the AI proposes stats, kit, and background; tweak the 52-point stat buy yourself or reroll.
 
 **Play** — free-text input always available, plus quick actions (⚔️ โจมตี · 🔍 ตรวจสอบ · 💬 พูดคุย · 🏃 หนี) and a dice tray (pick stat + DC). **The app does all the math server-side** — d20+mod vs DC, weapon damage, crits, HP/MP/gold/XP, declared-spell มานา costs (tiered 3/5/8, fizzles when short), and potion use (ใช้ button on recognized items — heal 2d6+4 / มานา 1d6+7) — and the GM narrates the already-resolved result as streaming Thai novel prose (dialogue lines, 📊 status blocks only when something mechanical changed). Botched a roll? Spend 1 แต้มดวง (LUK) to reroll the last check with fate twisting back. At 0 HP the dying hero rolls death saves (d20 ≥ 10, three fails = the end).
 
@@ -52,7 +52,7 @@ LLAMA_URL=http://127.0.0.1:8090/v1 npm run dev
 All from `expedition_gate/`; nothing ever touches a live model server:
 
 ```bash
-npm test         # Vitest — 113 unit/engine tests (14 files)
+npm test         # Vitest — 120 unit/engine tests (15 files)
 npm run e2e      # node E2E smoke vs fake-llama: wizard → turns → stop → persist →
                  #   chips cache → checkpoint round-trip → consolidation → cleanup
 npm run e2e:pw   # Playwright browser e2e (boots fake-llama + dev server itself)
