@@ -552,6 +552,105 @@ export function setMessageMeta(messageId: string, meta: Record<string, unknown>)
 	db.update(messages).set({ meta }).where(eq(messages.id, messageId)).run();
 }
 
+// ---------------------------------------------------------------------------
+// Export / import — one .json file with everything (P4)
+// ---------------------------------------------------------------------------
+
+export interface CampaignExport {
+	gate: 1;
+	exportedAt: string;
+	campaign: {
+		title: string;
+		setting: string;
+		tone: string;
+		worldBrief: string;
+		stateJson: unknown;
+		stateStale: boolean;
+		turnCount: number;
+		sessionSummary: string;
+		chronicle: string;
+		ended: string | null;
+	};
+	messages: Array<{
+		seq: number;
+		role: 'player' | 'gm' | 'system';
+		content: string;
+		meta: unknown;
+	}>;
+}
+
+export function exportCampaign(id: string): CampaignExport | null {
+	const row = getCampaign(id);
+	if (!row) return null;
+	return {
+		gate: 1,
+		exportedAt: new Date().toISOString(),
+		campaign: {
+			title: row.title,
+			setting: row.setting,
+			tone: row.tone,
+			worldBrief: row.worldBrief,
+			stateJson: row.stateJson,
+			stateStale: row.stateStale,
+			turnCount: row.turnCount,
+			sessionSummary: row.sessionSummary,
+			chronicle: row.chronicle,
+			ended: row.ended
+		},
+		messages: getMessages(row.id, 10_000).map((message) => ({
+			seq: message.seq,
+			role: message.role,
+			content: message.content,
+			meta: message.meta
+		}))
+	};
+}
+
+/** Import a campaign export: brand-new id, message seqs preserved. */
+export function importCampaign(payload: CampaignExport): string | null {
+	const db = getDb();
+	if (payload?.gate !== 1 || !payload.campaign?.title || !Array.isArray(payload.messages)) {
+		return null;
+	}
+	const state = parseState(payload.campaign.stateJson);
+	if (!state) return null;
+
+	const id = crypto.randomUUID();
+	db.insert(campaigns)
+		.values({
+			id,
+			title: `${payload.campaign.title.slice(0, 70)}`,
+			setting: payload.campaign.setting || 'custom',
+			tone: payload.campaign.tone || '[]',
+			worldBrief: payload.campaign.worldBrief || '',
+			stateJson: state,
+			stateStale: Boolean(payload.campaign.stateStale),
+			turnCount: Math.max(0, Math.trunc(payload.campaign.turnCount ?? 0)),
+			sessionSummary: String(payload.campaign.sessionSummary ?? '').slice(0, 1200),
+			chronicle: String(payload.campaign.chronicle ?? '').slice(0, 4000),
+			ended:
+				payload.campaign.ended === 'dead' || payload.campaign.ended === 'epilogue'
+					? payload.campaign.ended
+					: null,
+			lastPlayedAt: new Date()
+		})
+		.run();
+
+	const rows = payload.messages
+		.filter((message) => message && typeof message.content === 'string')
+		.map((message, index) => ({
+			id: crypto.randomUUID(),
+			campaignId: id,
+			seq: Math.trunc(message.seq) || index + 1,
+			role: (['player', 'gm', 'system'] as const).includes(message.role) ? message.role : 'system',
+			content: message.content.slice(0, 60_000),
+			meta: (message.meta as Record<string, unknown> | null) ?? null
+		}))
+		.sort((a, b) => a.seq - b.seq);
+	if (rows.length > 0) db.insert(messages).values(rows).run();
+	return id;
+}
+
 export function deleteCampaign(id: string) {
 	const db = getDb();
 	db.delete(campaigns).where(eq(campaigns.id, id)).run();

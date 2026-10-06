@@ -1,0 +1,95 @@
+{
+	"$comment": "Scene-art library manifest (Docs/02 § Scene illustration). One entry per image: file (relative to static/assets/scenes/), tags (controlled vocabulary = SCENE_TAGS in src/lib/game/worldstate.ts), setting (preset keys or 'any'), source, license, author. Entries with `url` are downloaded by scripts/fetch-assets.mjs (validated: http/https only, localhost/loopback/private/reserved hosts rejected, per-file size cap, atomic write). Entries with `generator` are regenerated locally by the same script — starter art authored for this project, CC0. ADD REAL CURATED ART by appending entries with verified free-license URLs (CC0/PD preferred); never add art without a recorded source+license+author.",
+	"images": [
+		{
+			"file": "gate.svg",
+			"tags": ["gate", "ruins", "night"],
+			"setting": ["any"],
+			"generator": "gate",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "village.svg",
+			"tags": ["village", "inn", "market"],
+			"setting": ["any"],
+			"generator": "village",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "forest.svg",
+			"tags": ["forest", "swamp"],
+			"setting": ["any"],
+			"generator": "forest",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "mountain.svg",
+			"tags": ["mountain", "cave"],
+			"setting": ["any"],
+			"generator": "mountain",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "tavern.svg",
+			"tags": ["tavern", "inn"],
+			"setting": ["any"],
+			"generator": "tavern",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "dungeon.svg",
+			"tags": ["dungeon", "cave", "ruins"],
+			"setting": ["any"],
+			"generator": "dungeon",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "temple.svg",
+			"tags": ["temple", "ritual"],
+			"setting": ["any"],
+			"generator": "temple",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "campfire.svg",
+			"tags": ["campfire", "night"],
+			"setting": ["any"],
+			"generator": "campfire",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "night.svg",
+			"tags": ["night", "void"],
+			"setting": ["any"],
+			"generator": "night",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		},
+		{
+			"file": "river.svg",
+			"tags": ["river", "sea"],
+			"setting": ["any"],
+			"generator": "river",
+			"source": "generated locally by scripts/fetch-assets.mjs (starter art for Expedition's Gate)",
+			"license": "CC0-1.0",
+			"author": "Expedition's Gate project"
+		}
+	]
+}

@@ -171,7 +171,9 @@ export const WorldStateSchema = z.object({
 	world: WorldSchema,
 	npcs: z.array(NpcSchema).max(60).default([]),
 	quests: z.array(QuestSchema).max(30).default([]),
-	recentEvents: z.array(z.string().max(160)).max(20).default([])
+	recentEvents: z.array(z.string().max(160)).max(20).default([]),
+	/** Turn-level flag from the state tracker: this beat ended on a major decision. */
+	majorDecision: z.boolean().default(false)
 });
 export type WorldState = z.infer<typeof WorldStateSchema>;
 

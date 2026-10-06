@@ -327,13 +327,19 @@ export async function generateSuggestions(input: {
 	narration: string;
 	quickFacts: string;
 	n: number;
+	/** Major-decision beat (state tracker flagged it): dramatic branch options. */
+	major?: boolean;
 	baseUrl?: string;
 }): Promise<{ ok: true; chips: string[] } | { ok: false; error: string }> {
 	const n = Math.max(1, Math.min(6, Math.round(input.n)));
+	const mode = input.major
+		? 'บริบทพิเศษ: เทิร์นนี้คือ **จุดตัดสินใจสำคัญ** ของเรื่อง — เสนอทางเลือกที่ต่างกันอย่างชัดเจนทั้งความเสี่ยงและผลระยะยาว (อย่างน้อยหนึ่งข้อควรเสี่ยง/กล้าหาญ อย่างน้อยหนึ่งข้อระมัดระวัง อย่างน้อยหนึ่งข้อไม่คาดคิด)'
+		: 'เสนอทางเลือกตามจังหวะเรื่องปกติ (ผสมพูด/ทำ/เปลี่ยนทิศ)';
 	const prompt = fill(PROMPTS.suggestions, {
 		N: String(n),
 		NARRATION: input.narration.slice(-3000),
-		QUICK_FACTS: input.quickFacts
+		QUICK_FACTS: input.quickFacts,
+		MODE: mode
 	});
 	const result = await completeJson([{ role: 'user', content: prompt }], SuggestionsSchema, {
 		baseUrl: input.baseUrl,

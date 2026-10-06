@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { Compass, ScrollText, Swords, Trash2 } from '@lucide/svelte';
+	import { goto } from '$app/navigation';
+	import { Compass, FileUp, ScrollText, Swords, Trash2 } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import WorldWizard from '$lib/components/WorldWizard.svelte';
 
@@ -20,6 +21,33 @@
 
 	let wizardOpen = $state(false);
 	let confirmDelete = $state<string | null>(null);
+	let fileInput: HTMLInputElement | undefined = $state();
+	let importError = $state('');
+	let importing = $state(false);
+
+	async function onImportFile(event: Event) {
+		const input = event.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+		importing = true;
+		importError = '';
+		try {
+			const text = await file.text();
+			const res = await fetch('/api/campaigns/import', {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: text
+			});
+			const body = (await res.json()) as { id?: string; error?: string };
+			if (!res.ok || !body.id) throw new Error(body.error ?? 'นำเข้าไม่สำเร็จ');
+			await goto(`/campaign/${body.id}`);
+		} catch (err) {
+			importError = err instanceof Error ? err.message : 'นำเข้าไม่สำเร็จ';
+			importing = false;
+		} finally {
+			input.value = '';
+		}
+	}
 
 	const SETTING_ICON: Record<string, string> = {
 		sword_sorcery: '⚔️',
@@ -71,11 +99,33 @@
 		</p>
 	</section>
 
-	<section class="gate-rise mt-9" style="--stagger: 1">
-		<Button size="lg" class="px-6 text-base" onclick={() => (wizardOpen = true)}>
-			<Compass data-icon="inline-start" aria-hidden="true" />
-			สร้างโลกใหม่
-		</Button>
+	<section class="gate-rise mt-9 flex flex-col items-center gap-2" style="--stagger: 1">
+		<div class="flex items-center gap-2">
+			<Button size="lg" class="px-6 text-base" onclick={() => (wizardOpen = true)}>
+				<Compass data-icon="inline-start" aria-hidden="true" />
+				สร้างโลกใหม่
+			</Button>
+			<Button
+				variant="outline"
+				size="lg"
+				onclick={() => fileInput?.click()}
+				disabled={importing}
+				title="นำเข้าการผจญภัยจากไฟล์ .json"
+			>
+				<FileUp data-icon="inline-start" aria-hidden="true" />
+				{importing ? 'กำลังนำเข้า...' : 'นำเข้า'}
+			</Button>
+			<input
+				type="file"
+				accept=".json,application/json"
+				class="hidden"
+				bind:this={fileInput}
+				onchange={onImportFile}
+			/>
+		</div>
+		{#if importError}
+			<p class="text-sm text-destructive" role="alert">{importError}</p>
+		{/if}
 	</section>
 
 	<section class="gate-rise mt-14 w-full max-w-3xl" style="--stagger: 2">

@@ -1,5 +1,7 @@
 <script lang="ts">
+	import BookOpen from '@lucide/svelte/icons/book-open';
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
+	import Download from '@lucide/svelte/icons/download';
 	import History from '@lucide/svelte/icons/history';
 	import PanelLeft from '@lucide/svelte/icons/panel-left';
 	import Settings from '@lucide/svelte/icons/settings';
@@ -15,6 +17,7 @@
 	import NarrationCard from '$lib/components/game/NarrationCard.svelte';
 	import NpcPanel from '$lib/components/game/NpcPanel.svelte';
 	import QuestList from '$lib/components/game/QuestList.svelte';
+	import WorldCodex from '$lib/components/game/WorldCodex.svelte';
 	import RecapCard from '$lib/components/game/RecapCard.svelte';
 	import SceneCard from '$lib/components/game/SceneCard.svelte';
 	import { session } from '$lib/stores/campaign.svelte';
@@ -28,6 +31,7 @@
 	let mobileRailOpen = $state(false);
 	let cpOpen = $state(false);
 	let settingsOpen = $state(false);
+	let codexOpen = $state(false);
 	let levelUpOpen = $state(false);
 	let narrationEl: HTMLElement | undefined = $state();
 
@@ -141,6 +145,16 @@
 					>
 						<PanelLeft class="size-4" aria-hidden="true" />
 					</Button>
+					{#if session.state}
+						<Button
+							variant="ghost"
+							size="icon-sm"
+							onclick={() => ((codexOpen = !codexOpen), (cpOpen = false), (settingsOpen = false))}
+							title="บันทึกแห่งโลก"
+						>
+							<BookOpen class="size-4" aria-hidden="true" />
+						</Button>
+					{/if}
 					{#if !session.ended}
 						<Button
 							variant="ghost"
@@ -152,6 +166,14 @@
 							<History class="size-4" aria-hidden="true" />
 						</Button>
 					{/if}
+					<Button
+						variant="ghost"
+						size="icon-sm"
+						href={`/api/campaigns/${data.id}/export`}
+						title="ส่งออกการผจญภัย (.json)"
+					>
+						<Download class="size-4" aria-hidden="true" />
+					</Button>
 					<Button
 						variant="ghost"
 						size="icon-sm"
@@ -170,6 +192,10 @@
 						<PanelLeft class="size-4" aria-hidden="true" />
 					</Button>
 				</div>
+
+				{#if codexOpen && session.state}
+					<WorldCodex world={session.state} onclose={() => (codexOpen = false)} />
+				{/if}
 
 				{#if cpOpen}
 					<CheckpointManager
@@ -247,6 +273,22 @@
 							value={settings.modelUrl}
 							onchange={(event) => settings.setModelUrl(event.currentTarget.value)}
 						/>
+
+						<hr class="my-3 border-border/60" />
+
+						<label class="block text-xs font-bold" for="gm-override">โน้ตถึงผู้เล่าเรื่อง</label>
+						<p class="mt-0.5 text-[10px] text-muted-foreground">
+							คำสั่งพิเศษที่ทับกฎในระบบทั้งหมด (แทรกท้าย prompt ทุกเทิร์น) เช่น
+							"เล่าจากมุมมองบุรุษที่ 2"
+						</p>
+						<textarea
+							id="gm-override"
+							class="mt-1.5 w-full rounded-md border border-input bg-input/30 px-2 py-1.5 text-xs leading-relaxed"
+							rows="3"
+							maxlength="2000"
+							placeholder="เขียนคำสั่งพิเศษสำหรับ GM ที่นี่..."
+							value={settings.gmOverride}
+							onchange={(event) => settings.setGmOverride(event.currentTarget.value)}></textarea>
 					</div>
 				{/if}
 			</div>
@@ -254,7 +296,7 @@
 			<div bind:this={narrationEl} class="min-h-0 flex-1 overflow-y-auto px-4 py-5 sm:px-6">
 				<div class="mx-auto flex w-full max-w-3xl flex-col gap-5">
 					{#if session.state}
-						<SceneCard world={session.state} />
+						<SceneCard world={session.state} setting={session.setting} campaignId={data.id} />
 					{/if}
 
 					{#if session.recap}
@@ -317,7 +359,12 @@
 						</div>
 					{/if}
 
-					<ChoiceChips chips={session.chips} busy={session.busy} onsend={handleSend} />
+					<ChoiceChips
+						chips={session.chips}
+						busy={session.busy}
+						major={Boolean(session.state?.majorDecision)}
+						onsend={handleSend}
+					/>
 				</div>
 			</div>
 

@@ -48,6 +48,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		narration: lastGm.content,
 		quickFacts: `วันที่ ${state.world.day} (${state.world.timeOfDay}) · ${state.world.location}`,
 		n: 6, // generate the max pool; the client slices to the user's setting
+		major: state.majorDecision === true,
 		baseUrl
 	});
 

@@ -22,13 +22,17 @@ data/
 *.db-shm
 
 # Scene-art binaries (assets/manifest.json IS committed; re-download via scripts/fetch-assets.mjs)
-static/assets/
+expedition_gate/static/assets/
 
 # Logs & OS
 *.log
 npm-debug.log*
 .DS_Store
 Thumbs.db
+
+# Playwright transient output
+test-results/
+playwright-report/
 
 # Editors / tooling
 .vscode/*

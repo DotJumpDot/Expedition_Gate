@@ -19,6 +19,7 @@
 		"format": "prettier --write . && eslint . --fix",
 		"db:generate": "drizzle-kit generate",
 		"db:studio": "drizzle-kit studio",
+		"assets": "node scripts/fetch-assets.mjs",
 		"fake-llama": "node tests/fake-llama/server.mjs"
 	},
 	"devDependencies": {
