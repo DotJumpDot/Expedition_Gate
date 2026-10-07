@@ -137,8 +137,12 @@ export function pickNpcPortrait(
 
 	const hay = `${npcName} ${npcRole}`.toLowerCase();
 
-	// 1) monsters (the name or role names a creature)
-	const monster = firstHit(hay, MONSTER_KEYWORDS);
+	// 1) monsters (the name or role names a creature). หมอผี (shaman — one of
+	// the game's own classes) and ผีเสื้อ (butterfly) contain the ghost keyword
+	// ผี; strip them first so humans stay human (ผีเสื้อ routes via profession,
+	// หมอผี via the priest profession row below).
+	const monsterHay = hay.replaceAll('หมอผี', ' ').replaceAll('ผีเสื้อ', ' ');
+	const monster = firstHit(monsterHay, MONSTER_KEYWORDS);
 	if (monster) {
 		let pool = usable.filter((entry) => entry.tags[0] === 'monster' && entry.tags[1] === monster);
 		if (pool.length > 0) return pool[hashKey(npcName) % pool.length] ?? null;

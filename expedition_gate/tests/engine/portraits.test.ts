@@ -110,14 +110,19 @@ describe('portrait catalog (assets/portraits.json)', () => {
 		}
 	});
 
-	it.skipIf(!catalog)('every catalog entry has its binary on disk', () => {
-		for (const entry of catalog!) {
-			expect(
-				existsSync(resolve('static/assets/portraits', entry.file)),
-				`binary missing: ${entry.file}`
-			).toBe(true);
+	// Binaries are gitignored — a fresh clone has the catalog but no images
+	// until `npm run portraits`; the test battery must not fail there.
+	it.skipIf(!existsSync(resolve('static/assets/portraits')))(
+		'every catalog entry has its binary on disk',
+		() => {
+			for (const entry of catalog!) {
+				expect(
+					existsSync(resolve('static/assets/portraits', entry.file)),
+					`binary missing: ${entry.file}`
+				).toBe(true);
+			}
 		}
-	});
+	);
 });
 
 // --- selection logic (lib/game/portraits.ts) ---------------------------------
@@ -202,7 +207,8 @@ const NPC_LIB: PortraitEntry[] = [
 	{ file: 'e.png', bucket: 'anime', tags: ['boy', 'warrior'] },
 	{ file: 'f.png', bucket: 'anime', tags: ['monster', 'goblin'] },
 	{ file: 'g.png', bucket: 'anime', tags: ['monster', 'dragon'] },
-	{ file: 'h.png', bucket: 'anime', tags: ['monster', 'slime'] }
+	{ file: 'h.png', bucket: 'anime', tags: ['monster', 'slime'] },
+	{ file: 'i.png', bucket: 'anime', tags: ['monster', 'ghost'] }
 ];
 
 describe('pickNpcPortrait (NPC + monster routing)', () => {
@@ -244,5 +250,17 @@ describe('pickNpcPortrait (NPC + monster routing)', () => {
 	});
 	it('empty library → null', () => {
 		expect(pickNpcPortrait([], 'ใครสักคน', 'ใครก็ได้')).toBeNull();
+	});
+	it('หมอผี (a shipped hero class) stays human — never the ghost monster', () => {
+		const pick = pickNpcPortrait(NPC_LIB, 'หมอผีเฒ่าทอง', 'หมอผีประจำหมู่บ้าน');
+		expect(pick?.tags[0]).not.toBe('monster');
+	});
+	it('ผีเสื้อ (butterfly) is not a ghost', () => {
+		const pick = pickNpcPortrait(NPC_LIB, 'ป้าผีเสื้อ', 'แม่ค้าขายผีเสื้อ');
+		expect(pick?.tags[0]).not.toBe('monster');
+	});
+	it('a real ghost NPC still routes to the ghost art', () => {
+		const pick = pickNpcPortrait(NPC_LIB, 'ผีสาวในโรงสี', 'วิญญาณที่ยังไม่สูญ');
+		expect(pick?.tags).toEqual(['monster', 'ghost']);
 	});
 });
