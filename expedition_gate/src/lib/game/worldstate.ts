@@ -288,7 +288,9 @@ export const NpcSchema = z.object({
 	disposition: z.number().int().min(-3).max(3).default(0),
 	location: z.string().max(120).default(''),
 	status: z.string().max(60).default('มีชีวิต'),
-	note: z.string().max(200).optional()
+	note: z.string().max(200).optional(),
+	/** GM's one-line appearance hint — matched app-side to a library portrait. */
+	portrait: z.string().max(120).default('')
 });
 
 export const QuestSchema = z.object({
@@ -536,7 +538,34 @@ export function acceptStateUpdate(
 		...next,
 		hero: { ...next.hero, ...stripUndefined(appMath) }
 	};
+	next = { ...next, npcs: carryNpcExtras(next.npcs, previous.npcs) };
 	return { state: next, stale: false };
+}
+
+/**
+ * The state serialization never shows `portrait` (and usually not `note`) to
+ * the tracker, so it cannot copy what it cannot see — an omitted field would
+ * silently wipe it every turn. Carry each previous NPC's extras onto its
+ * successor (match by id, then name); a NEW hint the tracker wrote wins.
+ */
+function carryNpcExtras(
+	proposed: WorldState['npcs'],
+	previous: WorldState['npcs']
+): WorldState['npcs'] {
+	if (previous.length === 0) return proposed;
+	const byId = new Map(previous.map((npc) => [npc.id, npc]));
+	const byName = new Map(previous.map((npc) => [npc.name, npc]));
+	return proposed.map((npc) => {
+		if (npc.portrait.trim()) return npc;
+		const was = byId.get(npc.id) ?? byName.get(npc.name);
+		return was?.portrait || was?.note
+			? {
+					...npc,
+					portrait: npc.portrait || was.portrait,
+					note: npc.note ?? was.note
+				}
+			: npc;
+	});
 }
 
 function stripUndefined<T extends object>(obj: T): Partial<T> {

@@ -7,11 +7,14 @@
 	let {
 		heroName,
 		klass,
+		concept = '',
 		campaignId = '',
 		readonly = false
 	}: {
 		heroName: string;
 		klass: string;
+		/** Concept line — its temperament words narrow the auto-pick. */
+		concept?: string;
 		campaignId?: string;
 		/** Wizard preview: no override picker (no campaign id exists yet). */
 		readonly?: boolean;
@@ -49,7 +52,7 @@
 			const hit = library.find((entry) => entry.file === overrideFile);
 			if (hit) return hit;
 		}
-		return pickPortrait(library, klass, heroName);
+		return pickPortrait(library, klass, heroName, concept);
 	});
 
 	function setOverride(file: string | null) {

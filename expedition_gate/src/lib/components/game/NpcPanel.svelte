@@ -19,8 +19,14 @@
 		}
 	});
 
-	function faceFor(npc: { id: string; name: string; role: string }): PortraitEntry | null {
-		return pickNpcPortrait(library, npc.name, npc.role);
+	function faceFor(npc: {
+		id: string;
+		name: string;
+		role: string;
+		portrait?: string;
+		disposition?: number;
+	}): PortraitEntry | null {
+		return pickNpcPortrait(library, npc.name, npc.role, npc.portrait ?? '', npc.disposition ?? 0);
 	}
 
 	const DISPOSITION_TH: Record<number, string> = {

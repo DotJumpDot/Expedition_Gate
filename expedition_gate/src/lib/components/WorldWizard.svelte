@@ -687,6 +687,7 @@
 											klass={heroClass === CUSTOM_CLASS
 												? customClassName.trim() || 'นักผจญภัย'
 												: heroClass}
+											concept={heroConcept}
 											readonly
 										/>
 										<p class="text-[11px] text-muted-foreground">เปลี่ยนรูปได้ในหน้าเกม</p>

@@ -5,6 +5,11 @@
  * The library is ANIME-ONLY (a photorealistic bucket was generated 2026-10-06
  * and dropped by user review — it didn't match the app's fantasy look). Entries
  * keep a `bucket` field so a future style expansion stays schema-compatible.
+ *
+ * Faces are picked by the APP, never by the model: the GM only describes (NPC
+ * name/role/portrait hint, hero concept), and Thai keyword tables here map that
+ * text onto the library's groups — profession, monster, gender/age, and
+ * temperament (cheerful/stern/dull). Every pick is deterministic per name.
  */
 
 export const PORTRAIT_BUCKET = 'anime';
@@ -18,6 +23,8 @@ export const PORTRAIT_ROLES = [
 	'noble'
 ] as const;
 export type PortraitRole = (typeof PORTRAIT_ROLES)[number];
+
+export type PortraitExpression = 'cheerful' | 'stern' | 'dull';
 
 export interface PortraitEntry {
 	file: string;
@@ -52,6 +59,24 @@ export function roleTagForClass(klass: string): PortraitRole {
 	return 'commoner';
 }
 
+/**
+ * Thai appearance words → temperament variant (library expression group).
+ * Reads the GM's portrait hint / hero concept: "ยิ้มแย้ม ร่าเริง" → cheerful,
+ * "หน้านิ่ง จริงจัง" → stern, "เหนื่อยอ่อนเพลีย ซีด" → dull. null = no signal.
+ */
+export function expressionTagFor(text: string): PortraitExpression | null {
+	const hay = text.toLowerCase();
+	const rows: Array<[RegExp, PortraitExpression]> = [
+		[/ยิ้ม|แย้ม|ร่าเริง|เบิกบาน|แจ่มใส|สดใส|รื่นเริง|เฮฮา|cheerful|smile/, 'cheerful'],
+		[/นิ่ง|เคร่ง|จริงจัง|ขรึม|เย็นชา|ดุดัน|stern|serious/, 'stern'],
+		[/เหนื่อย|อ่อนเพลีย|ซีด|ซึม|เฉยเมย|เหม่อ|อมทุกข์|weary|tired|dull/, 'dull']
+	];
+	for (const [pattern, expression] of rows) {
+		if (pattern.test(hay)) return expression;
+	}
+	return null;
+}
+
 /** FNV-1a — the same stable hash the asset scripts use. */
 function hashKey(key: string): number {
 	let h = 2166136261;
@@ -59,15 +84,32 @@ function hashKey(key: string): number {
 	return h >>> 0;
 }
 
+function pickFrom(pool: PortraitEntry[], seed: string): PortraitEntry | null {
+	return pool[hashKey(seed) % pool.length] ?? null;
+}
+
+/** Prefer the temperament variant when the pool has one; never empty the pool. */
+function preferExpression(
+	pool: PortraitEntry[],
+	expression: PortraitExpression | null
+): PortraitEntry[] {
+	if (!expression) return pool;
+	const hit = pool.filter((entry) => entry.tags.includes(expression));
+	return hit.length > 0 ? hit : pool;
+}
+
 /**
- * Deterministic pick: keep available library entries, prefer those whose tags
- * include the class's role, tie-break by stable hash of seedKey (hero name) so
- * the same hero keeps the same face across reloads. Empty library → null.
+ * Deterministic hero pick: keep available library entries, prefer those whose
+ * tags include the class's role, then narrow by the hero concept's temperament
+ * ("หญิงสาวร่าเริง" → a cheerful face), tie-break by stable hash of seedKey
+ * (hero name) so the same hero keeps the same face across reloads.
+ * Empty library → null.
  */
 export function pickPortrait(
 	entries: PortraitEntry[],
 	klass: string,
-	seedKey: string
+	seedKey: string,
+	conceptHint = ''
 ): PortraitEntry | null {
 	const usable = entries.filter(
 		(entry) => entry.bucket === PORTRAIT_BUCKET && entry.available !== false
@@ -75,15 +117,17 @@ export function pickPortrait(
 	if (usable.length === 0) return null;
 	const role = roleTagForClass(klass);
 	const preferred = usable.filter((entry) => entry.tags.includes(role));
-	const pool = preferred.length > 0 ? preferred : usable;
-	return pool[hashKey(seedKey) % pool.length] ?? null;
+	let pool = preferred.length > 0 ? preferred : usable;
+	pool = preferExpression(pool, expressionTagFor(conceptHint));
+	return pickFrom(pool, seedKey);
 }
 
 // --- NPC & monster faces -----------------------------------------------------
 // The GM adds NPCs (and enemies) as world-state entries with free-text Thai
-// names/roles; these keyword tables route them at the library's profession,
-// monster, and personality-variant groups. Best effort by design — any miss
-// falls through to a sensible pool, never to "no portrait".
+// names/roles plus a one-line `portrait` appearance hint (update-state prompt);
+// these keyword tables route them at the library's profession, monster, and
+// personality-variant groups. Best effort by design — any miss falls through
+// to a sensible pool, never to "no portrait".
 
 const MONSTER_KEYWORDS: Array<[string, string[]]> = [
 	['goblin', ['กอบลิน', 'โกบลิน', 'goblin']],
@@ -109,8 +153,23 @@ const PROFESSION_KEYWORDS: Array<[string, string[]]> = [
 	['priest', ['พระ', 'นักบวช', 'หมอผี', 'ปุโรหิต', 'แม่ชี', 'เณร']]
 ];
 
-const WOMAN_HINTS = ['ป้า', 'ยาย', 'แม่', 'นาง', 'หญิง', 'สาว', 'คุณหญิง', 'หม่อม'];
-const MAN_HINTS = ['ลุง', 'ตา', 'พ่อ', 'นาย', 'ชาย', 'หนุ่ม'];
+// Plain 'ตา' is dropped on purpose — in hint text it is usually eyes ("ตาลึก").
+const WOMAN_HINTS = [
+	'ป้า',
+	'ยาย',
+	'คุณยาย',
+	'แม่',
+	'นาง',
+	'หญิง',
+	'ผู้หญิง',
+	'หญิงสาว',
+	'สาว',
+	'เด็กหญิง',
+	'คุณหญิง',
+	'หม่อม'
+];
+const MAN_HINTS = ['ลุง', 'คุณตา', 'ตาแก่', 'พ่อ', 'นาย', 'ชาย', 'ผู้ชาย', 'เด็กชาย', 'หนุ่ม'];
+const ELDERLY_HINTS = ['ชรา', 'วัยชรา', 'อายุมาก', 'แก่', 'เฒ่า', 'ชราภา'];
 const ADULT_AGES = ['man', 'woman', 'grandpa', 'grandma'];
 
 function firstHit(haystack: string, table: Array<[string, string[]]>): string | null {
@@ -122,13 +181,17 @@ function firstHit(haystack: string, table: Array<[string, string[]]>): string | 
 
 /**
  * Portrait for a world-state NPC (or enemy — monsters route via name/role
- * keywords). Fallback chain: monster → profession/role (± gender) → any adult
- * → anything; tie-break stable per NPC name. Empty library → null.
+ * keywords). The GM's `portrait` hint steers gender, age, and temperament;
+ * a friendly/hostile disposition biases the face when the hint is silent.
+ * Fallback chain: monster → profession/role (± look) → adults → anything;
+ * tie-break stable per NPC name. Empty library → null.
  */
 export function pickNpcPortrait(
 	entries: PortraitEntry[],
 	npcName: string,
-	npcRole: string
+	npcRole: string,
+	npcPortrait = '',
+	disposition = 0
 ): PortraitEntry | null {
 	const usable = entries.filter(
 		(entry) => entry.bucket === PORTRAIT_BUCKET && entry.available !== false
@@ -136,39 +199,66 @@ export function pickNpcPortrait(
 	if (usable.length === 0) return null;
 
 	const hay = `${npcName} ${npcRole}`.toLowerCase();
+	const lookHay = npcPortrait.toLowerCase();
 
-	// 1) monsters (the name or role names a creature). หมอผี (shaman — one of
-	// the game's own classes) and ผีเสื้อ (butterfly) contain the ghost keyword
-	// ผี; strip them first so humans stay human (ผีเสื้อ routes via profession,
-	// หมอผี via the priest profession row below).
+	// 1) monsters — matched on name/role ONLY: an appearance hint must not
+	//    summon a monster (a human described "หน้าซีดเหมือนผี" stays human).
+	//    หมอผี (shaman — a game class) and ผีเสื้อ (butterfly) contain the
+	//    ghost keyword ผี; strip them so humans stay human.
 	const monsterHay = hay.replaceAll('หมอผี', ' ').replaceAll('ผีเสื้อ', ' ');
 	const monster = firstHit(monsterHay, MONSTER_KEYWORDS);
 	if (monster) {
 		let pool = usable.filter((entry) => entry.tags[0] === 'monster' && entry.tags[1] === monster);
-		if (pool.length > 0) return pool[hashKey(npcName) % pool.length] ?? null;
+		if (pool.length > 0) return pickFrom(pool, npcName);
 		pool = usable.filter((entry) => entry.tags[0] === 'monster');
-		if (pool.length > 0) return pool[hashKey(npcName) % pool.length] ?? null;
+		if (pool.length > 0) return pickFrom(pool, npcName);
 	}
 
 	// 2) profession (library professions first, then the hero-role vocabulary)
 	const profTag = firstHit(hay, PROFESSION_KEYWORDS) ?? roleTagForClass(npcRole);
-	const isWoman = WOMAN_HINTS.some((word) => hay.includes(word));
-	const isMan = MAN_HINTS.some((word) => hay.includes(word));
-	const gender = isWoman && !isMan ? 'woman' : isMan && !isWoman ? 'man' : null;
+
+	// Look: gender + age from name/role/hint; temperament from the hint, with
+	// disposition as the fallback signal (ภักดี smiles, เกลียดชัง glares).
+	const text = `${hay} ${lookHay}`;
+	const isWoman = WOMAN_HINTS.some((word) => text.includes(word));
+	const isMan = MAN_HINTS.some((word) => text.includes(word));
+	const gender: 'woman' | 'man' | null =
+		isWoman && !isMan ? 'woman' : isMan && !isWoman ? 'man' : null;
+	const elderly = ELDERLY_HINTS.some((word) => text.includes(word));
+	const genderTags =
+		gender === 'woman'
+			? elderly
+				? ['woman', 'grandma']
+				: ['woman']
+			: gender === 'man'
+				? elderly
+					? ['man', 'grandpa']
+					: ['man']
+				: elderly
+					? ['grandpa', 'grandma']
+					: null;
+	const matchesLook = (entry: PortraitEntry) =>
+		genderTags === null || entry.tags.some((tag) => genderTags.includes(tag));
+	const expression =
+		expressionTagFor(lookHay) ??
+		(disposition >= 2 ? 'cheerful' : disposition <= -2 ? 'stern' : null);
+
 	let pool = usable.filter(
-		(entry) =>
-			entry.tags[0] !== 'monster' &&
-			entry.tags.includes(profTag) &&
-			(gender === null || entry.tags.includes(gender))
+		(entry) => entry.tags[0] !== 'monster' && entry.tags.includes(profTag) && matchesLook(entry)
 	);
-	if (pool.length > 0) return pool[hashKey(npcName) % pool.length] ?? null;
+	if (pool.length > 0) return pickFrom(preferExpression(pool, expression), npcName);
 	pool = usable.filter((entry) => entry.tags[0] !== 'monster' && entry.tags.includes(profTag));
-	if (pool.length > 0) return pool[hashKey(npcName) % pool.length] ?? null;
+	if (pool.length > 0) return pickFrom(preferExpression(pool, expression), npcName);
 
 	// 3) any adult human (kids read wrong for arbitrary NPCs)
 	pool = usable.filter(
+		(entry) =>
+			entry.tags[0] !== 'monster' && ADULT_AGES.includes(entry.tags[0]) && matchesLook(entry)
+	);
+	if (pool.length > 0) return pickFrom(preferExpression(pool, expression), npcName);
+	pool = usable.filter(
 		(entry) => entry.tags[0] !== 'monster' && ADULT_AGES.includes(entry.tags[0])
 	);
-	if (pool.length > 0) return pool[hashKey(npcName) % pool.length] ?? null;
-	return usable[hashKey(npcName) % usable.length] ?? null;
+	if (pool.length > 0) return pickFrom(pool, npcName);
+	return pickFrom(usable, npcName);
 }

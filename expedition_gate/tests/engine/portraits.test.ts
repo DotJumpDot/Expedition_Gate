@@ -2,11 +2,13 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import {
+	expressionTagFor,
 	pickNpcPortrait,
 	pickPortrait,
 	roleTagForClass,
 	type PortraitEntry
 } from '$lib/game/portraits';
+import { acceptStateUpdate, WorldStateSchema } from '$lib/game/worldstate';
 import { SCENARIOS } from '$lib/game/scenarios';
 
 // --- the committed catalog (assets/portraits.json) ---------------------------
@@ -130,6 +132,11 @@ describe('portrait catalog (assets/portraits.json)', () => {
 const LIB: PortraitEntry[] = [
 	{ file: 'anime_boy_warrior_illustrious.png', bucket: 'anime', tags: ['boy', 'warrior'] },
 	{ file: 'anime_girl_mystic_noobai.png', bucket: 'anime', tags: ['girl', 'mystic'] },
+	{
+		file: 'anime_girl_mystic_cheerful_noobai.png',
+		bucket: 'anime',
+		tags: ['girl', 'mystic', 'cheerful']
+	},
 	{ file: 'anime_man_noble_illustrious.png', bucket: 'anime', tags: ['man', 'noble'] },
 	{ file: 'realistic_man_warrior_arien.png', bucket: 'realistic', tags: ['man', 'warrior'] }
 ];
@@ -208,7 +215,11 @@ const NPC_LIB: PortraitEntry[] = [
 	{ file: 'f.png', bucket: 'anime', tags: ['monster', 'goblin'] },
 	{ file: 'g.png', bucket: 'anime', tags: ['monster', 'dragon'] },
 	{ file: 'h.png', bucket: 'anime', tags: ['monster', 'slime'] },
-	{ file: 'i.png', bucket: 'anime', tags: ['monster', 'ghost'] }
+	{ file: 'i.png', bucket: 'anime', tags: ['monster', 'ghost'] },
+	{ file: 'm.png', bucket: 'anime', tags: ['man', 'commoner', 'cheerful'] },
+	{ file: 'n.png', bucket: 'anime', tags: ['man', 'commoner', 'stern'] },
+	{ file: 'o.png', bucket: 'anime', tags: ['man', 'commoner', 'dull'] },
+	{ file: 'p.png', bucket: 'anime', tags: ['grandma', 'commoner'] }
 ];
 
 describe('pickNpcPortrait (NPC + monster routing)', () => {
@@ -262,5 +273,117 @@ describe('pickNpcPortrait (NPC + monster routing)', () => {
 	it('a real ghost NPC still routes to the ghost art', () => {
 		const pick = pickNpcPortrait(NPC_LIB, 'ผีสาวในโรงสี', 'วิญญาณที่ยังไม่สูญ');
 		expect(pick?.tags).toEqual(['monster', 'ghost']);
+	});
+});
+
+// --- GM portrait hints: temperament, age, disposition ------------------------
+
+describe('expressionTagFor (Thai appearance words → temperament)', () => {
+	it('maps cheer, sternness, weariness', () => {
+		expect(expressionTagFor('หญิงวัยกลางคน ยิ้มแย้ม ร่าเริง')).toBe('cheerful');
+		expect(expressionTagFor('ชายชรา หน้านิ่ง จริงจัง')).toBe('stern');
+		expect(expressionTagFor('เหนื่อยอ่อนเพลีย หน้าซีด')).toBe('dull');
+	});
+	it('returns null without a signal', () => {
+		expect(expressionTagFor('สูงใหญ่ แต่งชุดเรียบ')).toBeNull();
+		expect(expressionTagFor('')).toBeNull();
+	});
+});
+
+describe('pickNpcPortrait with the GM portrait hint', () => {
+	it('routes a cheerful hint to the cheerful face', () => {
+		const pick = pickNpcPortrait(NPC_LIB, 'คนแปลกหน้า', 'ชาวบ้าน', 'หญิงวัยกลางคน ยิ้มแย้ม');
+		expect(pick?.tags).toContain('cheerful');
+	});
+	it('routes a stern elderly man hint to stern within his age pool', () => {
+		const pick = pickNpcPortrait(NPC_LIB, 'คนแปลกหน้า', 'ชาวบ้าน', 'ชายชรา หน้านิ่ง จริงจัง');
+		expect(pick?.tags).toContain('stern');
+	});
+	it('routes a weary hint to the dull face', () => {
+		const pick = pickNpcPortrait(NPC_LIB, 'คนแปลกหน้า', 'คนงาน', 'เหนื่อยอ่อนเพลีย ซีด');
+		expect(pick?.tags).toContain('dull');
+	});
+	it('elderly woman hint prefers the grandma pool', () => {
+		const pick = pickNpcPortrait(NPC_LIB, 'คนแปลกหน้า', 'ชาวบ้าน', 'หญิงชรา ยิ้มแย้ม');
+		expect(pick?.tags[0]).toBe('grandma');
+	});
+	it('a ghost SIMILE in the hint never summons a monster', () => {
+		const pick = pickNpcPortrait(NPC_LIB, 'คนแปลกหน้า', 'คนเดินทาง', 'หน้าซีดเหมือนผี เหนื่อยอ่อย');
+		expect(pick?.tags[0]).not.toBe('monster');
+		expect(pick?.tags).toContain('dull');
+	});
+	it('disposition biases the face when the hint is silent', () => {
+		const friendly = pickNpcPortrait(NPC_LIB, 'คนแปลกหน้า', 'ชาวบ้าน', '', 2);
+		const hostile = pickNpcPortrait(NPC_LIB, 'คนแปลกหน้า', 'ชาวบ้าน', '', -2);
+		expect(friendly?.tags).toContain('cheerful');
+		expect(hostile?.tags).toContain('stern');
+	});
+	it('an explicit hint beats the disposition bias', () => {
+		const pick = pickNpcPortrait(NPC_LIB, 'คนแปลกหน้า', 'ชาวบ้าน', 'หน้านิ่ง ขรึม', 3);
+		expect(pick?.tags).toContain('stern');
+	});
+});
+
+describe('pickPortrait with the hero concept hint', () => {
+	it('a cheerful concept narrows the mystic pick', () => {
+		const pick = pickPortrait(LIB, 'นักเวท', 'ริน วาเลียร์', 'หญิงสาวร่าเริง ขี้เล่น');
+		expect(pick?.tags).toContain('cheerful');
+	});
+	it('no concept signal keeps the plain role pick', () => {
+		const pick = pickPortrait(LIB, 'นักเวท', 'ริน วาเลียร์');
+		expect(pick?.tags).toContain('mystic');
+	});
+});
+
+describe('portrait hints survive state updates (carryNpcExtras)', () => {
+	const prev = WorldStateSchema.parse({
+		world: {},
+		hero: {
+			name: 'ตะวัน',
+			klass: 'นักดาบ',
+			stats: { str: 5, agi: 5, dex: 5, vit: 5, int: 5, spi: 5, cha: 5, luk: 5 },
+			hp: 10,
+			maxHp: 10,
+			mp: 5,
+			maxMp: 5
+		},
+		npcs: [
+			{ id: 'npc-1', name: 'ป้าสมจิตร', role: 'แม่เม้า', portrait: 'หญิงวัยกลางคน ยิ้มแย้ม' },
+			{ id: 'npc-2', name: 'ลุงหมึก', role: 'ชาวประมง', note: 'เคยเห็นสิ่งประหลาด' }
+		]
+	});
+
+	it('carries an omitted hint (the tracker cannot see it) and keeps a new one', () => {
+		const proposed = {
+			...JSON.parse(JSON.stringify(prev)),
+			npcs: [
+				{ id: 'npc-1', name: 'ป้าสมจิตร', role: 'แม่เม้า' },
+				{ id: 'npc-2', name: 'ลุงหมึก', role: 'ชาวประมง' },
+				{ id: 'npc-3', name: 'หมอผีเฒ่าทอง', role: 'หมอผี', portrait: 'ชายชรา หน้านิ่ง' }
+			]
+		};
+		const result = acceptStateUpdate(proposed, prev, {});
+		expect(result).not.toBeNull();
+		const npcs = result!.state.npcs;
+		expect(npcs[0].portrait).toBe('หญิงวัยกลางคน ยิ้มแย้ม'); // carried by id
+		expect(npcs[1].note).toBe('เคยเห็นสิ่งประหลาด'); // note carried too (same blind spot)
+		expect(npcs[2].portrait).toBe('ชายชรา หน้านิ่ง'); // fresh hint untouched
+	});
+
+	it('a renamed npc still finds its hint by name', () => {
+		const proposed = {
+			...JSON.parse(JSON.stringify(prev)),
+			npcs: [{ id: 'npc-9', name: 'ป้าสมจิตร', role: 'แม่เม้าที่แก่ตัวลง' }]
+		};
+		const result = acceptStateUpdate(proposed, prev, {});
+		expect(result!.state.npcs[0].portrait).toBe('หญิงวัยกลางคน ยิ้มแย้ม');
+	});
+
+	it('NpcSchema defaults portrait to empty for old saves', () => {
+		const parsed = WorldStateSchema.parse({
+			...JSON.parse(JSON.stringify(prev)),
+			npcs: [{ id: 'npc-1', name: 'ป้าสมจิตร', role: 'แม่เม้า' }]
+		});
+		expect(parsed.npcs[0].portrait).toBe('');
 	});
 });

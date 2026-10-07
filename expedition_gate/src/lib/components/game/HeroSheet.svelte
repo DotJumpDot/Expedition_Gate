@@ -46,7 +46,7 @@
 
 <div class="space-y-4">
 	<header class="flex items-center gap-3">
-		<HeroPortrait heroName={hero.name} klass={hero.klass} {campaignId} />
+		<HeroPortrait heroName={hero.name} klass={hero.klass} concept={hero.concept} {campaignId} />
 		<div>
 			<h2 class="text-base font-bold">{hero.name}</h2>
 			<p class="mt-0.5 text-xs text-muted-foreground">{hero.klass} · LV {hero.level}</p>
