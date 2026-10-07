@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import { onNavigate } from '$app/navigation';
 	import favicon from '$lib/assets/favicon.svg';
 	import GmStatusChip from '$lib/components/GmStatusChip.svelte';
 	import { settings } from '$lib/stores/settings.svelte';
@@ -7,10 +8,37 @@
 
 	let { children }: LayoutProps = $props();
 
+	// Route changes crossfade instead of hard-swapping (durations in app.css;
+	// reduced-motion skips the animation entirely).
+	onNavigate((navigation) => {
+		if (!document.startViewTransition) return;
+		return new Promise((resolve) => {
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
+
 	// Reading preferences (ตั้งค่า → การแสดงผล): theme, font family + UI scale,
 	// applied at the document root so everything follows the choice.
+	let themeBootstrapped = false;
 	$effect(() => {
-		document.documentElement.dataset.theme = settings.theme;
+		const theme = settings.theme;
+		// First run just applies (the pre-paint script already painted it).
+		if (!themeBootstrapped) {
+			themeBootstrapped = true;
+			document.documentElement.dataset.theme = theme;
+			return;
+		}
+		// Later changes crossfade the whole palette.
+		const apply = () => {
+			document.documentElement.dataset.theme = theme;
+		};
+		if (document.startViewTransition) document.startViewTransition(apply);
+		else apply();
+	});
+	$effect(() => {
 		document.documentElement.style.setProperty('--font-sans', settings.fontStack());
 		document.documentElement.style.fontSize = `${(settings.fontScale / 100) * 16}px`;
 	});

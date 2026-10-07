@@ -3,6 +3,7 @@
 	import { fade } from 'svelte/transition';
 	import Image from '@lucide/svelte/icons/image';
 	import { settingPreset, type WorldState } from '$lib/game/worldstate';
+	import { clickOutside } from '$lib/actions/clickOutside';
 
 	let {
 		world,
@@ -117,7 +118,7 @@
 			{/if}
 		</span>
 		{#if library.length > 0}
-			<div class="relative">
+			<div class="relative" use:clickOutside={() => (pickerOpen = false)}>
 				<button
 					type="button"
 					class="art-btn"

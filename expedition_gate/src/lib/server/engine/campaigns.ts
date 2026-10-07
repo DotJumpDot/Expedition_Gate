@@ -101,6 +101,7 @@ export function listCampaigns(): Array<{
 	updatedAt: Date;
 	lastPlayedAt: Date | null;
 	heroName: string | null;
+	heroClass: string | null;
 	day: number | null;
 }> {
 	const db = getDb();
@@ -120,6 +121,7 @@ export function listCampaigns(): Array<{
 			updatedAt: row.updatedAt,
 			lastPlayedAt: row.lastPlayedAt,
 			heroName: state?.hero.name ?? null,
+			heroClass: state?.hero.klass ?? null,
 			day: state?.world.day ?? null
 		};
 	});

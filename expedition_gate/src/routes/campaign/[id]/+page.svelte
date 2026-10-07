@@ -1,5 +1,6 @@
 <script lang="ts">
 	import BookOpen from '@lucide/svelte/icons/book-open';
+	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 	import ChevronLeft from '@lucide/svelte/icons/chevron-left';
 	import Download from '@lucide/svelte/icons/download';
 	import History from '@lucide/svelte/icons/history';
@@ -47,12 +48,22 @@
 
 	// Follow the story only while the reader is AT the bottom — scrolling up
 	// to reread must survive the stream (and jump back on the next send).
-	let stickToBottom = true;
+	let stickToBottom = $state(true);
 
 	function handleNarrationScroll() {
 		const el = narrationEl;
 		if (!el) return;
 		stickToBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+	}
+
+	// Floating "catch up" pill for readers who scrolled away mid-stream.
+	const showJump = $derived(
+		!stickToBottom && (session.messages.length > 0 || Boolean(session.streaming))
+	);
+
+	function jumpToLatest() {
+		stickToBottom = true;
+		narrationEl?.scrollTo({ top: narrationEl.scrollHeight, behavior: 'smooth' });
 	}
 
 	$effect(() => {
@@ -358,6 +369,20 @@
 						major={Boolean(session.state?.majorDecision)}
 						onsend={handleSend}
 					/>
+
+					{#if showJump}
+						<div class="jump-wrap">
+							<button
+								type="button"
+								class="jump-btn {session.streaming ? 'jump-live' : ''}"
+								onclick={jumpToLatest}
+								aria-label="เลื่อนลงไปอ่านล่าสุด"
+							>
+								<ChevronDown class="size-3.5" aria-hidden="true" />
+								ลงไปอ่านล่าสุด
+							</button>
+						</div>
+					{/if}
 				</div>
 			</div>
 
@@ -422,6 +447,47 @@
 	@keyframes rail-in {
 		from {
 			opacity: 0;
+		}
+	}
+
+	/* Catch-up pill: sticky to the scroll container's bottom while the reader
+	   is above the newest content; pulses gently while the GM still streams. */
+	.jump-wrap {
+		position: sticky;
+		bottom: 0.75rem;
+		z-index: 20;
+		display: flex;
+		justify-content: flex-end;
+		pointer-events: none;
+	}
+	.jump-btn {
+		pointer-events: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		border-radius: 9999px;
+		border: 1px solid color-mix(in oklch, var(--color-gold) 40%, transparent);
+		background: color-mix(in oklch, var(--color-popover) 92%, transparent);
+		box-shadow: 0 8px 24px oklch(0 0 0 / 35%);
+		padding: 0.42rem 0.9rem;
+		font-size: 0.78rem;
+		font-weight: 600;
+		color: var(--color-gold);
+		backdrop-filter: blur(6px);
+		transition:
+			transform 0.12s var(--ease-out),
+			border-color 0.15s var(--ease-out);
+	}
+	.jump-btn:active {
+		transform: scale(0.95);
+	}
+	.jump-live {
+		animation: jump-pulse 1.6s var(--ease-in-out) infinite;
+	}
+	@keyframes jump-pulse {
+		50% {
+			border-color: color-mix(in oklch, var(--color-gold) 80%, transparent);
+			box-shadow: 0 8px 28px color-mix(in oklch, var(--color-gold) 22%, oklch(0 0 0 / 35%));
 		}
 	}
 

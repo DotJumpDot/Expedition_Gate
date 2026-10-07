@@ -3,6 +3,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { STAT_KEYS, STAT_LABELS_TH, type StatKey } from '$lib/game/rules';
+	import { clickOutside } from '$lib/actions/clickOutside';
 	import type { SendKind } from '$lib/stores/campaign.svelte';
 
 	let {
@@ -66,7 +67,10 @@
 	}
 </script>
 
-<div class="border-t border-border/60 bg-background/80 px-4 py-3 backdrop-blur-md sm:px-6">
+<div
+	class="border-t border-border/60 bg-background/80 px-4 py-3 backdrop-blur-md sm:px-6"
+	use:clickOutside={() => (diceOpen = false)}
+>
 	<div class="mx-auto w-full max-w-3xl space-y-2.5">
 		<!-- Quick actions + dice tray -->
 		<div class="flex flex-wrap items-center gap-2">

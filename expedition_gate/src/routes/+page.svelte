@@ -207,8 +207,26 @@
 	}
 
 	@media (max-width: 480px) {
+		/* Narrow screens stack: art becomes a top band fading DOWN into the
+		   text, so long titles and taglines get the full width. */
+		.tile-art {
+			inset: 0 0 auto 0;
+			width: 100%;
+			height: 112px;
+			-webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+			mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+		}
+		.tile-fallback {
+			inset: 0 0 auto 0;
+			width: 100%;
+			height: 112px;
+			-webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+			mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+		}
 		.tile-body {
-			padding-left: 40%;
+			margin-top: 72px;
+			padding: 0.15rem 1rem 0.9rem;
+			min-height: 0;
 		}
 	}
 

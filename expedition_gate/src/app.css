@@ -539,6 +539,27 @@
 }
 
 @layer utilities {
+	/* View Transitions (route crossfade + theme swap) — snappier than the
+	   browser default 250ms; fully disabled under reduced motion. */
+	@media (prefers-reduced-motion: no-preference) {
+		::view-transition-old(root) {
+			animation: vt-out 0.14s var(--ease-in-out) both;
+		}
+		::view-transition-new(root) {
+			animation: vt-in 0.18s var(--ease-out) both;
+		}
+	}
+	@keyframes vt-out {
+		to {
+			opacity: 0;
+		}
+	}
+	@keyframes vt-in {
+		from {
+			opacity: 0;
+		}
+	}
+
 	/* Ambient candle-lit backdrop for the app; fixed so it never scrolls. */
 	.gate-vignette {
 		position: fixed;

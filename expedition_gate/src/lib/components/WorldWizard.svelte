@@ -97,6 +97,37 @@
 
 	const customPresetsFull = $derived(settings.customPresets.length >= 12);
 
+	// Generation waits run 10–60s on the real model — rotate a status line so
+	// the button never reads as frozen (spinner + shimmer sit next to these).
+	const BRIEF_STAGES = [
+		'กำลังร่างพื้นที่และสถานที่สำคัญ...',
+		'กำลังเขียนสถานการณ์ตั้งต้น...',
+		'กำลังฝังตัวละครและจุดประกายเรื่อง...'
+	];
+	const HERO_STAGES = [
+		'กำลังอ่านอาชีพและแนวคิดของฮีโร่...',
+		'กำลังแจกแต้มสถานะ 52 แต้ม...',
+		'กำลังจัดอาวุธ ของติดตัว และปูมหลัง...'
+	];
+	let briefStage = $state(0);
+	let heroStage = $state(0);
+	$effect(() => {
+		if (!briefLoading) {
+			briefStage = 0;
+			return;
+		}
+		const timer = setInterval(() => (briefStage = (briefStage + 1) % BRIEF_STAGES.length), 3500);
+		return () => clearInterval(timer);
+	});
+	$effect(() => {
+		if (!heroLoading) {
+			heroStage = 0;
+			return;
+		}
+		const timer = setInterval(() => (heroStage = (heroStage + 1) % HERO_STAGES.length), 3500);
+		return () => clearInterval(timer);
+	});
+
 	async function generateBrief() {
 		briefLoading = true;
 		briefError = '';
@@ -525,9 +556,24 @@
 							{/if}
 
 							<Button size="lg" class="w-full" onclick={generateBrief} disabled={briefLoading}>
-								<Sparkles data-icon="inline-start" aria-hidden="true" />
+								{#if briefLoading}
+									<span class="btn-spinner" aria-hidden="true"></span>
+								{:else}
+									<Sparkles data-icon="inline-start" aria-hidden="true" />
+								{/if}
 								{briefLoading ? 'กำลังสร้างโลก...' : 'สร้างโลก'}
 							</Button>
+
+							{#if briefLoading}
+								<div class="space-y-2" aria-hidden="true">
+									<p class="text-center text-xs text-muted-foreground">
+										{BRIEF_STAGES[briefStage]}
+									</p>
+									<div class="skele w-11/12"></div>
+									<div class="skele w-4/5"></div>
+									<div class="skele w-2/3"></div>
+								</div>
+							{/if}
 						</section>
 					{:else if step === 'brief' && brief}
 						<!-- Step 2: brief preview -->
@@ -675,9 +721,28 @@
 										onclick={generateProposal}
 										disabled={heroLoading}
 									>
-										<Sparkles data-icon="inline-start" aria-hidden="true" />
+										{#if heroLoading}
+											<span class="btn-spinner" aria-hidden="true"></span>
+										{:else}
+											<Sparkles data-icon="inline-start" aria-hidden="true" />
+										{/if}
 										{heroLoading ? 'AI กำลังจัดค่าให้...' : 'ให้ AI จัดค่าให้'}
 									</Button>
+
+									{#if heroLoading}
+										<div class="space-y-2" aria-hidden="true">
+											<p class="text-center text-xs text-muted-foreground">
+												{HERO_STAGES[heroStage]}
+											</p>
+											<div class="skele w-full"></div>
+											<div class="skele w-5/6"></div>
+											<div class="flex gap-1.5">
+												<div class="skele h-6 w-24 !rounded-full"></div>
+												<div class="skele h-6 w-20 !rounded-full"></div>
+												<div class="skele h-6 w-16 !rounded-full"></div>
+											</div>
+										</div>
+									{/if}
 								</div>
 							{:else}
 								<div class="space-y-4">
@@ -777,7 +842,11 @@
 											onclick={startCampaign}
 											disabled={creating || pointsLeft !== 0}
 										>
-											<Compass data-icon="inline-start" aria-hidden="true" />
+											{#if creating}
+												<span class="btn-spinner" aria-hidden="true"></span>
+											{:else}
+												<Compass data-icon="inline-start" aria-hidden="true" />
+											{/if}
 											{creating
 												? 'กำลังเปิดประตู...'
 												: pointsLeft === 0
@@ -976,10 +1045,54 @@
 		}
 	}
 
+	/* Generation-wait feedback: in-button spinner + content shimmer. */
+	.btn-spinner {
+		width: 14px;
+		height: 14px;
+		flex-shrink: 0;
+		border-radius: 9999px;
+		border: 2px solid color-mix(in oklch, var(--color-foreground) 22%, transparent);
+		border-top-color: var(--color-foreground);
+		animation: spin 0.8s linear infinite;
+	}
+	@keyframes spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	.skele {
+		height: 11px;
+		border-radius: 9999px;
+		background: linear-gradient(
+			90deg,
+			color-mix(in oklch, var(--color-muted) 55%, transparent) 25%,
+			color-mix(in oklch, var(--color-muted) 25%, transparent) 45%,
+			color-mix(in oklch, var(--color-muted) 55%, transparent) 65%
+		);
+		background-size: 200% 100%;
+		animation: shimmer 1.6s linear infinite;
+	}
+	@keyframes shimmer {
+		from {
+			background-position: 200% 0;
+		}
+		to {
+			background-position: -200% 0;
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.msg-enter,
 		.step-enter {
 			animation: none;
+		}
+		.btn-spinner {
+			animation-duration: 1.6s;
+		}
+		.skele {
+			animation: none;
+			opacity: 0.6;
 		}
 		.scenario-card,
 		.setting-card,

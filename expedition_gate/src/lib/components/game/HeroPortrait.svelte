@@ -3,6 +3,7 @@
 	import { fade } from 'svelte/transition';
 	import ImagePlus from '@lucide/svelte/icons/image-plus';
 	import { pickPortrait, type PortraitEntry } from '$lib/game/portraits';
+	import { clickOutside } from '$lib/actions/clickOutside';
 
 	let {
 		heroName,
@@ -63,7 +64,7 @@
 	}
 </script>
 
-<div class="portrait-block">
+<div class="portrait-block" use:clickOutside={() => (pickerOpen = false)}>
 	{#if chosen}
 		{#key chosen.url}
 			<img

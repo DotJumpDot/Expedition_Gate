@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { Compass, ScrollText, Swords, Trash2 } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { SETTING_PRESETS } from '$lib/game/worldstate';
+	import { pickPortrait, type PortraitEntry } from '$lib/game/portraits';
 
 	let {
 		data
@@ -12,6 +14,7 @@
 				title: string;
 				setting: string;
 				heroName: string | null;
+				heroClass: string | null;
 				day: number | null;
 				lastPlayedAt: string | null;
 			}>;
@@ -19,6 +22,27 @@
 	} = $props();
 
 	let confirmDelete = $state<string | null>(null);
+
+	// Hero faces on the cards — the same deterministic per-name pick the game
+	// screen uses (falls back to the setting emoji when no hero/library yet).
+	let portraits = $state<PortraitEntry[]>([]);
+	onMount(async () => {
+		try {
+			const res = await fetch('/api/portraits', { cache: 'no-store' });
+			const json = (await res.json()) as { portraits: PortraitEntry[] };
+			portraits = json.portraits.filter((entry) => entry.available);
+		} catch {
+			portraits = [];
+		}
+	});
+
+	function faceFor(campaign: {
+		heroName: string | null;
+		heroClass: string | null;
+	}): PortraitEntry | null {
+		if (!campaign.heroName || portraits.length === 0) return null;
+		return pickPortrait(portraits, campaign.heroClass ?? '', campaign.heroName);
+	}
 
 	const SETTING_ICON: Record<string, string> = Object.fromEntries(
 		Object.values(SETTING_PRESETS).map((preset) => [preset.key, preset.icon])
@@ -66,6 +90,7 @@
 	{#if data.campaigns.length}
 		<ul class="mt-5 grid gap-3 sm:grid-cols-2">
 			{#each data.campaigns as campaign (campaign.id)}
+				{@const face = faceFor(campaign)}
 				<li>
 					<a
 						href="/campaign/{campaign.id}"
@@ -73,7 +98,11 @@
 						aria-label="เล่นต่อ {campaign.title}"
 					>
 						<div class="flex items-start gap-3">
-							<span class="campaign-icon">{SETTING_ICON[campaign.setting] ?? '🌀'}</span>
+							{#if face}
+								<img class="campaign-face" src={face.url} alt="" loading="lazy" />
+							{:else}
+								<span class="campaign-icon">{SETTING_ICON[campaign.setting] ?? '🌀'}</span>
+							{/if}
 							<div class="min-w-0 flex-1">
 								<p class="truncate font-bold">{campaign.title}</p>
 								<p class="mt-0.5 truncate text-xs text-muted-foreground">
@@ -151,6 +180,15 @@
 		border: 1px solid color-mix(in oklch, var(--color-border) 80%, transparent);
 		background: color-mix(in oklch, var(--color-muted) 55%, transparent);
 		font-size: 1.1rem;
+	}
+
+	.campaign-face {
+		width: 40px;
+		height: 40px;
+		object-fit: cover;
+		object-position: top;
+		border-radius: var(--radius-md);
+		border: 1px solid color-mix(in oklch, var(--color-border) 80%, transparent);
 	}
 
 	.delete-btn {
