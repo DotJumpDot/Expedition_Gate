@@ -294,12 +294,12 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 	},
 	villainess: {
 		key: 'villainess',
-		label: 'วิลเลนเนสก่อนประหาร',
+		label: 'วายร้ายก่อนประหาร',
 		description:
 			'ตื่นมาในร่างบารอนเนสผู้เย่อหยิ่งของนวนิยายรักที่เคยอ่าน — ตัวร้ายที่บทกำหนดให้ถูกประหารเมื่องานเลี้ยงสิ้นปี ผู้เล่นจำพล็อตได้ละเอียดกว่าผู้เขียนเอง รู้ว่าคำไหนทำให้เจ้าชายเกลียด รู้ว่าใครวางแผนอะไรอยู่ แต่ทุกครั้งที่ขยับหนีบทเดิม โลกก็บิดเบือนตอบโต้ ราชสำนัก งานเต้นรำ และคู่หมั้นผู้เกลียดชังที่บทเขียนไว้ว่าจะจบกันเพราะเธอตาย',
 		art: 'sword_sorcery',
 		icon: '👑',
-		keywords: 'มังฮวา เกาหลี นางร้าย villainess otome novel prince execution flag'
+		keywords: 'มังฮวา เกาหลี นางร้าย วายร้าย ตัวร้าย villainess otome novel prince execution flag'
 	},
 	extra_novel: {
 		key: 'extra_novel',

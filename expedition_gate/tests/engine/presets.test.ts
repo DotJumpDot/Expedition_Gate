@@ -108,6 +108,8 @@ describe('preset search (presetMatches / textMatchesQuery)', () => {
 		expect(presetMatches(SETTING_PRESETS.zombie_break, 'ZOMBIE')).toBe(true);
 		expect(presetMatches(SETTING_PRESETS.villainess, 'otome')).toBe(true);
 		expect(presetMatches(SETTING_PRESETS.villainess, 'นางร้าย')).toBe(true);
+		expect(presetMatches(SETTING_PRESETS.villainess, 'วายร้าย')).toBe(true);
+		expect(presetMatches(SETTING_PRESETS.villainess, 'ตัวร้าย')).toBe(true);
 	});
 
 	it('searching มังฮวา surfaces the whole manhwa group', () => {
