@@ -501,7 +501,7 @@
 										<Search class="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
 										<input
 											type="text"
-											placeholder="ค้นหาฉาก — มันหวา, ซอมบี้, solo leveling…"
+											placeholder="ค้นหาฉาก — มังฮวา, ซอมบี้, solo leveling…"
 											aria-label="ค้นหาฉาก"
 											bind:value={presetQuery}
 											onkeydown={(event) => {

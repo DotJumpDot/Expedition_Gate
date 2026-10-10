@@ -110,7 +110,7 @@ export interface SettingPreset {
 	/** Scene-art bucket — which library group illustrates this world. */
 	art: 'sword_sorcery' | 'scifi' | 'horror' | 'thai_legend' | 'any';
 	icon: string;
-	/** English genre aliases for the preset search (manhwa titles etc.), space-separated lowercase. */
+	/** Genre aliases for the preset search (community-standard Thai + English), space-separated lowercase. */
 	keywords?: string;
 }
 
@@ -258,12 +258,12 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 	},
 	hunter_gate: {
 		key: 'hunter_gate',
-		label: 'ประตูมิติ & นักล่า',
+		label: 'ประตูมิติ & ฮันเตอร์',
 		description:
-			'สิบปีหลัง "ประตู" มิติเปิดครั้งแรกกลางกรุงโซล โลกของนักล่าผู้ตื่นพลังที่ไต่อันดับ E ถึง S บุกดันเจี้ยนเก็บคริสตัลเลี้ยงชีพ ผู้เล่นคือนักล่าอันดับต่ำสุดที่รอดจากดันเจี้ยนระดับ S พร้อมความลับที่พลิกทุกอย่าง — ระบบเติบโตไร้ขีดจำกัดที่มีเพียงผู้เดียว สมาคมกดราคา กิลด์ใหญ่กลืนกินคนเล็ก และประตูที่ใหญ่ขึ้นเรื่อย ๆ กำลังเปิด',
+			'สิบปีหลัง "ประตู" มิติเปิดครั้งแรกกลางกรุงโซล โลกของฮันเตอร์ผู้ตื่นพลังที่ไต่แรงก์ E ถึง S บุกดันเจี้ยนเก็บคริสตัลเลี้ยงชีพ ผู้เล่นคือฮันเตอร์แรงก์ E ที่รอดจากดันเจี้ยนระดับ S พร้อมความลับที่พลิกทุกอย่าง — ระบบเติบโตไร้ขีดจำกัดที่มีเพียงผู้เดียว สมาคมกดราคา กิลด์ใหญ่กลืนกินคนเล็ก และประตูที่ใหญ่ขึ้นเรื่อย ๆ กำลังเปิด',
 		art: 'any',
 		icon: '🌀',
-		keywords: 'solo leveling hunter gate dungeon rank awakened guild'
+		keywords: 'มังฮวา เกาหลี ฮันเตอร์ solo leveling hunter gate dungeon rank awakened guild'
 	},
 	regressor: {
 		key: 'regressor',
@@ -272,7 +272,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 			'ผู้เล่นตายในหายนะที่สิ้นสุดโลก — แล้วลืมตาตื่นในวันเก่าสิบปีก่อน ในร่างวัยเยาว์ของตัวเอง พร้อมความทรงจำอนาคตครบทุกฉาก สมบัติที่จะผุดขึ้นเมื่อไร ใครจะทรยศตอนไหน หายนะเริ่มต้นจากอะไร รู้หมด — แต่ยิ่งเปลี่ยนอนาคต ความจำก็ยิ่งบิดเพี้ยนไปจากเดิม และมีผู้ย้อนกลับคนอื่นที่ไม่ยอมให้ใครขวางแผนของตัวเอง',
 		art: 'any',
 		icon: '🔁',
-		keywords: 'regression returner second chance future memory'
+		keywords: 'มังฮวา เกาหลี regression returner second chance future memory'
 	},
 	tower_climb: {
 		key: 'tower_climb',
@@ -281,7 +281,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 			'หอคอยปริศนาสูงทะลุเมฆงอกขึ้นพร้อมกันทุกประเทศ เรียกผู้กล้าด้วยสัญญาว่ายอดสุดมอบสิ่งที่ปรารถนาทุกอย่าง แต่ละชั้นคือด่านตายที่มีกฎบิดเบือนของตัวเอง — พันธมิตรวันนี้คือคู่แข่งพรุ่งนี้ กฎเปลี่ยนกลางด่าน และผู้เล่นเพิ่งก้าวเข้าชั้นแรกพร้อมความลับที่หอคอยพร้อมล้างบาปด้วยการโยนคนรู้ลงเหว',
 		art: 'any',
 		icon: '🗼',
-		keywords: 'tower floor trial climb reward'
+		keywords: 'มังฮวา เกาหลี tower floor trial climb reward'
 	},
 	murim: {
 		key: 'murim',
@@ -290,7 +290,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 			'ยุทธจักรมูริมที่สำนักธรรมะและสำนักมารสมดุลกันด้วยกำปั้นมาพันปี ผู้เล่นคือศิษย์ไร้สังกัดผู้ได้ตำราต้องห้ามหรือปรมาจารย์ผู้ไม่มีชื่อ ไต่สู่การประลองห้ายอดฝีมือ สะสมชื่อเสียงที่มีแต่ศัตรูเป็นผลพลอยได้ และเลือกเองว่าจะรักษาสมดุลเก่า สร้างสำนักใหม่ หรือเผายุทธจักรทั้งใบ — ก่อนสงครามสำนักใหญ่จะเริ่มและกลืนคนไร้สังกัดก่อนใคร',
 		art: 'sword_sorcery',
 		icon: '🐺',
-		keywords: 'murim martial korean sect cult master'
+		keywords: 'มังฮวา เกาหลี มูริม murim martial korean sect cult master'
 	},
 	villainess: {
 		key: 'villainess',
@@ -299,7 +299,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 			'ตื่นมาในร่างบารอนเนสผู้เย่อหยิ่งของนวนิยายรักที่เคยอ่าน — ตัวร้ายที่บทกำหนดให้ถูกประหารเมื่องานเลี้ยงสิ้นปี ผู้เล่นจำพล็อตได้ละเอียดกว่าผู้เขียนเอง รู้ว่าคำไหนทำให้เจ้าชายเกลียด รู้ว่าใครวางแผนอะไรอยู่ แต่ทุกครั้งที่ขยับหนีบทเดิม โลกก็บิดเบือนตอบโต้ ราชสำนัก งานเต้นรำ และคู่หมั้นผู้เกลียดชังที่บทเขียนไว้ว่าจะจบกันเพราะเธอตาย',
 		art: 'sword_sorcery',
 		icon: '👑',
-		keywords: 'villainess otome novel prince execution flag'
+		keywords: 'มังฮวา เกาหลี นางร้าย villainess otome novel prince execution flag'
 	},
 	extra_novel: {
 		key: 'extra_novel',
@@ -308,7 +308,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 			'ฟื้นมาเป็นตัวประกอบไร้ชื่อในนิยายที่เคยอ่านจบ — ไม่ใช่พระเอก ไม่ใช่ตัวร้าย แค่ตัวละครสามัญที่บทเดิมเขียนสั้น ๆ ว่าตายในเหตุการณ์ปีที่สาม ผู้เล่นรู้พล็อตล่วงหน้าทุกฉากใหญ่และต้องใช้มันไต่ตัวขึ้นจากความไร้ตัวตน — โดยไม่แตะตัวละครหลักที่ "บท" คุ้มครองไว้ เพราะใครที่พล็อตสนใจ ความตายก็สนใจตาม',
 		art: 'sword_sorcery',
 		icon: '📖',
-		keywords: 'extra side character novel transmigration background'
+		keywords: 'มังฮวา เกาหลี extra side character novel transmigration background'
 	},
 	monster_reborn: {
 		key: 'monster_reborn',
@@ -317,7 +317,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 			'ตายแล้วฟื้นในร่างมอนสเตอร์ชั้นต่ำใต้ดันเจี้ยนลึก — ไม่มีมือจับดาบ ไม่มีเสียงพูด มีแต่สัญชาตญาณ การวิวัฒนาการ และความทรงจำมนุษย์เดิมที่ทำให้แตกต่าง กลืนพลังจากเหล่าอสูร พัฒนาร่างทีละขั้น รวมฝูงอสูรไร้ปัญญา และไต่จากอาหารของนักผจญภัยสู่จ้าวแห่งชั้นลึกที่มนุษย์เอ่ยชื่อด้วยความกลัว',
 		art: 'any',
 		icon: '👾',
-		keywords: 'monster reincarnation evolution weak'
+		keywords: 'มังฮวา เกาหลี monster reincarnation evolution weak'
 	},
 	dungeon_lord: {
 		key: 'dungeon_lord',
@@ -326,7 +326,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 			'ผู้เล่นคือแกนกลางของดันเจี้ยนที่เพิ่งถือกำเนิด — วางห้อง อัญเชิญอสูร ตั้งกับดัก และเก็บเกี่ยวมานาจากนักผจญภัยที่บุกเข้ามาเอง ทุกการบุกคือกลยุทธ์ ทุกศพคือทรัพยากร แต่เมื่อดันเจี้ยนโตพ้นวงจร อาณาจักรจะส่งฮีโร่ระดับสูงมากวาดล้าง และสิ่งที่อยู่ลึกกว่านั้นก็เริ่มส่งสายตามาหาเพื่อนใหม่',
 		art: 'any',
 		icon: '🔑',
-		keywords: 'dungeon defense core monster raid manager army'
+		keywords: 'มังฮวา เกาหลี dungeon defense core monster raid manager army'
 	},
 	necromancer: {
 		key: 'necromancer',
@@ -388,7 +388,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
  */
 export const PRESET_GROUPS: Array<{ label: string; keys: string[] }> = [
 	{
-		label: 'มันหวา · เกาหลี',
+		label: 'มังฮวา · เกาหลี',
 		keys: [
 			'hunter_gate',
 			'regressor',

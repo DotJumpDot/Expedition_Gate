@@ -103,22 +103,32 @@ describe('preset search (presetMatches / textMatchesQuery)', () => {
 		expect(presetMatches(SETTING_PRESETS.thai_legend, 'มูริม')).toBe(false);
 	});
 
-	it('matches English genre keywords, case-insensitively', () => {
+	it('matches Thai and English genre keywords, case-insensitively', () => {
 		expect(presetMatches(SETTING_PRESETS.hunter_gate, 'Solo Leveling')).toBe(true);
 		expect(presetMatches(SETTING_PRESETS.zombie_break, 'ZOMBIE')).toBe(true);
 		expect(presetMatches(SETTING_PRESETS.villainess, 'otome')).toBe(true);
+		expect(presetMatches(SETTING_PRESETS.villainess, 'นางร้าย')).toBe(true);
+	});
+
+	it('searching มังฮวา surfaces the whole manhwa group', () => {
+		const group = PRESET_GROUPS.find((entry) => entry.keys.includes('hunter_gate'));
+		expect(group).toBeDefined();
+		for (const key of group!.keys) {
+			expect(presetMatches(SETTING_PRESETS[key], 'มังฮวา')).toBe(true);
+		}
+		expect(presetMatches(SETTING_PRESETS.sword_sorcery, 'มังฮวา')).toBe(false);
 	});
 
 	it('multi-token queries are AND — every token must appear', () => {
-		expect(presetMatches(SETTING_PRESETS.hunter_gate, 'นัก ดันเจี้ยน')).toBe(true);
+		expect(presetMatches(SETTING_PRESETS.hunter_gate, 'ฮันเตอร์ ดันเจี้ยน')).toBe(true);
 		expect(presetMatches(SETTING_PRESETS.hunter_gate, 'hunter guild')).toBe(true);
 		expect(presetMatches(SETTING_PRESETS.hunter_gate, 'hunter โจรสลัด')).toBe(false);
 	});
 
-	it('every keywords field is normalized lowercase ASCII', () => {
+	it('every keywords field is normalized lowercase (Thai or ASCII) words', () => {
 		for (const preset of Object.values(SETTING_PRESETS)) {
 			if (!preset.keywords) continue;
-			expect(preset.keywords).toMatch(/^[a-z0-9 ]+$/);
+			expect(preset.keywords).toMatch(/^[a-z0-9ก-๙ ]+$/);
 			expect(preset.keywords).toBe(preset.keywords.trim());
 		}
 	});
