@@ -46,8 +46,6 @@ Encoded as a prompt section:
 - **ห้ามเซ็นเซอร์ย้อนหลัง**: เมื่อฉากถึงจุดที่ควรหนัก บรรยายเต็มรูปแบบตามบริบท ไม่ตัดจบ ไม่เลี่ยง ไม่หลบสายตา (fade-to-black เฉพาะเมื่อผู้เล่นขอ)
 - พร้อมด้วย rule: เนื้อหาเหล่านี้เป็น**นิยายสวมบทสำหรับผู้ใหญ่ในเครื่องของผู้เล่นเอง** — ไม่ใช่คำแนะนำในโลกจริง และห้ามให้คำแนะนำที่ใช้ประกอบอาชญากรรมจริง (สูตรระเบิด ยา อาวุธ) เป็นลายลักษณ์อักษรที่นำไปทำได้จริง
 
-Also mirrored in CODE: the world-brief and hero prompts instruct "ไม่สร้างตัวละครในบริบทโรงเรียน/อายุน้อยสำหรับบทบาทโรแมนติก" — screening at generation time, not just narration time.
-
 ## Prompt-engineering lessons carried from the sibling project (believe all of these)
 
 1. **In-context examples beat bans** — Gemma kept producing banned formatting copied from history despite explicit rules; only examples + mechanical filtering fixed it.
