@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
-	import { Compass, Minus, Plus, Sparkles, X } from '@lucide/svelte';
+	import { Compass, Minus, Plus, Search, Sparkles, X } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { STAT_KEYS, STAT_LABELS_TH, type Stats } from '$lib/game/rules';
 	import {
 		PRESET_GROUPS,
 		SETTING_PRESETS,
+		presetMatches,
 		settingPreset,
+		textMatchesQuery,
 		type HeroProposal
 	} from '$lib/game/worldstate';
 	import type { WorldBrief } from '$lib/game/worldstate';
@@ -50,6 +52,10 @@
 	let presetSaveMsg = $state('');
 
 	const TONE_OPTIONS = ['มืดมน', 'ผจญภัย', 'ตลกฮา', 'โรแมนติก'];
+	/** Preset picker search + active category tab ('ทั้งหมด' = all groups). */
+	const PRESET_TAB_ALL = 'ทั้งหมด';
+	let presetQuery = $state('');
+	let presetTab = $state(PRESET_TAB_ALL);
 	const CLASS_OPTIONS = [
 		'นักดาบ',
 		'อัศวิน',
@@ -70,6 +76,37 @@
 		stats ? Object.values(stats).reduce((sum, value) => sum + value, 0) : 0
 	);
 	const pointsLeft = $derived(52 - statTotal);
+
+	const presetFiltering = $derived(presetTab !== PRESET_TAB_ALL || presetQuery.trim() !== '');
+	const visibleGroups = $derived(
+		PRESET_GROUPS.filter((group) => presetTab === PRESET_TAB_ALL || presetTab === group.label)
+			.map((group) => ({
+				label: group.label,
+				keys: group.keys.filter((key) => presetMatches(SETTING_PRESETS[key], presetQuery))
+			}))
+			.filter((group) => group.keys.length > 0)
+	);
+	// Player-saved presets and กำหนดเอง belong to no group — shown on the all-tab only.
+	const visibleCustomPresets = $derived(
+		presetTab === PRESET_TAB_ALL
+			? settings.customPresets.filter((preset) =>
+					textMatchesQuery(`${preset.label} ${preset.description}`, presetQuery)
+				)
+			: []
+	);
+	const showCustomCard = $derived(
+		presetTab === PRESET_TAB_ALL && presetMatches(SETTING_PRESETS.custom, presetQuery)
+	);
+	const presetResultCount = $derived(
+		visibleGroups.reduce((sum, group) => sum + group.keys.length, 0) +
+			visibleCustomPresets.length +
+			(showCustomCard ? 1 : 0)
+	);
+
+	function clearPresetFilter() {
+		presetQuery = '';
+		presetTab = PRESET_TAB_ALL;
+	}
 
 	function selectPreset(key: string) {
 		setting = key;
@@ -459,63 +496,131 @@
 								<p class="mb-2 text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">
 									เลือกฉาก (ทุกฉากแก้ได้)
 								</p>
-								<div class="space-y-3.5">
-									{#each PRESET_GROUPS as group (group.label)}
-										<div>
-											<p class="group-label">{group.label}</p>
-											<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
-												{#each group.keys as key (key)}
-													<button
-														type="button"
-														class="setting-card {setting === key && !customSelected
-															? 'setting-active col-span-2'
-															: ''}"
-														title={SETTING_PRESETS[key].label}
-														onclick={() => selectPreset(key)}
-													>
-														{SETTING_PRESETS[key].icon}
-														{SETTING_PRESETS[key].label}
-													</button>
-												{/each}
-											</div>
-										</div>
-									{/each}
-									<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
-										{#each settings.customPresets as preset (preset.label)}
-											<div
-												class="relative {customSelected?.label === preset.label
-													? 'col-span-2'
-													: ''}"
+								<div class="space-y-3">
+									<div class="preset-search">
+										<Search class="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+										<input
+											type="text"
+											placeholder="ค้นหาฉาก — มันหวา, ซอมบี้, solo leveling…"
+											aria-label="ค้นหาฉาก"
+											bind:value={presetQuery}
+											onkeydown={(event) => {
+												// ESC clears the search WITHOUT leaving the wizard —
+												// the window-level ESC handler must not see it.
+												if (event.key === 'Escape' && presetQuery) {
+													event.stopPropagation();
+													presetQuery = '';
+												}
+											}}
+										/>
+										{#if presetQuery.trim() !== ''}
+											<button
+												type="button"
+												class="search-x"
+												aria-label="ล้างการค้นหา"
+												onclick={() => (presetQuery = '')}
 											>
-												<button
-													type="button"
-													class="setting-card w-full pr-6 {customSelected?.label === preset.label
-														? 'setting-active'
-														: ''}"
-													onclick={() => selectCustomPreset(preset)}
-												>
-													📌 {preset.label}
-												</button>
-												<button
-													type="button"
-													class="preset-x"
-													title="ลบพรีเซ็ตนี้"
-													aria-label="ลบพรีเซ็ต {preset.label}"
-													onclick={() => settings.removeCustomPreset(preset.label)}
-												>
-													<X class="size-3" aria-hidden="true" />
-												</button>
-											</div>
-										{/each}
+												<X class="size-3.5" aria-hidden="true" />
+											</button>
+										{/if}
+									</div>
+									<div class="flex flex-wrap gap-1.5" aria-label="หมวดฉาก">
 										<button
 											type="button"
-											class="setting-card {setting === 'custom' && !customSelected
-												? 'setting-active col-span-2'
-												: ''}"
-											onclick={() => selectPreset('custom')}
+											class="tone-chip {presetTab === PRESET_TAB_ALL ? 'tone-active' : ''}"
+											onclick={() => (presetTab = PRESET_TAB_ALL)}
 										>
-											✍️ กำหนดเอง
+											{PRESET_TAB_ALL}
 										</button>
+										{#each PRESET_GROUPS as group (group.label)}
+											<button
+												type="button"
+												class="tone-chip {presetTab === group.label ? 'tone-active' : ''}"
+												onclick={() => (presetTab = group.label)}
+											>
+												{group.label}
+											</button>
+										{/each}
+									</div>
+									{#if presetFiltering}
+										<p class="text-xs text-muted-foreground">
+											พบ {presetResultCount} ฉาก
+										</p>
+									{/if}
+									<div class="space-y-3.5">
+										{#each visibleGroups as group (group.label)}
+											<div>
+												{#if presetTab === PRESET_TAB_ALL}
+													<p class="group-label">{group.label}</p>
+												{/if}
+												<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+													{#each group.keys as key (key)}
+														<button
+															type="button"
+															class="setting-card {setting === key && !customSelected
+																? 'setting-active col-span-2'
+																: ''}"
+															title={SETTING_PRESETS[key].label}
+															onclick={() => selectPreset(key)}
+														>
+															{SETTING_PRESETS[key].icon}
+															{SETTING_PRESETS[key].label}
+														</button>
+													{/each}
+												</div>
+											</div>
+										{/each}
+										{#if presetResultCount === 0}
+											<div class="no-match">
+												<span>
+													ไม่พบฉากที่ตรงกับ "{presetQuery.trim() || presetTab}"
+												</span>
+												<button type="button" class="tone-chip" onclick={clearPresetFilter}>
+													ล้างตัวกรอง
+												</button>
+											</div>
+										{:else if presetTab === PRESET_TAB_ALL}
+											<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+												{#each visibleCustomPresets as preset (preset.label)}
+													<div
+														class="relative {customSelected?.label === preset.label
+															? 'col-span-2'
+															: ''}"
+													>
+														<button
+															type="button"
+															class="setting-card w-full pr-6 {customSelected?.label ===
+															preset.label
+																? 'setting-active'
+																: ''}"
+															onclick={() => selectCustomPreset(preset)}
+														>
+															📌 {preset.label}
+														</button>
+														<button
+															type="button"
+															class="preset-x"
+															title="ลบพรีเซ็ตนี้"
+															aria-label="ลบพรีเซ็ต {preset.label}"
+															onclick={() => settings.removeCustomPreset(preset.label)}
+														>
+															<X class="size-3" aria-hidden="true" />
+														</button>
+													</div>
+												{/each}
+												{#if showCustomCard}
+													<button
+														type="button"
+														class="setting-card {setting === 'custom' && !customSelected
+															? 'setting-active col-span-2'
+															: ''}"
+														onclick={() => selectPreset('custom')}
+													>
+														✍️ กำหนดเอง
+													</button>
+												{/if}
+											</div>
+										{/if}
 									</div>
 								</div>
 							</div>
@@ -942,6 +1047,51 @@
 		opacity: 0.85;
 	}
 
+	.preset-search {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		border-radius: var(--radius-lg);
+		border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);
+		background: color-mix(in oklch, var(--color-card) 55%, transparent);
+		padding: 0.5rem 0.8rem;
+		transition: border-color 0.15s var(--ease-out);
+	}
+	.preset-search:focus-within {
+		border-color: color-mix(in oklch, var(--color-gold) 55%, transparent);
+	}
+	.preset-search input {
+		flex: 1;
+		min-width: 0;
+		border: none;
+		background: transparent;
+		outline: none;
+		font-size: 0.9rem;
+		color: inherit;
+	}
+	.preset-search input::placeholder {
+		color: var(--color-muted-foreground);
+	}
+	.search-x {
+		display: inline-flex;
+		padding: 0.2rem;
+		border-radius: 9999px;
+		color: var(--color-muted-foreground);
+		transition: color 0.12s var(--ease-out);
+	}
+	.no-match {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		gap: 0.75rem;
+		border: 1px dashed color-mix(in oklch, var(--color-border) 90%, transparent);
+		border-radius: var(--radius-lg);
+		padding: 1.1rem 0.8rem;
+		font-size: 0.85rem;
+		color: var(--color-muted-foreground);
+	}
+
 	.setting-card {
 		border-radius: var(--radius-lg);
 		border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);
@@ -1062,6 +1212,9 @@
 		.setting-card:hover,
 		.tone-chip:hover {
 			border-color: color-mix(in oklch, var(--color-gold) 40%, transparent);
+			color: var(--color-foreground);
+		}
+		.search-x:hover {
 			color: var(--color-foreground);
 		}
 		.step-btn:hover {

@@ -1,5 +1,11 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { PRESET_GROUPS, SETTING_PRESETS, settingPreset } from '$lib/game/worldstate';
+import {
+	PRESET_GROUPS,
+	presetMatches,
+	SETTING_PRESETS,
+	settingPreset,
+	textMatchesQuery
+} from '$lib/game/worldstate';
 import { settings } from '$lib/stores/settings.svelte';
 
 describe('SETTING_PRESETS (rich world presets)', () => {
@@ -81,6 +87,45 @@ describe('SETTING_PRESETS (rich world presets)', () => {
 	it('settingPreset falls back to custom for unknown keys (old/imported saves)', () => {
 		expect(settingPreset('magic_academy').label).toBe('สถาบันเวทมนตร์');
 		expect(settingPreset('does_not_exist').key).toBe('custom');
+	});
+});
+
+describe('preset search (presetMatches / textMatchesQuery)', () => {
+	it('empty query matches everything', () => {
+		for (const preset of Object.values(SETTING_PRESETS)) {
+			expect(presetMatches(preset, '   ')).toBe(true);
+		}
+	});
+
+	it('matches Thai substrings in label and description', () => {
+		expect(presetMatches(SETTING_PRESETS.murim, 'มูริม')).toBe(true);
+		expect(presetMatches(SETTING_PRESETS.hunter_gate, 'ดันเจี้ยน')).toBe(true);
+		expect(presetMatches(SETTING_PRESETS.thai_legend, 'มูริม')).toBe(false);
+	});
+
+	it('matches English genre keywords, case-insensitively', () => {
+		expect(presetMatches(SETTING_PRESETS.hunter_gate, 'Solo Leveling')).toBe(true);
+		expect(presetMatches(SETTING_PRESETS.zombie_break, 'ZOMBIE')).toBe(true);
+		expect(presetMatches(SETTING_PRESETS.villainess, 'otome')).toBe(true);
+	});
+
+	it('multi-token queries are AND — every token must appear', () => {
+		expect(presetMatches(SETTING_PRESETS.hunter_gate, 'นัก ดันเจี้ยน')).toBe(true);
+		expect(presetMatches(SETTING_PRESETS.hunter_gate, 'hunter guild')).toBe(true);
+		expect(presetMatches(SETTING_PRESETS.hunter_gate, 'hunter โจรสลัด')).toBe(false);
+	});
+
+	it('every keywords field is normalized lowercase ASCII', () => {
+		for (const preset of Object.values(SETTING_PRESETS)) {
+			if (!preset.keywords) continue;
+			expect(preset.keywords).toMatch(/^[a-z0-9 ]+$/);
+			expect(preset.keywords).toBe(preset.keywords.trim());
+		}
+	});
+
+	it('textMatchesQuery works standalone (player-saved presets)', () => {
+		expect(textMatchesQuery('แดนมังกร โลกที่มังกรครองฟ้า', 'มังกร')).toBe(true);
+		expect(textMatchesQuery('แดนมังกร', 'solo')).toBe(false);
 	});
 });
 

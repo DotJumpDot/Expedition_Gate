@@ -110,6 +110,8 @@ export interface SettingPreset {
 	/** Scene-art bucket — which library group illustrates this world. */
 	art: 'sword_sorcery' | 'scifi' | 'horror' | 'thai_legend' | 'any';
 	icon: string;
+	/** English genre aliases for the preset search (manhwa titles etc.), space-separated lowercase. */
+	keywords?: string;
 }
 
 /**
@@ -125,7 +127,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ทวีปคลาสสิกแห่งราชอาณาจักร อัศวิน มังกร และเวทมนตร์โบราณ — หอคอยพ่อมด ป่าหวงห้าม เมืองการค้าที่สมาคมนักผจญภัยตั้งกิลด์ และสงครามเงาระหว่างอาณาจักรที่กำลังลุกเป็นไฟ ผู้เล่นคือนักผจญภัยอิสระที่ทั้งบัลลังก์และเงาใต้บัลลังก์ต่างต้องการตัว การผจญภัยสวมบทแบบตะวันตกเต็มรูปแบบ',
 		art: 'sword_sorcery',
-		icon: '⚔️'
+		icon: '⚔️',
+		keywords: 'fantasy sword sorcery dragon knight kingdom'
 	},
 	magic_academy: {
 		key: 'magic_academy',
@@ -133,7 +136,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'หอเรียนเวทมนตร์อันดับหนึ่งที่ชนชั้นสูงผูกขาดไว้ ผู้เล่นคือนักเรียนผู้ยากจนหรือตกหล่นที่ต้องไต่จากล่างสุดสู่อันดับต้นด้วยการสอบเวท ดวลเวทระหว่างชั้นปี แก๊งอิทธิพลในสถาบัน หอสมุดต้องห้าม และครูผู้ซ่อนอดีตไว้ใต้อาภรณ์',
 		art: 'sword_sorcery',
-		icon: '🎓'
+		icon: '🎓',
+		keywords: 'academy magic school wizard student rank duel'
 	},
 	frozen_north_noble: {
 		key: 'frozen_north_noble',
@@ -141,7 +145,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ผู้เล่นกลับชาติมาเกิดเป็นทายาทหนุ่มสาวแห่งตระกูลขุนนางผู้ครองแคว้นเหนือกึ๊กขั้วโลก ปราสาทบนภูเขาน้ำแข็ง การเมืองระหว่างตระกูล สัตว์อสูรแดนเยือกเย็น และเวทมนตร์น้ำแข็งที่ไหลอยู่ในสายเลือด ทุกสายตาในแคว้นจ้องดูว่าทายาทคนใหม่จะแข็งแกร่งพอหรือไม่',
 		art: 'sword_sorcery',
-		icon: '❄️'
+		icon: '❄️',
+		keywords: 'reincarnated noble ice north frozen heir'
 	},
 	system_power: {
 		key: 'system_power',
@@ -149,7 +154,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'หนึ่งวันผู้เล่นตื่นขึ้นมาพร้อม "ระบบ" ที่มีเพียงผู้เดียวที่มองเห็น — ภารกิจ ค่าประสบการณ์ สกิล และร้านค้าลับปรากฏขึ้นหน้าตาเหมือนเกม ทั้งที่โลกรอบตัวเป็นโลกจริงที่ไม่มีใครมีสิ่งนี้ ความลับนี้เป็นทั้งพลังและหายนะถ้าใครรู้',
 		art: 'any',
-		icon: '💠'
+		icon: '💠',
+		keywords: 'system level up status quest secret power'
 	},
 	fallen_noble_sword: {
 		key: 'fallen_noble_sword',
@@ -157,7 +163,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ตระกูลขุนนางถูกโค่นล้มในคืนเดียว ที่ดินถูกยึด ชื่อกลายเป็นคำสาป ผู้เล่นคือบุตรผู้รอดพ้นจากไฟไหม้คืนนั้น ถือดาบประจำตระกูลเพียงเล่มเดียว ออกเดินทางในฐานะนักดาบรับจ้าง หาทางฟื้นเกียรติยศและเฉลยว่าใครอยู่เบื้องหลังการล่มสลาย',
 		art: 'sword_sorcery',
-		icon: '🗡️'
+		icon: '🗡️',
+		keywords: 'fallen noble swordsman revenge wanderer'
 	},
 	time_control: {
 		key: 'time_control',
@@ -165,7 +172,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ในมหานครแสนวุ่นวาย ผู้เล่นครอบครองพลังหยุดและย้อนเวลาได้ไม่กี่วินาที แต่ทุกครั้งมีราคาที่ต้องจ่าย องค์กรลับได้กลิ่น ผู้มีอิทธิพลต้องการพลังนี้ไปครอง และเส้นเวลาที่ถูกพลิกซ้ำแล้วซ้ำเล่ากำลังแยกรอยแยกที่โลกไม่ควรมองเห็น',
 		art: 'any',
-		icon: '⏳'
+		icon: '⏳',
+		keywords: 'time stop rewind seconds city'
 	},
 	eastern_empire: {
 		key: 'eastern_empire',
@@ -173,7 +181,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'จักรวรรดิกลิ่นอายยุโรปตะวันออก พระราชวังหิมะ แม่ทัพผู้เกรียงไกร และเวทมนตร์สายเลือดโบราณของชนชั้นสูง ราชสำนักเต็มไปด้วยการวางแผนชิงบัลลังก์ ทุกจานเลี้ยงอาจมีพิษ ทุกคำสัญญามีด้านมืด และผู้เล่นเพิ่งถูกดึงเข้าไปอยู่กลางเกมอำนาจนี้',
 		art: 'sword_sorcery',
-		icon: '🏰'
+		icon: '🏰',
+		keywords: 'empire court politics throne poison'
 	},
 	wuxia: {
 		key: 'wuxia',
@@ -181,7 +190,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'โลกยุทธจักรแห่งหุบเขาและเมืองโบราณ นิกายใหญ่น้อยแย่งชิงตำราลับและตำแหน่งจอมยุทธ์อันดับหนึ่ง ผู้เล่นคือนักสู้รุ่นใหม่ที่ต้องฝึกฝนศาสตร์ แก้แค้นตระกูล เลือกข้างระหว่างนิกาย และเผชิญโลกนอกยุทธจักรที่ไม่เคยยุติธรรม',
 		art: 'sword_sorcery',
-		icon: '🥋'
+		icon: '🥋',
+		keywords: 'wuxia jianghu martial arts sect china'
 	},
 	demon_lord_reborn: {
 		key: 'demon_lord_reborn',
@@ -189,7 +199,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ผู้เล่นลืมตาขึ้นในร่างของจอมมารที่โลกทั้งใบกลัวและเกลียดชัง กองทัพผนึกมารกำลังเดินทัพมาถึง ขุนนางมารในปราสาทแย่งอำนาจกันเอง และความทรงจำของเจ้าของร่างเดิมยังหลงเหลืออยู่ — ทางเลือกเปิดกว้างว่าจะเป็นจอมมารแบบไหน',
 		art: 'sword_sorcery',
-		icon: '😈'
+		icon: '😈',
+		keywords: 'demon lord isekai possess castle'
 	},
 	pirate_sea: {
 		key: 'pirate_sea',
@@ -197,7 +208,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ทะเลพันเกาะแห่งกัปตันโจร สมบัติในตำนาน และเรือปริศนาที่ล่องหนกลางหมอก ผู้เล่นเริ่มต้นด้วยเรือเล็กหนึ่งลำและลูกเรือไม่กี่คน ออกล่าแผนที่สมบัติ หลบกองเรือราชนาวี ต่อรองกับเมืองท่าไร้กฎหมาย และเผชิญอสูรทะเลที่ไม่มีใครเชื่อว่ามีจริง',
 		art: 'any',
-		icon: '🏴‍☠️'
+		icon: '🏴‍☠️',
+		keywords: 'pirate sea treasure ship crew'
 	},
 	post_apoc: {
 		key: 'post_apoc',
@@ -205,7 +217,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'อารยธรรมล่มสลายไปแล้ว เมืองร้างถูกฝุ่นกลืน สัตว์กลายพันธุ์ครองถนน เหลือเพียงกลุ่มผู้รอดชีวิตแย่งกันหาน้ำสะอาดและซากเทคโนโลยี ผู้เล่นคือนักสำรวจที่เพิ่งขุดพบสิ่งประดิษฐ์ที่อาจเขียนกฎของโลกใหม่ทั้งใบได้',
 		art: 'scifi',
-		icon: '☢️'
+		icon: '☢️',
+		keywords: 'post apocalypse wasteland survivor ruin'
 	},
 	steampunk: {
 		key: 'steampunk',
@@ -213,7 +226,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'มหานครที่ไอน้ำ ฟันเฟือง และอาคมขับเคลื่อนกันอยู่ ชนชั้นสูงขี่เรือเหาะเหนือเมฆ ชนชั้นล่างขุดแร่อาคมใต้ดิน ผู้เล่นคือช่างซ่อมจักรกลที่บังเอิญพบแกนเวทมนตร์ต้องสาปซึ่งทั้งบรรษัทใหญ่และราชสำนักต้องการไปครองไม่ว่าจะด้วยวิธีใด',
 		art: 'scifi',
-		icon: '⚙️'
+		icon: '⚙️',
+		keywords: 'steampunk steam gear airship engineer'
 	},
 	scifi: {
 		key: 'scifi',
@@ -221,7 +235,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'อนาคตไกลที่มนุษยชาติกระจายตัวข้ามดาว — ยานอวกาศเดินสาย สถานีการค้าห่างไกล ปัญญาประดิษฐ์ที่เริ่มมีความฝัน เผ่าพันธุ์ต่างดาวผู้เงียบขรึม และบรรษัทข้ามดาวที่ใหญ่กว่ารัฐ ผู้เล่นคือลูกเรือ นักล่าเงินรางวัล หรือผู้ตรวจการที่บังเอิญจับสัญญาณที่ไม่ควรมีอยู่ ความลับของจักรวาลรออยู่ในห้วงดาว — พร้อมสิ่งที่เฝ้ามันมาก่อน',
 		art: 'scifi',
-		icon: '🚀'
+		icon: '🚀',
+		keywords: 'scifi space starship alien ai cyberpunk'
 	},
 	horror: {
 		key: 'horror',
@@ -229,7 +244,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ความมืดที่ค่อย ๆ กัดกินความจริง — หมู่บ้านที่ความตายไม่จบสิ้น คฤหาสน์ผีสิง คำสาบตกทอดข้ามตระกูล และสิ่งที่จ้องกลับมาจากเงามืด ผู้เล่นคือคนแปลกหน้าที่เห็นสิ่งที่ชาวบ้านปฏิเสธ อาวุธมีแต่คบเทียน ความเชื่อ และสติที่ถูกกัดกินทีละนิดทุกคืน — เรื่องเล่าที่อาจไม่มีใครรอดกลับมาเล่าให้ฟัง',
 		art: 'horror',
-		icon: '👻'
+		icon: '👻',
+		keywords: 'horror ghost haunted curse village'
 	},
 	thai_legend: {
 		key: 'thai_legend',
@@ -237,7 +253,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'แดนพื้นบ้านไทยตามความเชื่อโบราณ — พระเครื่อง ผีปอบ นาคราช หมอผี และป่าลึกที่ห้ามผู้ใดล้ำเดี่ยว ผู้เล่นคือลูกหลานสายเลือดหมอผี ครูมือใหม่ที่เพิ่งรับสืบทอด หรือคนธรรมดาที่ไปเผลอแตะของคน ความขลัง สัญญากับเจ้าที่ และหนี้กรรมที่ส่งต่อข้ามภพ — ดอกเบี้ยของโลกนี้น่ากลัวกว่าต้นทุนเสมอ',
 		art: 'thai_legend',
-		icon: '🪔'
+		icon: '🪔',
+		keywords: 'thai legend folklore spirit isan lanna'
 	},
 	hunter_gate: {
 		key: 'hunter_gate',
@@ -245,7 +262,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'สิบปีหลัง "ประตู" มิติเปิดครั้งแรกกลางกรุงโซล โลกของนักล่าผู้ตื่นพลังที่ไต่อันดับ E ถึง S บุกดันเจี้ยนเก็บคริสตัลเลี้ยงชีพ ผู้เล่นคือนักล่าอันดับต่ำสุดที่รอดจากดันเจี้ยนระดับ S พร้อมความลับที่พลิกทุกอย่าง — ระบบเติบโตไร้ขีดจำกัดที่มีเพียงผู้เดียว สมาคมกดราคา กิลด์ใหญ่กลืนกินคนเล็ก และประตูที่ใหญ่ขึ้นเรื่อย ๆ กำลังเปิด',
 		art: 'any',
-		icon: '🌀'
+		icon: '🌀',
+		keywords: 'solo leveling hunter gate dungeon rank awakened guild'
 	},
 	regressor: {
 		key: 'regressor',
@@ -253,7 +271,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ผู้เล่นตายในหายนะที่สิ้นสุดโลก — แล้วลืมตาตื่นในวันเก่าสิบปีก่อน ในร่างวัยเยาว์ของตัวเอง พร้อมความทรงจำอนาคตครบทุกฉาก สมบัติที่จะผุดขึ้นเมื่อไร ใครจะทรยศตอนไหน หายนะเริ่มต้นจากอะไร รู้หมด — แต่ยิ่งเปลี่ยนอนาคต ความจำก็ยิ่งบิดเพี้ยนไปจากเดิม และมีผู้ย้อนกลับคนอื่นที่ไม่ยอมให้ใครขวางแผนของตัวเอง',
 		art: 'any',
-		icon: '🔁'
+		icon: '🔁',
+		keywords: 'regression returner second chance future memory'
 	},
 	tower_climb: {
 		key: 'tower_climb',
@@ -261,7 +280,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'หอคอยปริศนาสูงทะลุเมฆงอกขึ้นพร้อมกันทุกประเทศ เรียกผู้กล้าด้วยสัญญาว่ายอดสุดมอบสิ่งที่ปรารถนาทุกอย่าง แต่ละชั้นคือด่านตายที่มีกฎบิดเบือนของตัวเอง — พันธมิตรวันนี้คือคู่แข่งพรุ่งนี้ กฎเปลี่ยนกลางด่าน และผู้เล่นเพิ่งก้าวเข้าชั้นแรกพร้อมความลับที่หอคอยพร้อมล้างบาปด้วยการโยนคนรู้ลงเหว',
 		art: 'any',
-		icon: '🗼'
+		icon: '🗼',
+		keywords: 'tower floor trial climb reward'
 	},
 	murim: {
 		key: 'murim',
@@ -269,7 +289,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ยุทธจักรมูริมที่สำนักธรรมะและสำนักมารสมดุลกันด้วยกำปั้นมาพันปี ผู้เล่นคือศิษย์ไร้สังกัดผู้ได้ตำราต้องห้ามหรือปรมาจารย์ผู้ไม่มีชื่อ ไต่สู่การประลองห้ายอดฝีมือ สะสมชื่อเสียงที่มีแต่ศัตรูเป็นผลพลอยได้ และเลือกเองว่าจะรักษาสมดุลเก่า สร้างสำนักใหม่ หรือเผายุทธจักรทั้งใบ — ก่อนสงครามสำนักใหญ่จะเริ่มและกลืนคนไร้สังกัดก่อนใคร',
 		art: 'sword_sorcery',
-		icon: '🐺'
+		icon: '🐺',
+		keywords: 'murim martial korean sect cult master'
 	},
 	villainess: {
 		key: 'villainess',
@@ -277,7 +298,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ตื่นมาในร่างบารอนเนสผู้เย่อหยิ่งของนวนิยายรักที่เคยอ่าน — ตัวร้ายที่บทกำหนดให้ถูกประหารเมื่องานเลี้ยงสิ้นปี ผู้เล่นจำพล็อตได้ละเอียดกว่าผู้เขียนเอง รู้ว่าคำไหนทำให้เจ้าชายเกลียด รู้ว่าใครวางแผนอะไรอยู่ แต่ทุกครั้งที่ขยับหนีบทเดิม โลกก็บิดเบือนตอบโต้ ราชสำนัก งานเต้นรำ และคู่หมั้นผู้เกลียดชังที่บทเขียนไว้ว่าจะจบกันเพราะเธอตาย',
 		art: 'sword_sorcery',
-		icon: '👑'
+		icon: '👑',
+		keywords: 'villainess otome novel prince execution flag'
 	},
 	extra_novel: {
 		key: 'extra_novel',
@@ -285,7 +307,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ฟื้นมาเป็นตัวประกอบไร้ชื่อในนิยายที่เคยอ่านจบ — ไม่ใช่พระเอก ไม่ใช่ตัวร้าย แค่ตัวละครสามัญที่บทเดิมเขียนสั้น ๆ ว่าตายในเหตุการณ์ปีที่สาม ผู้เล่นรู้พล็อตล่วงหน้าทุกฉากใหญ่และต้องใช้มันไต่ตัวขึ้นจากความไร้ตัวตน — โดยไม่แตะตัวละครหลักที่ "บท" คุ้มครองไว้ เพราะใครที่พล็อตสนใจ ความตายก็สนใจตาม',
 		art: 'sword_sorcery',
-		icon: '📖'
+		icon: '📖',
+		keywords: 'extra side character novel transmigration background'
 	},
 	monster_reborn: {
 		key: 'monster_reborn',
@@ -293,7 +316,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ตายแล้วฟื้นในร่างมอนสเตอร์ชั้นต่ำใต้ดันเจี้ยนลึก — ไม่มีมือจับดาบ ไม่มีเสียงพูด มีแต่สัญชาตญาณ การวิวัฒนาการ และความทรงจำมนุษย์เดิมที่ทำให้แตกต่าง กลืนพลังจากเหล่าอสูร พัฒนาร่างทีละขั้น รวมฝูงอสูรไร้ปัญญา และไต่จากอาหารของนักผจญภัยสู่จ้าวแห่งชั้นลึกที่มนุษย์เอ่ยชื่อด้วยความกลัว',
 		art: 'any',
-		icon: '👾'
+		icon: '👾',
+		keywords: 'monster reincarnation evolution weak'
 	},
 	dungeon_lord: {
 		key: 'dungeon_lord',
@@ -301,7 +325,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'ผู้เล่นคือแกนกลางของดันเจี้ยนที่เพิ่งถือกำเนิด — วางห้อง อัญเชิญอสูร ตั้งกับดัก และเก็บเกี่ยวมานาจากนักผจญภัยที่บุกเข้ามาเอง ทุกการบุกคือกลยุทธ์ ทุกศพคือทรัพยากร แต่เมื่อดันเจี้ยนโตพ้นวงจร อาณาจักรจะส่งฮีโร่ระดับสูงมากวาดล้าง และสิ่งที่อยู่ลึกกว่านั้นก็เริ่มส่งสายตามาหาเพื่อนใหม่',
 		art: 'any',
-		icon: '🔑'
+		icon: '🔑',
+		keywords: 'dungeon defense core monster raid manager army'
 	},
 	necromancer: {
 		key: 'necromancer',
@@ -309,7 +334,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'เวทมนตร์มรณะถูกสาปทั่วทั้งทวีป — ผู้เป็นเนโครแมนเซอร์ถูกเผาทั้งเป็นเมื่อจับได้ ผู้เล่นตื่นสายนี้โดยไม่ได้เลือก พร้อมพรสวรรค์ที่ทั้งโลกเกลียด กองทัพศพที่โตทีละตัวจากสังขารศัตรู ความลับของสงครามศักดิ์สิทธิ์ที่โบสถ์ใหญ่ปกปิดมาสามชั่วอายุคน และเสียงกระซิบจากปรมาจารย์อสูรผู้เคยถูกเผาว่า "เลือกฝ่ายของแกเถอะ"',
 		art: 'sword_sorcery',
-		icon: '💀'
+		icon: '💀',
+		keywords: 'necromancer undead summon army curse church'
 	},
 	gladiator_arena: {
 		key: 'gladiator_arena',
@@ -317,7 +343,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'จักรวรรดิผู้รุ่งเรืองด้วยสังเวียน — ผู้เล่นคือทาสนักสู้ที่ถูกโยนเข้าไปสู้เพื่อความบันเทิงของคนทั้งเมือง ชนะเพื่อมีชีวิต ชนะต่อเพื่อซื้ออิสรภาพ ชนะให้ผู้ชมเจรจาชื่อ แต่สังเวียนมีเจ้าของ การพนัน และการเมืองที่ต้องการเลือดของคนดัง — ทุกสัปดาห์มีคู่ต่อสู้ใหม่ ศพใหม่ และราคาใหม่ของชัยชนะ',
 		art: 'sword_sorcery',
-		icon: '🏟️'
+		icon: '🏟️',
+		keywords: 'gladiator arena colosseum slave champion empire'
 	},
 	myth_demigod: {
 		key: 'myth_demigod',
@@ -325,7 +352,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'เทพเจ้ายังเดินดินและมีบุตรกับมนุษย์ — ผู้เล่นคือลูกครึ่งเทพที่เพิ่งรู้สายเลือดตัวเองเมื่ออสูรในตำนานมาหน้าบ้าน วิหารโบราณ คำทำนายที่จารึกชื่อไว้ก่อนเกิด สัตว์ประหลาดที่ดมกลิ่นเทพได้ และการเมืองบนสวรรค์ที่ใช้ลูกครึ่งเป็นหมาก ของขวัญหนึ่งชิ้นจากพระชนกหรือพระชนนี และโทษสาปที่ตามมาตลอดชีวิต',
 		art: 'sword_sorcery',
-		icon: '⚡'
+		icon: '⚡',
+		keywords: 'demigod mythology olympus god monster prophecy'
 	},
 	zombie_break: {
 		key: 'zombie_break',
@@ -333,7 +361,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'เช้าวันหนึ่งเมืองลุกเป็นไฟด้วยผู้ติดเชื้อ — ผู้เล่นคือผู้รอดชีวิตธรรมดา มีแต่ของในบ้าน ทักษะที่มี และการตัดสินใจที่โหดร้ายขึ้นทุกสัปดาห์ ตามหาคนที่รัก รวมกลุ่มผู้รอด ปล้นซากเมือง และค่อย ๆ พบว่าเชื้อนี้ไม่ได้แพร่เอง — ใครบางคนปล่อยมัน และเขายังอยู่ในเมืองนี้',
 		art: 'any',
-		icon: '🧟'
+		icon: '🧟',
+		keywords: 'zombie apocalypse infected outbreak survival city'
 	},
 	shaman_seoul: {
 		key: 'shaman_seoul',
@@ -341,7 +370,8 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		description:
 			'มหานครสมัยใหม่ที่วิญญาณร้ายปลอมตัวเป็นคน — ผู้เล่นคือผู้มีตาวิญญาณ หมอผีรุ่นสุดท้าย มูดังสายเลือดใหม่ หรือนักล่าผีมือใหม่ที่ติดหนี้ชีวิตให้เจ้า คดีสะเทือนขวัญ ของขลังโบราณ สัญญากับเทพที่ทรงมาโดยไม่ได้รับเชิญ ทุกคดีจบด้วยการไล่ผี — หรือสิ่งที่ไล่ผีจะตามกลับมาเอง',
 		art: 'any',
-		icon: '📿'
+		icon: '📿',
+		keywords: 'exorcist shaman ghost korean occult seoul'
 	},
 	custom: {
 		key: 'custom',
@@ -394,6 +424,22 @@ export const PRESET_GROUPS: Array<{ label: string; keys: string[] }> = [
 
 /** Campaign setting key — any preset key; user presets all persist as 'custom'. */
 export type SettingKey = string;
+
+/**
+ * Multi-token AND search — every space-separated token must appear somewhere,
+ * case-insensitive. Thai needs no word segmentation for substring hits.
+ */
+export function textMatchesQuery(haystack: string, query: string): boolean {
+	const q = query.trim().toLowerCase();
+	if (!q) return true;
+	const hay = haystack.toLowerCase();
+	return q.split(/\s+/).every((token) => hay.includes(token));
+}
+
+/** Preset search across label + description + English genre keywords. */
+export function presetMatches(preset: SettingPreset, query: string): boolean {
+	return textMatchesQuery(`${preset.label} ${preset.description} ${preset.keywords ?? ''}`, query);
+}
 
 /** Preset lookup that never throws — unknown keys (old saves, imports) fall back to custom. */
 export function settingPreset(key: string): SettingPreset {
