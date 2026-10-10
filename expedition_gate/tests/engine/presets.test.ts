@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { SETTING_PRESETS, settingPreset } from '$lib/game/worldstate';
+import { PRESET_GROUPS, SETTING_PRESETS, settingPreset } from '$lib/game/worldstate';
 import { settings } from '$lib/stores/settings.svelte';
 
 describe('SETTING_PRESETS (rich world presets)', () => {
@@ -7,6 +7,11 @@ describe('SETTING_PRESETS (rich world presets)', () => {
 		for (const key of ['sword_sorcery', 'scifi', 'horror', 'thai_legend', 'custom']) {
 			expect(SETTING_PRESETS[key]).toBeDefined();
 		}
+	});
+
+	it('ships 28 built-ins (15 originals + the 13-preset manhwa wave)', () => {
+		const builtIns = Object.keys(SETTING_PRESETS).filter((key) => key !== 'custom');
+		expect(builtIns).toHaveLength(28);
 	});
 
 	it('every preset has a label, a valid art bucket, and an icon', () => {
@@ -18,14 +23,58 @@ describe('SETTING_PRESETS (rich world presets)', () => {
 		}
 	});
 
+	it('record keys match their preset.key fields, labels and icons stay unique', () => {
+		const labels = new Set<string>();
+		const icons = new Set<string>();
+		for (const [key, preset] of Object.entries(SETTING_PRESETS)) {
+			expect(preset.key).toBe(key);
+			expect(labels.has(preset.label)).toBe(false);
+			expect(icons.has(preset.icon)).toBe(false);
+			labels.add(preset.label);
+			icons.add(preset.icon);
+		}
+	});
+
 	it('every built-in preset steers the GM with a description (except กำหนดเอง)', () => {
 		for (const preset of Object.values(SETTING_PRESETS)) {
 			if (preset.key === 'custom') {
 				expect(preset.description).toBe('');
 			} else {
 				expect(preset.description.length).toBeGreaterThan(40);
+				// the brief endpoint truncates premises at 400 — presets must fit intact
 				expect(preset.description.length).toBeLessThanOrEqual(400);
 			}
+		}
+	});
+
+	it('PRESET_GROUPS show every built-in exactly once (wizard completeness)', () => {
+		const grouped = PRESET_GROUPS.flatMap((group) => group.keys);
+		const builtIns = Object.keys(SETTING_PRESETS).filter((key) => key !== 'custom');
+		expect(new Set(grouped).size).toBe(grouped.length); // no duplicates across groups
+		expect([...grouped].sort()).toEqual([...builtIns].sort());
+		for (const group of PRESET_GROUPS) {
+			expect(group.label.trim().length).toBeGreaterThan(0);
+		}
+	});
+
+	it('manhwa wave is present: gates, regression, tower, murim, villainess…', () => {
+		for (const key of [
+			'hunter_gate',
+			'regressor',
+			'tower_climb',
+			'murim',
+			'villainess',
+			'extra_novel',
+			'monster_reborn',
+			'dungeon_lord',
+			'necromancer',
+			'gladiator_arena',
+			'myth_demigod',
+			'zombie_break',
+			'shaman_seoul'
+		]) {
+			expect(SETTING_PRESETS[key]).toBeDefined();
+			expect(SETTING_PRESETS[key].description.length).toBeGreaterThan(40);
 		}
 	});
 

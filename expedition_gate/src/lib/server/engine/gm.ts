@@ -173,15 +173,32 @@ export function parseJsonLoose(raw: string): unknown {
 export { SETTING_PRESETS, HeroProposalSchema } from './worldstate';
 export type { SettingKey, HeroProposal } from './worldstate';
 
+/**
+ * The player's edited premise wins; otherwise the chosen preset's steering
+ * paragraph reaches the GM (the docs' contract — for months only the short
+ * label made it into this prompt, leaving every preset description dead text).
+ */
+export function buildWorldBriefPrompt(input: {
+	setting: SettingKey;
+	tone: string[];
+	premise?: string;
+}): string {
+	const preset = settingPreset(input.setting);
+	const premise =
+		input.premise?.trim() ||
+		(preset.key !== 'custom' && preset.description ? preset.description : '');
+	return fill(PROMPTS.worldbrief, {
+		SETTING: preset.label,
+		PREMISE: premise ? ` โดยมีแนวคิดหลักของเรื่อง: "${premise}"` : '',
+		TONE: input.tone.join(' · ') || 'ผจญภัย'
+	});
+}
+
 export async function generateWorldBrief(
 	input: { setting: SettingKey; tone: string[]; premise?: string },
 	baseUrl?: string
 ): Promise<{ ok: true; brief: WorldBrief } | { ok: false; error: string }> {
-	const prompt = fill(PROMPTS.worldbrief, {
-		SETTING: settingPreset(input.setting).label,
-		PREMISE: input.premise ? ` โดยมีแนวคิดเรื่องจากผู้เล่น: "${input.premise}"` : '',
-		TONE: input.tone.join(' · ') || 'ผจญภัย'
-	});
+	const prompt = buildWorldBriefPrompt(input);
 	const result = await completeJson([{ role: 'user', content: prompt }], WorldBriefSchema, {
 		baseUrl,
 		maxTokens: 1500

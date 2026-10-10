@@ -213,7 +213,7 @@ export const SCENARIOS: Scenario[] = [
 		title: 'ระบบพลังลับ',
 		image: 'rain.svg',
 		tagline: 'ผู้ใช้คนแรกของระบบที่ไม่มีใครเห็น — ภารกิจแรก: รอดจากสถานีรถไฟใต้ดินก่อนเที่ยง',
-		setting: 'custom',
+		setting: 'system_power',
 		tones: ['ผจญภัย', 'มืดมน'],
 		brief: {
 			name: 'มหานครเทเวียน',
@@ -375,7 +375,7 @@ export const SCENARIOS: Scenario[] = [
 		image: 'pd-friedrich-two-men-moon.jpg',
 		tagline:
 			'หยุดเวลาได้ 6 วินาที ทุกครั้งมีราคา — คืนที่นาฬิกากลางเมืองเดินถอยหลังเป็นครั้งแรกในรอบร้อยปี',
-		setting: 'custom',
+		setting: 'time_control',
 		tones: ['มืดมน', 'ผจญภัย'],
 		brief: {
 			name: 'มหานครเมอริเดียน',

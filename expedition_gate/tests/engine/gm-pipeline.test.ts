@@ -4,9 +4,11 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createFakeLlama } from '../fake-llama/server.mjs';
 import {
 	buildGmMessages,
+	buildWorldBriefPrompt,
 	generateHeroProposal,
 	generateWorldBrief,
 	parseJsonLoose,
+	SETTING_PRESETS,
 	updateWorldState
 } from '$lib/server/engine/gm';
 import {
@@ -65,6 +67,30 @@ describe('generateWorldBrief (JSON call + zod)', () => {
 			expect(result.brief.name).toBe('ทุ่งประตูหิน');
 			expect(result.brief.hooks).toHaveLength(3);
 		}
+	});
+});
+
+describe('buildWorldBriefPrompt (preset steering reaches the GM)', () => {
+	it('injects the preset description when the player did not edit the premise', () => {
+		const prompt = buildWorldBriefPrompt({ setting: 'hunter_gate', tone: [] });
+		expect(prompt).toContain('ผู้สร้างโลก');
+		expect(prompt).toContain(SETTING_PRESETS.hunter_gate.description);
+	});
+
+	it("player's edited premise beats the preset description", () => {
+		const prompt = buildWorldBriefPrompt({
+			setting: 'wuxia',
+			tone: ['มืดมน'],
+			premise: 'หมู่บ้านช่างตีเหล็กกลางหุบเขา'
+		});
+		expect(prompt).toContain('หมู่บ้านช่างตีเหล็กกลางหุบเขา');
+		expect(prompt).not.toContain(SETTING_PRESETS.wuxia.description);
+	});
+
+	it('custom setting without a premise stays label-only', () => {
+		const prompt = buildWorldBriefPrompt({ setting: 'custom', tone: [] });
+		expect(prompt).toContain('กำหนดเอง');
+		expect(prompt).not.toContain('แนวคิดหลักของเรื่อง');
 	});
 });
 

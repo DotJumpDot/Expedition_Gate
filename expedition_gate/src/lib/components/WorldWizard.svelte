@@ -5,7 +5,12 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { STAT_KEYS, STAT_LABELS_TH, type Stats } from '$lib/game/rules';
-	import { SETTING_PRESETS, settingPreset, type HeroProposal } from '$lib/game/worldstate';
+	import {
+		PRESET_GROUPS,
+		SETTING_PRESETS,
+		settingPreset,
+		type HeroProposal
+	} from '$lib/game/worldstate';
 	import type { WorldBrief } from '$lib/game/worldstate';
 	import { SCENARIOS, type Scenario, type ScenarioHero } from '$lib/game/scenarios';
 	import HeroPortrait from '$lib/components/game/HeroPortrait.svelte';
@@ -59,7 +64,6 @@
 		'นักเล่นแร่แปรธาตุ',
 		'กำหนดเอง'
 	];
-	const SETTING_KEYS = Object.keys(SETTING_PRESETS).filter((key) => key !== 'custom');
 	const CUSTOM_CLASS = 'กำหนดเอง';
 
 	const statTotal = $derived(
@@ -455,53 +459,64 @@
 								<p class="mb-2 text-xs font-bold tracking-[0.12em] text-muted-foreground uppercase">
 									เลือกฉาก (ทุกฉากแก้ได้)
 								</p>
-								<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
-									{#each SETTING_KEYS as key (key)}
-										<button
-											type="button"
-											class="setting-card {setting === key && !customSelected
-												? 'setting-active col-span-2'
-												: ''}"
-											title={SETTING_PRESETS[key].label}
-											onclick={() => selectPreset(key)}
-										>
-											{SETTING_PRESETS[key].icon}
-											{SETTING_PRESETS[key].label}
-										</button>
-									{/each}
-									{#each settings.customPresets as preset (preset.label)}
-										<div
-											class="relative {customSelected?.label === preset.label ? 'col-span-2' : ''}"
-										>
-											<button
-												type="button"
-												class="setting-card w-full pr-6 {customSelected?.label === preset.label
-													? 'setting-active'
-													: ''}"
-												onclick={() => selectCustomPreset(preset)}
-											>
-												📌 {preset.label}
-											</button>
-											<button
-												type="button"
-												class="preset-x"
-												title="ลบพรีเซ็ตนี้"
-												aria-label="ลบพรีเซ็ต {preset.label}"
-												onclick={() => settings.removeCustomPreset(preset.label)}
-											>
-												<X class="size-3" aria-hidden="true" />
-											</button>
+								<div class="space-y-3.5">
+									{#each PRESET_GROUPS as group (group.label)}
+										<div>
+											<p class="group-label">{group.label}</p>
+											<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+												{#each group.keys as key (key)}
+													<button
+														type="button"
+														class="setting-card {setting === key && !customSelected
+															? 'setting-active col-span-2'
+															: ''}"
+														title={SETTING_PRESETS[key].label}
+														onclick={() => selectPreset(key)}
+													>
+														{SETTING_PRESETS[key].icon}
+														{SETTING_PRESETS[key].label}
+													</button>
+												{/each}
+											</div>
 										</div>
 									{/each}
-									<button
-										type="button"
-										class="setting-card {setting === 'custom' && !customSelected
-											? 'setting-active col-span-2'
-											: ''}"
-										onclick={() => selectPreset('custom')}
-									>
-										✍️ กำหนดเอง
-									</button>
+									<div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+										{#each settings.customPresets as preset (preset.label)}
+											<div
+												class="relative {customSelected?.label === preset.label
+													? 'col-span-2'
+													: ''}"
+											>
+												<button
+													type="button"
+													class="setting-card w-full pr-6 {customSelected?.label === preset.label
+														? 'setting-active'
+														: ''}"
+													onclick={() => selectCustomPreset(preset)}
+												>
+													📌 {preset.label}
+												</button>
+												<button
+													type="button"
+													class="preset-x"
+													title="ลบพรีเซ็ตนี้"
+													aria-label="ลบพรีเซ็ต {preset.label}"
+													onclick={() => settings.removeCustomPreset(preset.label)}
+												>
+													<X class="size-3" aria-hidden="true" />
+												</button>
+											</div>
+										{/each}
+										<button
+											type="button"
+											class="setting-card {setting === 'custom' && !customSelected
+												? 'setting-active col-span-2'
+												: ''}"
+											onclick={() => selectPreset('custom')}
+										>
+											✍️ กำหนดเอง
+										</button>
+									</div>
 								</div>
 							</div>
 
@@ -915,6 +930,16 @@
 	}
 	.scenario-card:active {
 		transform: scale(0.98);
+	}
+
+	.group-label {
+		margin-bottom: 0.4rem;
+		font-size: 0.7rem;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+		text-transform: uppercase;
+		color: var(--color-muted-foreground);
+		opacity: 0.85;
 	}
 
 	.setting-card {
