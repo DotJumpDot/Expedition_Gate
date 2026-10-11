@@ -13,6 +13,14 @@
 	/** Scene-art manifest entries (available only) — scenario tiles pull art by file. */
 	let artByFile = $state<Map<string, string>>(new Map());
 
+	/** Most recent open campaign — the เล่นต่อ tile on the gate. */
+	let lastPlayed = $state<{
+		id: string;
+		title: string;
+		heroName: string | null;
+		lastPlayedAt: string | null;
+	} | null>(null);
+
 	onMount(async () => {
 		try {
 			const res = await fetch('/api/scenes', { cache: 'no-store' });
@@ -25,7 +33,33 @@
 		} catch {
 			artByFile = new Map();
 		}
+		try {
+			const res = await fetch('/api/campaigns', { cache: 'no-store' });
+			const data = (await res.json()) as {
+				campaigns: Array<{
+					id: string;
+					title: string;
+					heroName: string | null;
+					lastPlayedAt: string | null;
+				}>;
+			};
+			lastPlayed = data.campaigns[0] ?? null; // list is sorted most-recent-first
+		} catch {
+			lastPlayed = null;
+		}
 	});
+
+	function relativeDate(iso: string | null): string {
+		if (!iso) return '';
+		const minutes = Math.floor((Date.now() - new Date(iso).getTime()) / 60_000);
+		if (minutes < 1) return 'เมื่อสักครู่';
+		if (minutes < 60) return `${minutes} นาทีที่แล้ว`;
+		const hours = Math.floor(minutes / 60);
+		if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`;
+		const days = Math.floor(hours / 24);
+		if (days < 30) return `${days} วันที่แล้ว`;
+		return new Date(iso).toLocaleDateString('th-TH');
+	}
 
 	async function onImportFile(event: Event) {
 		const input = event.currentTarget as HTMLInputElement;
@@ -101,6 +135,32 @@
 		{/if}
 	</section>
 
+	<!-- เล่นต่อ — jump straight back into the most recent adventure -->
+	{#if lastPlayed}
+		<section class="gate-rise mt-8 w-full" style="--stagger: 1.5">
+			<a
+				href="/campaign/{lastPlayed.id}"
+				class="continue-tile group"
+				aria-label="เล่นต่อ {lastPlayed.title}"
+			>
+				<span class="continue-pulse" aria-hidden="true"></span>
+				<div class="min-w-0 flex-1">
+					<p class="text-[11px] font-bold tracking-[0.18em] text-gold uppercase">เล่นต่อ</p>
+					<p class="mt-0.5 truncate text-sm font-bold">{lastPlayed.title}</p>
+					<p class="mt-0.5 truncate text-xs text-muted-foreground">
+						{lastPlayed.heroName ?? 'ยังไม่มีฮีโร่'}{lastPlayed.lastPlayedAt
+							? ` · ${relativeDate(lastPlayed.lastPlayedAt)}`
+							: ''}
+					</p>
+				</div>
+				<Swords
+					class="size-4 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-gold"
+					aria-hidden="true"
+				/>
+			</a>
+		</section>
+	{/if}
+
 	<!-- เรื่องพร้อมเล่น — rich scenario tiles with scene art -->
 	<section class="gate-rise mt-14 w-full" style="--stagger: 2">
 		<div class="mb-3 flex items-baseline justify-between gap-3">
@@ -158,6 +218,42 @@
 </div>
 
 <style>
+	.continue-tile {
+		position: relative;
+		display: flex;
+		align-items: center;
+		gap: 0.9rem;
+		width: 100%;
+		max-width: 34rem;
+		margin-inline: auto;
+		border-radius: var(--radius-lg);
+		border: 1px solid color-mix(in oklch, var(--color-gold) 35%, transparent);
+		background: color-mix(in oklch, var(--color-card) 65%, transparent);
+		padding: 0.8rem 1rem;
+		transition:
+			border-color 0.15s var(--ease-out),
+			transform 0.15s var(--ease-out);
+	}
+	.continue-tile:active {
+		transform: scale(0.985);
+	}
+	.continue-pulse {
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		pointer-events: none;
+		animation: continue-glow 2.6s ease-in-out infinite;
+	}
+	@keyframes continue-glow {
+		0%,
+		100% {
+			box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-gold) 14%, transparent);
+		}
+		50% {
+			box-shadow: 0 0 18px 0 color-mix(in oklch, var(--color-gold) 14%, transparent);
+		}
+	}
+
 	.scenario-tile {
 		position: relative;
 		display: block;
@@ -241,6 +337,13 @@
 
 	@media (prefers-reduced-motion: reduce) {
 		.scenario-tile {
+			transition: none;
+		}
+		.continue-pulse {
+			animation: none;
+			box-shadow: none;
+		}
+		.continue-tile {
 			transition: none;
 		}
 	}
