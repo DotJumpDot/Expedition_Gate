@@ -9,6 +9,12 @@ describe('ready-to-play scenarios (เริ่มทันที)', () => {
 		expect(new Set(SCENARIOS.map((s) => s.id)).size).toBe(SCENARIOS.length);
 	});
 
+	it('manhwa wave scenarios exist and use their real preset keys', () => {
+		const byId = new Map(SCENARIOS.map((scenario) => [scenario.id, scenario]));
+		expect(byId.get('hunter_gate')?.setting).toBe('hunter_gate');
+		expect(byId.get('villainess')?.setting).toBe('villainess');
+	});
+
 	it('every scenario maps to a real preset (scene art) and passes WorldBriefSchema', () => {
 		for (const scenario of SCENARIOS) {
 			expect(SETTING_PRESETS[scenario.setting]).toBeDefined();
