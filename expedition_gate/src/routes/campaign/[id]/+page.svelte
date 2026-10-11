@@ -130,6 +130,10 @@
 		void session.send('use-item', 'ใช้ ' + name, undefined, undefined, name);
 	}
 
+	function handleHeroRename(name: string) {
+		return session.rename({ heroName: name });
+	}
+
 	function handleSend(
 		kind: Parameters<typeof session.send>[0],
 		text: string,
@@ -183,6 +187,7 @@
 						campaignId={data.id}
 						disabled={session.busy}
 						onuseitem={handleUseItem}
+						onrename={handleHeroRename}
 					/>
 					<QuestList world={session.state} />
 					<NpcPanel world={session.state} />
@@ -203,6 +208,7 @@
 						campaignId={data.id}
 						disabled={session.busy}
 						onuseitem={handleUseItem}
+						onrename={handleHeroRename}
 					/>
 					<QuestList world={session.state} />
 					<NpcPanel world={session.state} />
@@ -327,6 +333,11 @@
 
 					{#if session.streaming}
 						<NarrationCard content={session.streaming} role="gm" streaming />
+						{#if session.streamCps > 0}
+							<p class="text-center text-[11px] text-muted-foreground/70 tabular-nums">
+								{session.streamCps} ตัวอักษร/วินาที
+							</p>
+						{/if}
 					{/if}
 
 					{#if session.busy && !session.streaming}

@@ -133,6 +133,52 @@ export function getCampaign(id: string) {
 	return row ?? null;
 }
 
+/**
+ * Rename the campaign title and/or the hero. The hero name lives inside the
+ * world-state JSON, so that path re-validates the full state through zod
+ * before writing (HeroSchema caps it at 40 chars).
+ */
+export function renameCampaign(
+	id: string,
+	patch: { title?: unknown; heroName?: unknown }
+): { ok: boolean; error?: string; title?: string; heroName?: string } {
+	const db = getDb();
+	const [row] = db.select().from(campaigns).where(eq(campaigns.id, id)).all();
+	if (!row) return { ok: false, error: 'ไม่พบการผจญภัยนี้' };
+
+	const title = typeof patch.title === 'string' ? patch.title.trim() : undefined;
+	const heroName = typeof patch.heroName === 'string' ? patch.heroName.trim() : undefined;
+	if (title === undefined && heroName === undefined) {
+		return { ok: false, error: 'ไม่มีอะไรให้เปลี่ยน' };
+	}
+
+	if (title !== undefined) {
+		if (title.length < 1 || title.length > 80) {
+			return { ok: false, error: 'ชื่อการผจญภัยต้องมี 1-80 ตัวอักษร' };
+		}
+		db.update(campaigns).set({ title, updatedAt: new Date() }).where(eq(campaigns.id, id)).run();
+	}
+
+	if (heroName !== undefined) {
+		if (heroName.length < 1 || heroName.length > 40) {
+			return { ok: false, error: 'ชื่อฮีโร่ต้องมี 1-40 ตัวอักษร' };
+		}
+		const state = parseState(row.stateJson);
+		if (!state) return { ok: false, error: 'สถานะเกมอ่านไม่ได้' };
+		const parsed = WorldStateSchema.safeParse({
+			...state,
+			hero: { ...state.hero, name: heroName }
+		});
+		if (!parsed.success) return { ok: false, error: 'ชื่อฮีโร่ไม่ถูกต้อง' };
+		db.update(campaigns)
+			.set({ stateJson: parsed.data, updatedAt: new Date() })
+			.where(eq(campaigns.id, id))
+			.run();
+	}
+
+	return { ok: true, title, heroName };
+}
+
 export function getMessages(campaignId: string, limit = 200) {
 	const db = getDb();
 	return db

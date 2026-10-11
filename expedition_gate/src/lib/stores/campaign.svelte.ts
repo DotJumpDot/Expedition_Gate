@@ -29,6 +29,10 @@ function createSession() {
 	let messages = $state<UiMessage[]>([]);
 	let streaming = $state('');
 	let resolutionLine = $state('');
+	/** Streaming pace — characters per second since the first delta (0 while thinking). */
+	let streamCps = $state(0);
+	let streamStart = 0;
+	let streamChars = 0;
 	let busy = $state(false);
 	let error = $state('');
 	let ended = $state<string | null>(null);
@@ -110,6 +114,9 @@ function createSession() {
 		error = '';
 		streaming = '';
 		resolutionLine = '';
+		streamCps = 0;
+		streamStart = 0;
+		streamChars = 0;
 		chips = [];
 		cjkLeak = false;
 		messages.push({
@@ -137,6 +144,7 @@ function createSession() {
 			}
 			streaming = '';
 			resolutionLine = '';
+			streamCps = 0;
 			busy = false;
 			controller = null;
 		};
@@ -194,9 +202,15 @@ function createSession() {
 								}
 							}
 							break;
-						case 'delta':
+						case 'delta': {
 							streaming += data.text ?? '';
+							// Pace is measured from the FIRST delta — thinking time excluded.
+							if (!streamStart) streamStart = Date.now();
+							streamChars += (data.text ?? '').length;
+							const elapsedSec = (Date.now() - streamStart) / 1000;
+							if (elapsedSec >= 1) streamCps = Math.round(streamChars / elapsedSec);
 							break;
+						}
 						case 'replace':
 							// CJK rewrite: the streamed text is superseded wholesale.
 							streaming = data.text ?? '';
@@ -276,6 +290,31 @@ function createSession() {
 		}
 	}
 
+	/** Rename the campaign and/or hero; mirrors the change into the local mirror. */
+	async function rename(patch: { title?: string; heroName?: string }): Promise<boolean> {
+		if (!campaignId) return false;
+		try {
+			const res = await fetch(`/api/campaigns/${campaignId}/rename`, {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify(patch)
+			});
+			const data = (await res.json()) as {
+				ok?: boolean;
+				title?: string;
+				heroName?: string;
+			};
+			if (!res.ok || !data.ok) return false;
+			if (data.title) title = data.title;
+			if (data.heroName && state) {
+				state = { ...state, hero: { ...state.hero, name: data.heroName } };
+			}
+			return true;
+		} catch {
+			return false;
+		}
+	}
+
 	/** Spend 2 stat points (app math; one level per call). */
 	async function levelUp(
 		allocations: Partial<Record<string, number>>
@@ -349,6 +388,9 @@ function createSession() {
 		get streaming() {
 			return streaming;
 		},
+		get streamCps() {
+			return streamCps;
+		},
 		get resolutionLine() {
 			return resolutionLine;
 		},
@@ -377,6 +419,7 @@ function createSession() {
 		load,
 		send,
 		stop,
+		rename,
 		fetchChips,
 		levelUp,
 		writeEpilogue,

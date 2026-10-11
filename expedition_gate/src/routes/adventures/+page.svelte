@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Compass, ScrollText, Swords, Trash2 } from '@lucide/svelte';
+	import { Compass, Pencil, ScrollText, Swords, Trash2 } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { SETTING_PRESETS } from '$lib/game/worldstate';
 	import { pickPortrait, type PortraitEntry } from '$lib/game/portraits';
@@ -22,6 +22,41 @@
 	} = $props();
 
 	let confirmDelete = $state<string | null>(null);
+	/** Inline rename: the card swaps to an edit form while its id matches. */
+	let editingId = $state<string | null>(null);
+	let renameDraft = $state('');
+	let renameSaving = $state(false);
+
+	function startRename(campaign: { id: string; title: string }) {
+		confirmDelete = null;
+		renameDraft = campaign.title;
+		editingId = campaign.id;
+	}
+	function cancelRename() {
+		editingId = null;
+	}
+	async function saveRename(id: string) {
+		const title = renameDraft.trim().slice(0, 80);
+		if (!title || renameSaving) {
+			editingId = null;
+			return;
+		}
+		renameSaving = true;
+		try {
+			const res = await fetch(`/api/campaigns/${id}/rename`, {
+				method: 'POST',
+				headers: { 'content-type': 'application/json' },
+				body: JSON.stringify({ title })
+			});
+			if (res.ok) {
+				const renamed = data.campaigns.find((campaign) => campaign.id === id);
+				if (renamed) renamed.title = title;
+			}
+		} finally {
+			renameSaving = false;
+			editingId = null;
+		}
+	}
 
 	// Hero faces on the cards — the same deterministic per-name pick the game
 	// screen uses (falls back to the setting emoji when no hero/library yet).
@@ -92,51 +127,86 @@
 			{#each data.campaigns as campaign (campaign.id)}
 				{@const face = faceFor(campaign)}
 				<li>
-					<a
-						href="/campaign/{campaign.id}"
-						class="campaign-card group"
-						aria-label="เล่นต่อ {campaign.title}"
-					>
-						<div class="flex items-start gap-3">
-							{#if face}
-								<img class="campaign-face" src={face.url} alt="" loading="lazy" />
-							{:else}
-								<span class="campaign-icon">{SETTING_ICON[campaign.setting] ?? '🌀'}</span>
-							{/if}
-							<div class="min-w-0 flex-1">
-								<p class="truncate font-bold">{campaign.title}</p>
-								<p class="mt-0.5 truncate text-xs text-muted-foreground">
-									{campaign.heroName ?? 'ยังไม่มีฮีโร่'}
-									{#if campaign.day}
-										· วันที่ {campaign.day}
-									{/if}
-								</p>
-								<p class="mt-1.5 text-[11px] text-muted-foreground/80">
-									{relativeDate(campaign.lastPlayedAt)}
-								</p>
-							</div>
-							<Swords
-								class="mt-1 size-4 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-gold"
-								aria-hidden="true"
-							/>
-						</div>
-					</a>
-					<div class="-mt-1 flex justify-end">
-						<button
-							type="button"
-							class="delete-btn"
-							onclick={(event) => {
+					{#if editingId === campaign.id}
+						<form
+							class="campaign-card"
+							onsubmit={(event) => {
 								event.preventDefault();
-								void deleteCampaign(campaign.id);
+								void saveRename(campaign.id);
 							}}
 						>
-							{#if confirmDelete === campaign.id}
-								ยืนยันการลบ?
-							{:else}
-								<Trash2 class="size-3" aria-hidden="true" /> ลบ
-							{/if}
-						</button>
-					</div>
+							<label class="mb-1.5 block text-xs text-muted-foreground" for="rename-{campaign.id}"
+								>ชื่อการผจญภัย</label
+							>
+							<div class="flex gap-2">
+								<input
+									id="rename-{campaign.id}"
+									class="rename-input"
+									bind:value={renameDraft}
+									maxlength="80"
+									autocomplete="off"
+								/>
+								<Button type="submit" size="sm" disabled={renameSaving}>บันทึก</Button>
+								<Button type="button" variant="outline" size="sm" onclick={cancelRename}
+									>ยกเลิก</Button
+								>
+							</div>
+						</form>
+					{:else}
+						<a
+							href="/campaign/{campaign.id}"
+							class="campaign-card group"
+							aria-label="เล่นต่อ {campaign.title}"
+						>
+							<div class="flex items-start gap-3">
+								{#if face}
+									<img class="campaign-face" src={face.url} alt="" loading="lazy" />
+								{:else}
+									<span class="campaign-icon">{SETTING_ICON[campaign.setting] ?? '🌀'}</span>
+								{/if}
+								<div class="min-w-0 flex-1">
+									<p class="truncate font-bold">{campaign.title}</p>
+									<p class="mt-0.5 truncate text-xs text-muted-foreground">
+										{campaign.heroName ?? 'ยังไม่มีฮีโร่'}
+										{#if campaign.day}
+											· วันที่ {campaign.day}
+										{/if}
+									</p>
+									<p class="mt-1.5 text-[11px] text-muted-foreground/80">
+										{relativeDate(campaign.lastPlayedAt)}
+									</p>
+								</div>
+								<Swords
+									class="mt-1 size-4 shrink-0 text-muted-foreground/50 transition-colors group-hover:text-gold"
+									aria-hidden="true"
+								/>
+							</div>
+						</a>
+						<div class="-mt-1 flex justify-end gap-1.5">
+							<button
+								type="button"
+								class="delete-btn"
+								aria-label="เปลี่ยนชื่อการผจญภัย"
+								onclick={() => startRename(campaign)}
+							>
+								<Pencil class="size-3" aria-hidden="true" /> เปลี่ยนชื่อ
+							</button>
+							<button
+								type="button"
+								class="delete-btn"
+								onclick={(event) => {
+									event.preventDefault();
+									void deleteCampaign(campaign.id);
+								}}
+							>
+								{#if confirmDelete === campaign.id}
+									ยืนยันการลบ?
+								{:else}
+									<Trash2 class="size-3" aria-hidden="true" /> ลบ
+								{/if}
+							</button>
+						</div>
+					{/if}
 				</li>
 			{/each}
 		</ul>
@@ -201,6 +271,18 @@
 		font-size: 0.68rem;
 		color: var(--color-muted-foreground);
 		transition: color 0.12s var(--ease-out);
+	}
+
+	.rename-input {
+		min-width: 0;
+		flex: 1;
+		border-radius: var(--radius-md);
+		border: 1px solid color-mix(in oklch, var(--color-gold) 55%, transparent);
+		background: color-mix(in oklch, var(--color-card) 60%, transparent);
+		padding: 0.3rem 0.6rem;
+		font-size: 0.9rem;
+		color: inherit;
+		outline: none;
 	}
 
 	@media (hover: hover) and (pointer: fine) {

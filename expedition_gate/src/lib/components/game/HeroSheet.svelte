@@ -3,20 +3,40 @@
 	import { STAT_LABELS_TH, isUsableItem } from '$lib/game/rules';
 	import CollapsibleSection from './CollapsibleSection.svelte';
 	import HeroPortrait from './HeroPortrait.svelte';
+	import { Pencil } from '@lucide/svelte';
 
 	let {
 		world,
 		campaignId,
 		disabled = false,
-		onuseitem
+		onuseitem,
+		onrename
 	}: {
 		world: WorldState;
 		campaignId: string;
 		disabled?: boolean;
 		onuseitem?: (name: string) => void;
+		/** Rename the hero (server-persisted by the caller). Return false to revert. */
+		onrename?: (name: string) => Promise<boolean>;
 	} = $props();
 
 	const hero = $derived(world.hero);
+
+	let editingName = $state(false);
+	let nameDraft = $state('');
+	function startRename() {
+		nameDraft = hero.name;
+		editingName = true;
+	}
+	function cancelRename() {
+		editingName = false;
+	}
+	async function saveRename() {
+		const name = nameDraft.trim().slice(0, 40);
+		editingName = false;
+		if (!name || name === hero.name) return;
+		await onrename?.(name);
+	}
 	const statGroups = $derived([
 		{ label: 'กาย', keys: ['str', 'agi', 'dex', 'vit'] as const },
 		{ label: 'จิต', keys: ['int', 'spi', 'cha'] as const },
@@ -47,8 +67,35 @@
 <div class="space-y-4">
 	<header class="flex items-center gap-3">
 		<HeroPortrait heroName={hero.name} klass={hero.klass} concept={hero.concept} {campaignId} />
-		<div>
-			<h2 class="text-base font-bold">{hero.name}</h2>
+		<div class="min-w-0">
+			{#if editingName}
+				<!-- eslint-disable-next-line svelte/no-static-event-interactions -- Enter saves, Escape cancels -->
+				<input
+					class="name-input"
+					bind:value={nameDraft}
+					maxlength="40"
+					aria-label="ชื่อฮีโร่"
+					onkeydown={(event) => {
+						if (event.key === 'Enter') void saveRename();
+						else if (event.key === 'Escape') cancelRename();
+					}}
+				/>
+			{:else}
+				<h2 class="flex items-center gap-1.5 text-base font-bold">
+					<span class="truncate">{hero.name}</span>
+					{#if onrename}
+						<button
+							type="button"
+							class="rename-btn"
+							title="เปลี่ยนชื่อฮีโร่"
+							aria-label="เปลี่ยนชื่อฮีโร่"
+							onclick={startRename}
+						>
+							<Pencil class="size-3" aria-hidden="true" />
+						</button>
+					{/if}
+				</h2>
+			{/if}
 			<p class="mt-0.5 text-xs text-muted-foreground">{hero.klass} · LV {hero.level}</p>
 		</div>
 	</header>
@@ -237,5 +284,38 @@
 			color: var(--color-gold);
 			border-color: color-mix(in oklch, var(--color-gold) 40%, transparent);
 		}
+		.rename-btn:hover {
+			color: var(--color-gold);
+			border-color: color-mix(in oklch, var(--color-gold) 40%, transparent);
+		}
+	}
+
+	.rename-btn {
+		display: inline-flex;
+		flex-shrink: 0;
+		border-radius: 9999px;
+		padding: 0.18rem;
+		color: var(--color-muted-foreground);
+		opacity: 0;
+		transition:
+			color 0.12s var(--ease-out),
+			border-color 0.12s var(--ease-out),
+			opacity 0.12s var(--ease-out);
+	}
+	header:hover .rename-btn,
+	.rename-btn:focus-visible {
+		opacity: 1;
+	}
+
+	.name-input {
+		width: 100%;
+		border-radius: var(--radius-md);
+		border: 1px solid color-mix(in oklch, var(--color-gold) 55%, transparent);
+		background: color-mix(in oklch, var(--color-card) 60%, transparent);
+		padding: 0.15rem 0.5rem;
+		font-size: 0.95rem;
+		font-weight: 700;
+		color: inherit;
+		outline: none;
 	}
 </style>

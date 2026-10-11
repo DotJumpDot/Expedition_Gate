@@ -16,6 +16,7 @@ import {
 	listCheckpoints,
 	maybeConsolidate,
 	rebirthCampaign,
+	renameCampaign,
 	restoreCheckpoint,
 	saveGmTurn
 } from '$lib/server/engine/campaigns';
@@ -66,6 +67,36 @@ function putState(id: string, patch: (state: WorldState) => WorldState) {
 		.where(eq(campaigns.id, id))
 		.run();
 }
+
+describe('rename (title + hero name, zod-guarded)', () => {
+	it('renames title and hero; the new hero name lands in the state', () => {
+		const id = newCampaign();
+		const result = renameCampaign(id, { title: 'ตำนานใหม่', heroName: 'ศิรา' });
+		expect(result.ok).toBe(true);
+		const db = getDb();
+		const [row] = db.select().from(campaigns).where(eq(campaigns.id, id)).all();
+		expect(row.title).toBe('ตำนานใหม่');
+		expect(getState(id).hero.name).toBe('ศิรา');
+	});
+
+	it('rejects empty/overlong names and unknown campaigns', () => {
+		const id = newCampaign();
+		expect(renameCampaign(id, { title: '   ' }).ok).toBe(false);
+		expect(renameCampaign(id, { heroName: 'x'.repeat(41) }).ok).toBe(false);
+		expect(renameCampaign('no-such-id', { title: 'x' }).ok).toBe(false);
+		expect(renameCampaign(id, {}).ok).toBe(false); // nothing to change
+	});
+
+	it('other hero fields survive the rename untouched', () => {
+		const id = newCampaign();
+		const before = getState(id).hero;
+		renameCampaign(id, { heroName: 'ชื่อใหม่' });
+		const after = getState(id).hero;
+		expect(after.klass).toBe(before.klass);
+		expect(after.hp).toBe(before.hp);
+		expect(after.stats).toEqual(before.stats);
+	});
+});
 
 describe('checkpoints (auto-snapshot-first, nothing is ever lost)', () => {
 	it('saves, restores, auto-snapshots the abandoned branch, and trims messages', () => {
