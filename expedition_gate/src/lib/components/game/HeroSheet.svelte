@@ -32,6 +32,12 @@
 		editingName = false;
 	}
 	async function saveRename() {
+		// A GM turn may have started while the input was open — its end-of-turn
+		// state write would clobber a rename saved now, so discard instead.
+		if (disabled) {
+			editingName = false;
+			return;
+		}
 		const name = nameDraft.trim().slice(0, 40);
 		editingName = false;
 		if (!name || name === hero.name) return;

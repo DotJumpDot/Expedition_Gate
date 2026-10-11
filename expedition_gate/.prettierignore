@@ -6,3 +6,4 @@ drizzle/
 package-lock.json
 .mimosa/
 assets/portraits.json
+assets/manifest.json
