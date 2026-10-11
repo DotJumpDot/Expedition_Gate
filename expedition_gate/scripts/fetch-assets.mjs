@@ -337,6 +337,13 @@ async function main() {
 			skipped++;
 			continue;
 		}
+		// Locally-generated art (ComfyUI) has no URL to download from — restore
+		// it with its own generator script instead of failing the run.
+		if (String(entry.source ?? '').startsWith('comfyui:')) {
+			skipped++;
+			console.log(`↷ ${entry.file} (สร้างในเครื่อง — รัน npm run scenes)`);
+			continue;
+		}
 		try {
 			if (entry.generator) {
 				const gen = GENERATORS[entry.generator];

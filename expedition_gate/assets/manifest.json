@@ -333,6 +333,134 @@
 			"source": "https://commons.wikimedia.org/wiki/File:Pillars_of_Creation_(NIRCam_and_MIRI_Composite_Image)_(pillarsofcreation_composite).jpeg",
 			"license": "CC BY 4.0",
 			"author": "NASA, ESA, CSA, STScI"
+		},
+		{
+			"file": "modern-gate-plaza.png",
+			"tags": ["gate"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-city-day.png",
+			"tags": ["city"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-city-night.png",
+			"tags": ["city", "night"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-city-rain.png",
+			"tags": ["city", "rain"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-street-day.png",
+			"tags": ["street"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-street-night.png",
+			"tags": ["street", "night"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-alley-night.png",
+			"tags": ["street", "night"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-subway.png",
+			"tags": ["street", "night"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-market-night.png",
+			"tags": ["market", "night"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-dungeon-crystal.png",
+			"tags": ["dungeon"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-dungeon-corridor.png",
+			"tags": ["dungeon"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-battle-street.png",
+			"tags": ["battle"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-ruins-overpass.png",
+			"tags": ["ruins"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-rooftop-night.png",
+			"tags": ["night"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-river-bridge.png",
+			"tags": ["river", "night"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
+		},
+		{
+			"file": "modern-void.png",
+			"tags": ["void"],
+			"setting": ["modern"],
+			"source": "comfyui:Illustrious-XL-v2.0.safetensors",
+			"license": "locally-generated, user-owned",
+			"author": "user (ComfyUI)"
 		}
 	]
 }

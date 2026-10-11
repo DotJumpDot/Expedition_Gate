@@ -21,7 +21,7 @@ describe('SETTING_PRESETS (rich world presets)', () => {
 	});
 
 	it('every preset has a label, a valid art bucket, and an icon', () => {
-		const buckets = ['sword_sorcery', 'scifi', 'horror', 'thai_legend', 'any'];
+		const buckets = ['sword_sorcery', 'scifi', 'horror', 'thai_legend', 'modern', 'any'];
 		for (const preset of Object.values(SETTING_PRESETS)) {
 			expect(preset.label.trim().length).toBeGreaterThan(0);
 			expect(preset.icon.trim().length).toBeGreaterThan(0);

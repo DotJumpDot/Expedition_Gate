@@ -21,6 +21,7 @@
 		"db:studio": "drizzle-kit studio",
 		"assets": "node scripts/fetch-assets.mjs",
 		"portraits": "node scripts/generate-portraits.mjs",
+		"scenes": "node scripts/generate-scenes.mjs",
 		"fake-llama": "node tests/fake-llama/server.mjs"
 	},
 	"devDependencies": {

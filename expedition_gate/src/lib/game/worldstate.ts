@@ -108,7 +108,7 @@ export interface SettingPreset {
 	/** Steering paragraph injected into the world-brief prompt (empty = player premise only). */
 	description: string;
 	/** Scene-art bucket — which library group illustrates this world. */
-	art: 'sword_sorcery' | 'scifi' | 'horror' | 'thai_legend' | 'any';
+	art: 'sword_sorcery' | 'scifi' | 'horror' | 'thai_legend' | 'modern' | 'any';
 	icon: string;
 	/** Genre aliases for the preset search (community-standard Thai + English), space-separated lowercase. */
 	keywords?: string;
@@ -153,7 +153,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		label: 'ระบบพลังลับ',
 		description:
 			'หนึ่งวันผู้เล่นตื่นขึ้นมาพร้อม "ระบบ" ที่มีเพียงผู้เดียวที่มองเห็น — ภารกิจ ค่าประสบการณ์ สกิล และร้านค้าลับปรากฏขึ้นหน้าตาเหมือนเกม ทั้งที่โลกรอบตัวเป็นโลกจริงที่ไม่มีใครมีสิ่งนี้ ความลับนี้เป็นทั้งพลังและหายนะถ้าใครรู้',
-		art: 'any',
+		art: 'modern',
 		icon: '💠',
 		keywords: 'system level up status quest secret power'
 	},
@@ -171,7 +171,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		label: 'ผู้สั่งการเวลา',
 		description:
 			'ในมหานครแสนวุ่นวาย ผู้เล่นครอบครองพลังหยุดและย้อนเวลาได้ไม่กี่วินาที แต่ทุกครั้งมีราคาที่ต้องจ่าย องค์กรลับได้กลิ่น ผู้มีอิทธิพลต้องการพลังนี้ไปครอง และเส้นเวลาที่ถูกพลิกซ้ำแล้วซ้ำเล่ากำลังแยกรอยแยกที่โลกไม่ควรมองเห็น',
-		art: 'any',
+		art: 'modern',
 		icon: '⏳',
 		keywords: 'time stop rewind seconds city'
 	},
@@ -261,7 +261,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		label: 'ประตูมิติ & ฮันเตอร์',
 		description:
 			'สิบปีหลัง "ประตู" มิติเปิดครั้งแรกกลางกรุงโซล โลกของฮันเตอร์ผู้ตื่นพลังที่ไต่แรงก์ E ถึง S บุกดันเจี้ยนเก็บคริสตัลเลี้ยงชีพ ผู้เล่นคือฮันเตอร์แรงก์ E ที่รอดจากดันเจี้ยนระดับ S พร้อมความลับที่พลิกทุกอย่าง — ระบบเติบโตไร้ขีดจำกัดที่มีเพียงผู้เดียว สมาคมกดราคา กิลด์ใหญ่กลืนกินคนเล็ก และประตูที่ใหญ่ขึ้นเรื่อย ๆ กำลังเปิด',
-		art: 'any',
+		art: 'modern',
 		icon: '🌀',
 		keywords: 'มังฮวา เกาหลี ฮันเตอร์ solo leveling hunter gate dungeon rank awakened guild'
 	},
@@ -360,7 +360,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		label: 'ซอมบี้ถล่มเมือง',
 		description:
 			'เช้าวันหนึ่งเมืองลุกเป็นไฟด้วยผู้ติดเชื้อ — ผู้เล่นคือผู้รอดชีวิตธรรมดา มีแต่ของในบ้าน ทักษะที่มี และการตัดสินใจที่โหดร้ายขึ้นทุกสัปดาห์ ตามหาคนที่รัก รวมกลุ่มผู้รอด ปล้นซากเมือง และค่อย ๆ พบว่าเชื้อนี้ไม่ได้แพร่เอง — ใครบางคนปล่อยมัน และเขายังอยู่ในเมืองนี้',
-		art: 'any',
+		art: 'modern',
 		icon: '🧟',
 		keywords: 'zombie apocalypse infected outbreak survival city'
 	},
@@ -369,7 +369,7 @@ export const SETTING_PRESETS: Record<string, SettingPreset> = {
 		label: 'มือปราบวิญญาณ',
 		description:
 			'มหานครสมัยใหม่ที่วิญญาณร้ายปลอมตัวเป็นคน — ผู้เล่นคือผู้มีตาวิญญาณ หมอผีรุ่นสุดท้าย มูดังสายเลือดใหม่ หรือนักล่าผีมือใหม่ที่ติดหนี้ชีวิตให้เจ้า คดีสะเทือนขวัญ ของขลังโบราณ สัญญากับเทพที่ทรงมาโดยไม่ได้รับเชิญ ทุกคดีจบด้วยการไล่ผี — หรือสิ่งที่ไล่ผีจะตามกลับมาเอง',
-		art: 'any',
+		art: 'modern',
 		icon: '📿',
 		keywords: 'exorcist shaman ghost korean occult seoul'
 	},
