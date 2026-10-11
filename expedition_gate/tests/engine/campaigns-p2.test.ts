@@ -87,6 +87,17 @@ describe('rename (title + hero name, zod-guarded)', () => {
 		expect(renameCampaign(id, {}).ok).toBe(false); // nothing to change
 	});
 
+	it('a rejected heroName leaves the title untouched (no half-applied rename)', () => {
+		const id = newCampaign();
+		const before = getState(id).hero.name;
+		const result = renameCampaign(id, { title: 'ชื่อใหม่', heroName: 'ยาวเกิน' + 'x'.repeat(40) });
+		expect(result.ok).toBe(false);
+		const db = getDb();
+		const [row] = db.select().from(campaigns).where(eq(campaigns.id, id)).all();
+		expect(row.title).toBe(BRIEF.name); // original title — nothing was written
+		expect(getState(id).hero.name).toBe(before);
+	});
+
 	it('other hero fields survive the rename untouched', () => {
 		const id = newCampaign();
 		const before = getState(id).hero;

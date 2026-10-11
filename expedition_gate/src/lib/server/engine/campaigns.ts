@@ -136,7 +136,9 @@ export function getCampaign(id: string) {
 /**
  * Rename the campaign title and/or the hero. The hero name lives inside the
  * world-state JSON, so that path re-validates the full state through zod
- * before writing (HeroSchema caps it at 40 chars).
+ * before writing (HeroSchema caps it at 40 chars). Everything is validated
+ * BEFORE the first write — a rejected heroName must not leave a half-applied
+ * title behind.
  */
 export function renameCampaign(
 	id: string,
@@ -152,13 +154,11 @@ export function renameCampaign(
 		return { ok: false, error: 'ไม่มีอะไรให้เปลี่ยน' };
 	}
 
-	if (title !== undefined) {
-		if (title.length < 1 || title.length > 80) {
-			return { ok: false, error: 'ชื่อการผจญภัยต้องมี 1-80 ตัวอักษร' };
-		}
-		db.update(campaigns).set({ title, updatedAt: new Date() }).where(eq(campaigns.id, id)).run();
+	if (title !== undefined && (title.length < 1 || title.length > 80)) {
+		return { ok: false, error: 'ชื่อการผจญภัยต้องมี 1-80 ตัวอักษร' };
 	}
 
+	let renamedState: WorldState | null = null;
 	if (heroName !== undefined) {
 		if (heroName.length < 1 || heroName.length > 40) {
 			return { ok: false, error: 'ชื่อฮีโร่ต้องมี 1-40 ตัวอักษร' };
@@ -170,11 +170,17 @@ export function renameCampaign(
 			hero: { ...state.hero, name: heroName }
 		});
 		if (!parsed.success) return { ok: false, error: 'ชื่อฮีโร่ไม่ถูกต้อง' };
-		db.update(campaigns)
-			.set({ stateJson: parsed.data, updatedAt: new Date() })
-			.where(eq(campaigns.id, id))
-			.run();
+		renamedState = parsed.data;
 	}
+
+	db.update(campaigns)
+		.set({
+			updatedAt: new Date(),
+			...(title !== undefined ? { title } : {}),
+			...(renamedState ? { stateJson: renamedState } : {})
+		})
+		.where(eq(campaigns.id, id))
+		.run();
 
 	return { ok: true, title, heroName };
 }

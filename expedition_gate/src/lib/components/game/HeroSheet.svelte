@@ -83,7 +83,9 @@
 			{:else}
 				<h2 class="flex items-center gap-1.5 text-base font-bold">
 					<span class="truncate">{hero.name}</span>
-					{#if onrename}
+					<!-- disabled = a GM turn is in flight: its end-of-turn state write
+					     would overwrite a rename made now, so the pencil hides. -->
+					{#if onrename && !disabled}
 						<button
 							type="button"
 							class="rename-btn"
